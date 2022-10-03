@@ -1,2 +1,2 @@
 # AHKv2Toys
-Random tests using AutoHotkeyV2
+Collection of various AutoHotkeyV2 scripts
