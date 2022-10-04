@@ -4,6 +4,7 @@
 
 #Include <DBT>
 
+
 class CursorGetterSetter {
     __Get(Name, Params){
         cPOINT := Buffer(8)
