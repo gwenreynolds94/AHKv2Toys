@@ -16,3 +16,8 @@ stdo(_msg*) {
     }
     FileAppend _msg_out, "*"
 }
+
+stdoplain(_msg*) {
+    for _m in _msg
+        FileAppend _m, "*"
+}
