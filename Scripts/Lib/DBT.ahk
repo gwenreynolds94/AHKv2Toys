@@ -8,7 +8,7 @@ stdo(_msg*) {
     for _m in _msg {
         if IsObject(_m) {
             for _om in _m.OwnProps() {
-                _msg_out .= _om "`n"
+                _msg_out .= "<" _om ">`n"
             }
         } else {
             _msg_out .= _m "`n"
