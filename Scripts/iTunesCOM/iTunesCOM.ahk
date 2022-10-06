@@ -28,8 +28,6 @@ Class iSearchField {
                5              )
 }
 
-iSearchField.All
-iSearchField.Visible
 
 Class iTrack {
     __New(IITTrack) {
@@ -57,10 +55,10 @@ Class iTrack {
 }
 
 Class iPlaylist {
-    __New(varPlaylist, iApp:=Null) {
-        if (Type(varPlaylist) = "String") and iApp
-            this.obj := iApp.LibrarySource.Playlists.ItemByName(varPlaylist)
-        else if IsObject(varPlaylist)
+    __New(varPlaylist, iTunesApp:=Null) {
+        if (Type(varPlaylist) = "String") and Type(iTunesApp) = "iTunesApp"
+            this.obj := iTunesApp.LibrarySource.Playlists.ItemByName(varPlaylist)
+        else if Type(varPlaylist) = "ComObject"
             this.obj := varPlaylist
     }
     __Item[songIdentity] {
@@ -104,7 +102,3 @@ Class iTunesHandle {
         }
     }
 }
-
-itunes := iTunesHandle()
-itunes["Dr. Dog"]["Lonesome"].Play()
-

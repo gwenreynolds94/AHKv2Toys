@@ -1,8 +1,4 @@
 
-DBT_LOAD() {
-
-}
-
 stdo(_msg*) {
     _msg_out := ""
     for _m in _msg {
@@ -45,8 +41,8 @@ Class PerfCounter {
         this.laps.Push(this.now)
         Return this.now-this.laps[this.laps.Length-1]
     }
-    ToMilliseconds(&count) {
-        Return count := count / this.frequency * 1000
+    ToMilliseconds(&_p_count) {
+        Return _p_count := _p_count / this.frequency * 1000
     }
     GetCurrentCounter() {
         DllCall "QueryPerformanceCounter", "Int*", &counter := 0
