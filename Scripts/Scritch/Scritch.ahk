@@ -18,13 +18,14 @@ Class ScritchGui {
         ;
         , iWidth        := 900
         , iHeight       := 450
-        , iXPosition    := A_ScreenWidth/2 - this.iWidth/2
-        , iYPosition    := A_ScreenHeight/2 - this.iHeight/2
+        , iXPosition    := Integer(A_ScreenWidth/2 - this.iWidth/2)
+        , iYPosition    := Integer(A_ScreenHeight/2 - this.iHeight/2)
         , sGuiOptsNew   := "-Caption +AlwaysOnTop"
         , sGuiOpts      := "w" this.iWidth      " "
                          . "h" this.iHeight     " "
                          . "x" this.iXPosition  " "
                          . "y" this.iYPosition
+        , sGuiHideOpts  := this.sGuiOpts " Hide"
         , sGuiFontName  := "Fira Code SemiBold"
         , sGuiFontOpts  := "s9"
         ; , sGuiBG        := "ce1cae4"
@@ -73,7 +74,14 @@ Class ScritchGui {
                         . "w" this.iBGPicWidth " "
                         . "h" this.iBGPicHeight
         ; ----------------------------------------------------------------------
-    __New() {
+    __New(sScritchWorkingDir, startHidden:=False) {
+        ; VALIDATE WORKING DIR
+        if !InStr(FileExist(sScritchWorkingDir), "D") {
+            SplitPath(sScritchWorkingDir,, &sDirDaddy)
+            if InStr(FileExist(sDirDaddy), "D")
+                DirCreate sScritchWorkingDir
+        }
+        this.sScritchWorkingDir := sScritchWorkingDir
         ; SET EVENTSINK GUI REFERENCE
         ;
         ScritchEventSink.cGuiParentClass := this  ; Share static reference to 
@@ -81,8 +89,8 @@ Class ScritchGui {
         ; ----------------------------------------------------------------------
         ; SET NOTE MANAGER AND CONF MANAGER
         ;
-        this.oNotes := ScritchNotes()  ; Create helper for managing notes/files
-        this.oConf  := ScritchConf()   ; Create helper for Scritch.conf
+        this.oNotes := ScritchNotes(sScritchWorkingDir)  ; Create helper for managing notes/files
+        this.oConf  := ScritchConf(sScritchWorkingDir)   ; Create helper for Scritch.conf
         ; ----------------------------------------------------------------------
         ;
         ; GUI SETUP
@@ -104,10 +112,13 @@ Class ScritchGui {
         ;   BACKGROUND PICTURE
         gBGGui := Gui( this.sGuiOptsNew
                      , this.sWindowName "BG" )
-
+        if !IsFile(sScritchWorkingDir "\bg.png")
+            Download "https://www.transparenttextures.com/patterns/"
+                   . "45-degree-fabric-light.png"
+                   , sScritchWorkingDir "\bg.png"
         gBGPic := gBGGui.Add( "Picture"
                             , this.sBGPicOpts
-                            , A_ScriptDir "\bg.png")
+                            , sScritchWorkingDir "\bg.png")
         ; ----------------------------------------------------------------------
         ;   TREEVIEW      
         ;                 .===============.
@@ -121,6 +132,8 @@ Class ScritchGui {
         ;   TREEVIEW ITEMS
         ; 
         mTreeItems := Map()                      ; Add items to Treeview
+        if !this.oConf.Config["Groups"]
+            this.oConf.Config["Groups"] := "General"
         aGroups := StrSplit(this.oConf.Config["Groups"], "|")
         for sGroup in aGroups
             mTreeItems[sGroup] := Map("Head", gTree.Add(sGroup))
@@ -172,20 +185,33 @@ Class ScritchGui {
         ; ----------------------------------------------------------------------
         ; SHOW GUI
         ;
-        this.gBGGui.Show "w" this.iWidth " "
-                       . "h" this.iHeight
-        this.gGui.Show "w" this.iWidth " "
-                     . "h" this.iHeight
-        this.gGui.Opt( "+Owner" this.gBGGui.Hwnd )
-        ; ----------------------------------------------------------------------
-        ; SET GUI TRANSPARENCY
-        ;
-        WinSetTransparent(Round(this.fBGOpacity*255), this.sWindowName "BG")
-        WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
-        ; ----------------------------------------------------------------------
-        ; SELECT FIRST ITEM IN TREEVIEW
-        ;
-        ControlSend "{Right}{Right}", this.gTree, this.gGui
+        if startHidden {
+            sHiddenOpts := RegExReplace(
+                this.sGuiOpts   ; from gui options
+              , "(?<=x)\d+"     ; find x{XPos}
+              , A_ScreenWidth   ; replace {XPos} with screen width
+            )
+            this.gBGGui.Show sHiddenOpts " NA"
+            this.gGui.Show   sHiddenOpts " NA"
+            WinSetTransparent(Round(this.fBGOpacity*255), this.sWindowName "BG")
+            WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
+            this.gBGGui.Opt("+Owner")
+            this.gGui.Opt( "+Owner" this.gBGGui.Hwnd )
+            this.gBGGui.Show this.sGuiOpts " Hide"
+            this.gGui.Show this.sGuiOpts " Hide"
+            for gCtrl in this.gBGGui
+                gCtrl.Redraw
+            for gCtrl in this.gGui
+                gCtrl.Redraw
+        } else {
+            this.gBGGui.Show this.sGuiOpts
+            this.gGui.Show this.sGuiOpts
+            WinSetTransparent(Round(this.fBGOpacity*255), this.sWindowName "BG")
+            WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
+            ControlSend "{Right}{Right}", this.gTree, this.gGui
+            this.gBGGui.Opt("+Owner")
+            this.gGui.Opt( "+Owner" this.gBGGui.Hwnd )
+        }
         ; ----------------------------------------------------------------------
         ; REGISTER HOTKEYS
         ;
@@ -227,6 +253,7 @@ Class ScritchGui {
         } else {
             this.gBGGui.Show
             this.gGui.Show
+            ControlSend "{Right}{Right}", this.gTree, this.gGui
         }
     }
 
@@ -235,11 +262,9 @@ Class ScritchGui {
         sItemID     := this.sTreeCtxMenuTargetItem
         sItemName   := this.gTree.GetText(sItemID)
         sItemParent := this.gTree.GetParent(sItemID)
-        stdo sItemName
         for sGroupName, mGroup in this.mTreeItems
             if sItemName = sGroupName
                 sItemParent := this.mTreeItems[sGroupName]["Head"]
-        stdo sItemParent
         sItemParentName := this.gTree.GetText(sItemParent)
         oNewNote := this.oNotes.NewNote( , , sItemParentName)
         this.mTreeItems[oNewNote.sGroup][oNewNote.sFileNameNoExt] :=
@@ -296,7 +321,7 @@ Class ScritchGui {
         for sItemName, sItemID in this.mTreeItems[sGroupName]
             if sItemName != "Head"
                 this.mTreeItems["General"][sItemName] := 
-                    this.gTree.Add(sItemName
+                    this.gTree.Add(ParseTimestampFromFileName(sItemName)
                                  , this.mTreeItems["General"]["Head"])
         this.mTreeItems.Delete(sGroupName)
         this.oNotes.MergeGroup(sGroupName, "General")
@@ -386,11 +411,13 @@ Class ScritchEventSink {
 
 
 Class ScritchNotes {
-    sNotesDir := A_ScriptDir "\scritches"
-    sNotesConf := A_ScriptDir "\notes.conf"
+    sNotesDir := "\scritches"
+    sNotesConf := "\notes.conf"
     aNotes := []
     
-    __New() {
+    __New(sScritchWorkingDir) {
+        this.sNotesConf := sScritchWorkingDir this.sNotesConf
+        this.sNotesDir  := sScritchWorkingDir this.sNotesDir
         if not InStr(FileExist(this.sNotesDir), "D")
             DirCreate this.sNotesDir
         Loop Files (this.sNotesDir "\*.note") {
@@ -430,7 +457,6 @@ Class ScritchNotes {
     NewNote(sFileName:="", sTimestamp:="", sGroup:="") {
         oNewNote := ScritchNotes.Note(sFileName, sTimestamp, sGroup)
         this.aNotes.Push oNewNote
-        stdo this.sNotesDir "\" oNewNote.sFileName
         FileAppend "", this.sNotesDir "\" oNewNote.sFileName
         this.UpdateConf
         Return oNewNote
@@ -497,24 +523,27 @@ Class ScritchNotes {
 
 
 Class ScritchConf {
-    __New() {
-        if !IsFile(A_ScriptDir "\Scritch.conf")
-            FileAppend "", A_ScriptDir "\Scritch.conf"
-        if IniRead(A_ScriptDir "\Scritch.conf", "Config", "Groups", 0) = 0
-            IniWrite("General", A_ScriptDir "\Scritch.conf", "Config", "Groups")
+    static sScritchWorkingDir := ""
+    __New(sScritchWorkingDir) {
+        ScritchConf.sScritchWorkingDir := sScritchWorkingDir
+        if !IsFile(sScritchWorkingDir "\Scritch.conf")
+            FileAppend "", sScritchWorkingDir "\Scritch.conf"
+        if IniRead(sScritchWorkingDir "\Scritch.conf", "Config", "Groups", 0) = 0
+            IniWrite("General", sScritchWorkingDir "\Scritch.conf", "Config", "Groups")
     }
 
     __Get(sName, aParams) {
         for vParam in aParams
             if IsAlnum(vParam)
-                Return IniRead(A_ScriptDir "\Scritch.conf", sName, vParam, 0)
+                Return IniRead(ScritchConf.sScritchWorkingDir "\Scritch.conf", sName, vParam, 0)
     }
 
     __Set(sName, aParams, vValue) {
         for vParam in aParams
             if IsAlnum(StrReplace(vParam, A_Space, "")) and !IsObject(vValue) {
-                IniWrite vValue, A_ScriptDir "\Scritch.conf", sName, vParam
-                Return IniRead(A_ScriptDir "\Scritch.conf", sName, vParam, 0)
+                FileAppend vValue "`n`t" ScritchConf.sScritchWorkingDir "\Scritch.conf" "`n`t" sName "`n`t" vParam, "*"
+                IniWrite vValue, ScritchConf.sScritchWorkingDir "\Scritch.conf", sName, vParam
+                Return IniRead(ScritchConf.sScritchWorkingDir "\Scritch.conf", sName, vParam, 0)
             }
         Return 0
     }
@@ -557,11 +586,11 @@ IsFile(sFilePath) {
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;  DEBUG FUNCTIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-_Debug_ClearNotes() {
-    if IsFile(A_ScriptDir "\scritches\*.note")
-        FileDelete A_ScriptDir "\scritches\*.note"
-    if IsFile(A_ScriptDir "\notes.conf")
-        FileDelete A_ScriptDir "\notes.conf"
+_Debug_ClearNotes(sScritchWorkingDir) {
+    if IsFile(sScritchWorkingDir "\scritches\*.note")
+        FileDelete sScritchWorkingDir "\scritches\*.note"
+    if IsFile(sScritchWorkingDir "\notes.conf")
+        FileDelete sScritchWorkingDir "\notes.conf"
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 _Debug_AddNotes(oScritchNotes) {
@@ -583,7 +612,10 @@ _Debug_AddNotes(oScritchNotes) {
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 _Debug_LoopNoteInfo(oScritchNotes) {
     for tNote in oScritchNotes.aNotes
-        stdo tNote.sFileName, "`t" tNote.sTimestamp, "`t" tNote.sGroup
+        FileAppend tNote.sFileName       "`n"
+                 . "`t" tNote.sTimestamp "`n"
+                 . "`t" tNote.sGroup     "`n"
+                 , "*"
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;  DEBUG FUNCTIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -597,7 +629,7 @@ if A_ScriptName = "Scritch.ahk" {
     ; _Debug_AddNotes(testScritchNotes)
     ; _Debug_LoopNoteInfo(testScritchNotes)
 
-    testScritchGui := ScritchGui()
+    testScritchGui := ScritchGui(A_ScriptDir, True)
     Hotkey "<#v", ObjBindMethod(testScritchGui, "ToggleGui")
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
