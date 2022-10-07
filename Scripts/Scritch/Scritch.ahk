@@ -72,22 +72,22 @@ Class ScritchGui {
         gGui := Gui( this.sGuiOptsNew ;
                    , this.sWindowName ;
                    , ScritchEventSink )
-        ;          '=============|===='.
+        ;          :=============|==='
         gGui.OnEvent "Close"     ; <Close>   
                    , "Gui_Close" ; registration 
-        ;          '-,-----------\______
+        ;          '-|-----------\______
         gGui.SetFont( this.sGuiFontOpts ; Set main gui font 
                     , this.sGuiFontName )
-        ;           '-------------------'
+        ;           '------------------'
         gGui.MarginX := gGui.MarginY := 0  ; Set Gui X and Y margins
         ; ----------------------------------------------------------------------
         ;   TREEVIEW      .===============.
         gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
                          , this.sTreeOpts ) ; notes to edit based on selection
-        ;                '================'   events
-        gTree.OnEvent "ItemSelect", "Tree_ItemSelect"  ; <ItemSelect>
-        ;                                                registration
-        gTree.OnEvent "ContextMenu", "Tree_ContextMenu"
+        ;            .---|===============/    events
+        gTree.OnEvent "ItemSelect"      ; <ItemSelect>
+                    , "Tree_ItemSelect" ; registration
+        ;           '+-----------------'                 
         ; ----------------------------------------------------------------------
         ;   TREEVIEW ITEMS 
         mTreeItems := Map()                      ; Add items to Treeview
@@ -107,30 +107,34 @@ Class ScritchGui {
         gTreeCtxMenu.Add
         gTreeCtxMenu.Add("New Group", ObjBindMethod(this, "MenuNewGroup"))
         gTreeCtxMenu.Add("Delete Group", ObjBindMethod(this, "MenuDeleteGroup"))
+        ;           .--------------------.
+        gTree.OnEvent "ContextMenu"      ; <ContextMenu>
+                    , "Tree_ContextMenu" ; registration
+        ;           '-------------------'
         ; ----------------------------------------------------------------------
         ;   SUBMIT BUTTON      .=================.
         gBtnSubmit := gGui.Add( "Button"         ;   Hidden submit button 
                               , "Hidden Default" ;   triggered on {!s} always,
                               , "&ScritchSubmit" ) ; and {Enter} if edit control
-        ;                  __/===============|==='   is not active
+        ;                  __/===============|=='   is not active
         gBtnSubmit.OnEvent "Click"           ; <Click>
                          , "BtnSubmit_Click" ; registration
-        ;                '-------------------'            
+        ;                '------------------'            
         ; ----------------------------------------------------------------------
         ;   DESTROY BUTTON      .==================.
         gBtnDestroy := gGui.Add( "Button"          ;   Hidden button used to
                                , "Hidden"          ;   save note and destroy Gui
                                , "Scritch&Destroy" ) ; on {!d} trigger
-        ;                   ___/=================|='
+        ;                   ___/=================|'
         gBtnDestroy.OnEvent  "Click"             ; <Click>
                            , "BtnDestroy_Click"  ; registration
-        ;                  '---------------------'
+        ;                  '--------------------'
         ; ----------------------------------------------------------------------
         ;   EDIT CONTROL  .=================.
         gEdit := gGui.Add( "Edit"           ; Edit control for editing notes
                          , this.sEditOpts   ;
                          , this.sEditPHText )
-        ;                '=================='
+        ;                '================='
         ; ----------------------------------------------------------------------
         ; STORE GUI IN INSTANCE
         this.gGui         := gGui
