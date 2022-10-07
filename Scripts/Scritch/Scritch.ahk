@@ -12,7 +12,7 @@ Class ScritchGui {
     ;
     ;* Gui Options Instance Variables
     sWindowName := "Scritches"
-        ;
+        ; ----------------------------------------------------------------------
         ;
         ;*  Main Gui Options
         ;
@@ -29,7 +29,7 @@ Class ScritchGui {
         , sGuiFontOpts  := ""
         , sGuiBG        := "ce1cae4"
         , fWinOpacity   := 0.75
-        ;
+        ; ----------------------------------------------------------------------
         ;
         ;*  Tree Options
         ;
@@ -46,7 +46,7 @@ Class ScritchGui {
         , sTreeRecentlySelected := ""
         , sTreeRecentlySelectedText := ""
         , sTreeCtxMenuTargetItem := ""
-        ;
+        ; ----------------------------------------------------------------------
         ;
         ;*  Edit Options
         ;
@@ -59,12 +59,13 @@ Class ScritchGui {
                          . "y" 0                 " "
                          . "Background" this.sEditBG
         , sEditPHText   := ""
-    
+        ; ----------------------------------------------------------------------
     __New() {
         ScritchEventSink.cGuiParentClass := this  ; Share static reference to 
         ;                                           instance with event sink
         this.oNotes := ScritchNotes()  ; Create helper for managing notes/files
         this.oConf  := ScritchConf()   ; Create helper for Scritch.conf
+
         ;   MAIN GUI.=================.
         gGui := Gui( this.sGuiOptsNew ;
                    , this.sWindowName ;
@@ -77,6 +78,7 @@ Class ScritchGui {
                     , this.sGuiFontName )
         ;           '-------------------'
         gGui.MarginX := gGui.MarginY := 0  ; Set Gui X and Y margins
+
         ;   TREEVIEW      .===============.
         gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
                          , this.sTreeOpts ) ; notes to edit based on selection
@@ -84,6 +86,7 @@ Class ScritchGui {
         gTree.OnEvent "ItemSelect", "Tree_ItemSelect"  ; <ItemSelect>
         ;                                                registration
         gTree.OnEvent "ContextMenu", "Tree_ContextMenu"
+
         ;   TREEVIEW ITEMS 
         mTreeItems := Map()                      ; Add items to Treeview
         aGroups := StrSplit(this.oConf.Config["Groups"], "|")
@@ -94,6 +97,7 @@ Class ScritchGui {
                 gTree.Add(
                     oNote.sTimestamp, mTreeItems[oNote.sGroup]["Head"])
         }
+
         ;   TREEVIEW CONTEXT MENU
         gTreeCtxMenu := Menu()
         gTreeCtxMenu.Add("New Note", ObjBindMethod(this, "MenuNewNote"))
@@ -101,6 +105,7 @@ Class ScritchGui {
         gTreeCtxMenu.Add
         gTreeCtxMenu.Add("New Group", ObjBindMethod(this, "MenuNewGroup"))
         gTreeCtxMenu.Add("Delete Group", ObjBindMethod(this, "MenuDeleteGroup"))
+        
         ;   SUBMIT BUTTON      .=================.
         gBtnSubmit := gGui.Add( "Button"         ;   Hidden submit button 
                               , "Hidden Default" ;   triggered on {!s} always,
@@ -109,6 +114,7 @@ Class ScritchGui {
         gBtnSubmit.OnEvent "Click"           ; <Click>
                          , "BtnSubmit_Click" ; registration
         ;                '-------------------'            
+
         ;   DESTROY BUTTON      .==================.
         gBtnDestroy := gGui.Add( "Button"          ;   Hidden button used to
                                , "Hidden"          ;   save note and destroy Gui
@@ -117,11 +123,13 @@ Class ScritchGui {
         gBtnDestroy.OnEvent  "Click"             ; <Click>
                            , "BtnDestroy_Click"  ; registration
         ;                  '---------------------'
+
         ;   EDIT CONTROL  .=================.
         gEdit := gGui.Add( "Edit"           ; Edit control for editing notes
                          , this.sEditOpts   ;
                          , this.sEditPHText )
         ;                '=================='
+
         ; STORE GUI IN INSTANCE
         this.gGui         := gGui
         this.gTree        := gTree
@@ -130,13 +138,17 @@ Class ScritchGui {
         this.gBtnSubmit   := gBtnSubmit
         this.gBtnDestroy  := gBtnDestroy
         this.gEdit        := gEdit
+
         ; SHOW GUI
         this.gGui.Show "w" this.iWidth " "
                      . "h" this.iHeight
+
         ; SET GUI TRANSPARENCY
         WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
+
         ; SELECT FIRST ITEM IN TREEVIEW
         ControlSend "{Right}{Right}", this.gTree, this.gGui
+
         ; REGISTER HOTKEYS
         HotIf (*)=> this.gGui.Hwnd = WinExist("A") and this.gEdit.Focused
         Hotkey "<^Tab", ObjBindMethod(this, "EditCtrlTab")
@@ -191,6 +203,7 @@ Class ScritchGui {
 
 Class ScritchEventSink {
     static cGuiParentClass := {}
+    ;   GUI <CLOSE>
     static Gui_Close(gMainObj, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
@@ -201,6 +214,7 @@ Class ScritchEventSink {
         gMainObj.Destroy
         ExitApp
     }
+    ;   BTNSUBMIT <CLICK>
     static BtnSubmit_Click(gCtrl, *) {
         stdo "{ScritchGui.gBtnSubmit} <Click> event triggered"
             , "ClassNN: " gCtrl.ClassNN
@@ -215,6 +229,7 @@ Class ScritchEventSink {
                     cGui.SaveEditToNote oNote
 
     }
+    ;   BTNDESTROY <CLICK>
     static BtnDestroy_Click(gCtrl, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
@@ -226,6 +241,7 @@ Class ScritchEventSink {
         gCtrl.Gui.Destroy
         ExitApp
     }
+    ;   TREE <ITEMSELECT>
     static Tree_ItemSelect(gCtrl, sItem, *) {
         cGui := this.cGuiParentClass
         selectedText := gCtrl.GetText(sItem)
@@ -248,6 +264,7 @@ Class ScritchEventSink {
         cGui.sTreeRecentlySelected := selectedText
         cGui.sTreeRecentlySelectedText := selectedText
     }
+    ;   TREE <CONTEXTMENU>
     static Tree_ContextMenu(gCtrl, sItem, *) {
         cGui := this.cGuiParentClass
         gCtxMenu := cGui.gTreeCtxMenu
