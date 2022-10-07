@@ -4,6 +4,7 @@
 
 #Include ..\Lib\DBT.ahk
 
+
 Class ScritchGui {
     ;
     ;* General Instance Variables
@@ -15,141 +16,127 @@ Class ScritchGui {
         ;
         ;*  Main Gui Options
         ;
-        , iWidth        := 750
+        , iWidth        := 900
         , iHeight       := 450
         , iXPosition    := A_ScreenWidth/2 - this.iWidth/2
         , iYPosition    := A_ScreenHeight/2 - this.iHeight/2
-        , sGuiOptsNew   := "-Caption -AlwaysOnTop"
+        , sGuiOptsNew   := "-Caption +AlwaysOnTop"
         , sGuiOpts      := "w" this.iWidth      " "
                          . "h" this.iHeight     " "
                          . "x" this.iXPosition  " "
                          . "y" this.iYPosition
         , sGuiFontName  := "Fira Code"
         , sGuiFontOpts  := ""
-        ;
-        ;
-        ;*  Buttons Options
-        ;
-        , iBtnBoxHeight  := 30
-        , iBtnBoxWidth   := 200
-        , iBtnBoxPadding := 5
-        , iBtnNewNoteXPos   := this.iBtnBoxPadding
-        , iBtnNewNoteYPos   := this.iHeight 
-                               - this.iBtnBoxHeight 
-                               + this.iBtnBoxPadding
-        , iBtnNewNoteHeight := this.iBtnBoxHeight - this.iBtnBoxPadding*2
-        , iBtnNewNoteWidth  := this.iBtnBoxWidth/3 - this.iBtnBoxPadding*4
+        , sGuiBG        := "ce1cae4"
+        , fWinOpacity   := 0.75
         ;
         ;
         ;*  Tree Options
         ;
-        , iTreeHeight   := this.iHeight - this.iBtnBoxHeight
-        , iTreeWidth    := this.iBtnBoxWidth
+        , iTreeHeight   := this.iHeight
+        , iTreeWidth    := 200
         , iTreeRows     := 20
-        , sTreeOpts     := "r" this.iTreeRows  " "
-                         . "x" 0               " "
-                         . "y" 0               " "
-                         . "w" this.iTreeWidth " "
-                         . "h" this.iTreeHeight
+        , sTreeBG       := this.sGuiBG
+        , sTreeOpts     := "r" this.iTreeRows    " "
+                         . "x" 0                 " "
+                         . "y" 0                 " "
+                         . "w" this.iTreeWidth   " "
+                         . "h" this.iTreeHeight  " "
+                         . "Background" this.sTreeBG
         , sTreeRecentlySelected := ""
         , sTreeRecentlySelectedText := ""
+        , sTreeCtxMenuTargetItem := ""
         ;
         ;
         ;*  Edit Options
         ;
         , iEditHeight   := this.iHeight
         , iEditWidth    := this.iWidth - this.iTreeWidth
-        , sEditOpts     := "WantTab"            " "
-                         . "w" this.iEditWidth  " "
-                         . "h" this.iEditHeight " "
-                         . "y" 0
+        , sEditBG       := this.sGuiBG
+        , sEditOpts     := "WantTab"             " "
+                         . "w" this.iEditWidth   " "
+                         . "h" this.iEditHeight  " "
+                         . "y" 0                 " "
+                         . "Background" this.sEditBG
         , sEditPHText   := ""
     
     __New() {
         ScritchEventSink.cGuiParentClass := this  ; Share static reference to 
         ;                                           instance with event sink
         this.oNotes := ScritchNotes()  ; Create helper for managing notes/files
-        ;
-        ; MAIN GUI  .=================.
+        this.oConf  := ScritchConf()   ; Create helper for Scritch.conf
+        ;   MAIN GUI.=================.
         gGui := Gui( this.sGuiOptsNew ;
                    , this.sWindowName ;
                    , ScritchEventSink )
-        ;          '=================='
+        ;          '=============|===='.
         gGui.OnEvent "Close"     ; <Close>   
                    , "Gui_Close" ; registration 
         ;          '-,-----------\______
         gGui.SetFont( this.sGuiFontOpts ; Set main gui font 
                     , this.sGuiFontName )
         ;           '-------------------'
-        ;
-        gGui.MarginX := gGui.MarginY := 0   ; Set Gui X and Y margins
-        ;
-        ; TREEVIEW        .===============.
+        gGui.MarginX := gGui.MarginY := 0  ; Set Gui X and Y margins
+        ;   TREEVIEW      .===============.
         gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
                          , this.sTreeOpts ) ; notes to edit based on selection
         ;                '================'   events
         gTree.OnEvent "ItemSelect", "Tree_ItemSelect"  ; <ItemSelect>
         ;                                                registration
-        ; TREEVIEW ITEMS 
+        gTree.OnEvent "ContextMenu", "Tree_ContextMenu"
+        ;   TREEVIEW ITEMS 
         mTreeItems := Map()                      ; Add items to Treeview
+        aGroups := StrSplit(this.oConf.Config["Groups"], "|")
+        for sGroup in aGroups
+            mTreeItems[sGroup] := Map("Head", gTree.Add(sGroup))
         for oNote in this.oNotes.aNotes {        ; representing notes to edit
-            if !mTreeItems.Has(oNote.sCategory)  ;
-                mTreeItems[oNote.sCategory] :=   ;
-                    Map("Head", gTree.Add(oNote.sCategory))
-            mTreeItems[oNote.sCategory][oNote.sFileNameNoExt] :=
+            mTreeItems[oNote.sGroup][oNote.sFileNameNoExt] :=
                 gTree.Add(
-                    oNote.sTimestamp, mTreeItems[oNote.sCategory]["Head"])
+                    oNote.sTimestamp, mTreeItems[oNote.sGroup]["Head"])
         }
-        ;
+        ;   TREEVIEW CONTEXT MENU
+        gTreeCtxMenu := Menu()
+        gTreeCtxMenu.Add("New Note", ObjBindMethod(this, "MenuNewNote"))
+        gTreeCtxMenu.Add("Delete Note", ObjBindMethod(this, "MenuDeleteNote"))
+        gTreeCtxMenu.Add
+        gTreeCtxMenu.Add("New Group", ObjBindMethod(this, "MenuNewGroup"))
+        gTreeCtxMenu.Add("Delete Group", ObjBindMethod(this, "MenuDeleteGroup"))
         ;   SUBMIT BUTTON      .=================.
         gBtnSubmit := gGui.Add( "Button"         ;   Hidden submit button 
                               , "Hidden Default" ;   triggered on {!s} always,
                               , "&ScritchSubmit" ) ; and {Enter} if edit control
-        ;                  __/==================='   is not active
+        ;                  __/===============|==='   is not active
         gBtnSubmit.OnEvent "Click"           ; <Click>
                          , "BtnSubmit_Click" ; registration
         ;                '-------------------'            
-        ;
         ;   DESTROY BUTTON      .==================.
         gBtnDestroy := gGui.Add( "Button"          ;   Hidden button used to
                                , "Hidden"          ;   save note and destroy Gui
                                , "Scritch&Destroy" ) ; on {!d} trigger
-        ;                   ___/==================='
+        ;                   ___/=================|='
         gBtnDestroy.OnEvent  "Click"             ; <Click>
                            , "BtnDestroy_Click"  ; registration
         ;                  '---------------------'
-        ;
         ;   EDIT CONTROL  .=================.
         gEdit := gGui.Add( "Edit"           ; Edit control for editing notes
                          , this.sEditOpts   ;
                          , this.sEditPHText )
         ;                '=================='
-        ;
-        ;   NEW NOTE BUTTON     .=====================.
-        gBtnNewNote := gGui.Add( "Button"             ;   Button to create a new
-                               , this.iBtnNewNoteOpts ;   note, update stored
-                               , "&New Note"          ) ; info, and create file
-        ;                  ___/======================='
-        gBtnNewNote.OnEvent "Click"            ; <Click>
-                          , "BtnNewNote_Click" ; registration
-        ;                 '--------------------'
-        ;                                       
         ; STORE GUI IN INSTANCE
-        this.gGui        := gGui
-        this.gTree       := gTree
-        this.mTreeItems  := mTreeItems
-        this.gBtnSubmit  := gBtnSubmit
-        this.gBtnDestroy := gBtnDestroy
-        this.gEdit       := gEdit
-        this.gBtnNewNote := gBtnNewNote
-        ;
+        this.gGui         := gGui
+        this.gTree        := gTree
+        this.mTreeItems   := mTreeItems
+        this.gTreeCtxMenu := gTreeCtxMenu
+        this.gBtnSubmit   := gBtnSubmit
+        this.gBtnDestroy  := gBtnDestroy
+        this.gEdit        := gEdit
         ; SHOW GUI
         this.gGui.Show "w" this.iWidth " "
                      . "h" this.iHeight
-        ;
+        ; SET GUI TRANSPARENCY
+        WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
         ; SELECT FIRST ITEM IN TREEVIEW
         ControlSend "{Right}{Right}", this.gTree, this.gGui
-        ;
         ; REGISTER HOTKEYS
         HotIf (*)=> this.gGui.Hwnd = WinExist("A") and this.gEdit.Focused
         Hotkey "<^Tab", ObjBindMethod(this, "OverrideEditTabFunction")
@@ -166,6 +153,7 @@ Class ScritchGui {
         for oNote in this.oNotes.aNotes
             if oNote.sTimestamp = sTimestamp
                 this.SaveEditToNote oNote
+        this.gGui.Hide
     }
 
     SaveEditToNote(oNote) {
@@ -173,8 +161,32 @@ Class ScritchGui {
         oNoteFile.Write this.gEdit.Value
         oNoteFile.Close
     }
-}
 
+    ToggleGui(*) {
+        if WinActive("ahk_id " this.gGui.Hwnd)
+            this.gGui.Hide
+        else this.gGui.Show
+    }
+    
+    ; MENU HANDLER METHODS
+    MenuNewNote(sItem, iItem, oMenu)     {  ; Create Note if selection in group
+
+    }
+    MenuDeleteNote(sItem, iItem, oMenu)  {  ; Delete Note if note selected
+
+    }
+    MenuNewGroup(sItem, iItem, oMenu)    {  ; Create Group > Unconditional
+        sNewGroupInput := InputBox("Enter New Group Name: ", "New Group"
+                                 , "w" 200 " h" 100 "-Caption", "New Group")
+        if sNewGroupInput.Result = "OK" 
+                and (sNewGroupInput.Value ~= "^[a-zA-Z0-9_\-\s]+$") {
+            this.oConf.Config["Groups"] .= "|" sNewGroupInput.Value
+        }
+    }
+    MenuDeleteGroup(sItem, iItem, oMenu) {  ; Delete Group if group selected
+
+    }
+}
 
 
 Class ScritchEventSink {
@@ -182,7 +194,7 @@ Class ScritchEventSink {
     static Gui_Close(gMainObj, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
-        if selectedText ~= "\d\d/\.*"
+        if selectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if selectedText = oNote.sTimestamp
                     cGui.SaveEditToNote oNote
@@ -195,20 +207,24 @@ Class ScritchEventSink {
             , "Hwnd:    " gCtrl.Hwnd
             , "Type:    " gCtrl.Type
             , "Name:    " gCtrl.Name
+        cGui := this.cGuiParentClass
+        selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
+        if selectedText ~= "^\d\d/.*"
+            for oNote in cgui.oNotes.aNotes
+                if selectedText = oNote.sTimestamp
+                    cGui.SaveEditToNote oNote
+
     }
     static BtnDestroy_Click(gCtrl, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
-        if selectedText ~= "\d\d/\.*"
+        if selectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if selectedText = oNote.sTimestamp
                     cGui.SaveEditToNote oNote
         gCtrl.Gui.Hide
         gCtrl.Gui.Destroy
         ExitApp
-    }
-    static BtnNewNote_Click(gCtrl, *) {
-
     }
     static Tree_ItemSelect(gCtrl, sItem, *) {
         cGui := this.cGuiParentClass
@@ -217,13 +233,13 @@ Class ScritchEventSink {
         cGui := this.cGuiParentClass
         ; if recently selected item is a timestamp, 
         ;       i.e. starts with 2 digits and a backslash
-        if recentlySelectedText ~= "\d\d/\.*"
+        if recentlySelectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if recentlySelectedText = oNote.sTimestamp
                     cGui.SaveEditToNote oNote
         ; if selected item is a timestamp, 
         ;       i.e. starts with 2 digits and a backslash
-        if selectedText ~= "\d\d/\.*"
+        if selectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if selectedText = oNote.sTimestamp
                     cGui.gEdit.Value := 
@@ -232,17 +248,33 @@ Class ScritchEventSink {
         cGui.sTreeRecentlySelected := selectedText
         cGui.sTreeRecentlySelectedText := selectedText
     }
+    static Tree_ContextMenu(gCtrl, sItem, *) {
+        cGui := this.cGuiParentClass
+        gCtxMenu := cGui.gTreeCtxMenu
+        cGui.sTreeCtxMenuTargetItem := sItem
+        isGroupName := False
+        for sGroupName, oGroup in cGui.mTreeItems
+            if oGroup["Head"] = sItem
+                isGroupName := True
+        if !isGroupName {
+            gCtxMenu.Disable "Delete Group"
+            if sItem {
+                gCtxMenu.Enable "New Note"
+                gCtxMenu.Enable "Delete Note"
+            } else {
+                gCtxMenu.Disable "New Note"
+                gCtxMenu.Disable "Delete Note"
+            }
+        } else {
+            gCtxMenu.Disable "Delete Note"
+            gCtxMenu.Enable "Delete Group"
+            gCtxMenu.Enable "New Note"
+        }
+        gCtxMenu.Show
+    }
 }
 
-Class ScritchConf {
-    __Get(sName, aParams) {
 
-    }
-
-    __Set(sName, aParams, vValue) {
-
-    }
-}
 
 Class ScritchNotes {
     sNotesDir := A_ScriptDir "\scritches"
@@ -274,12 +306,12 @@ Class ScritchNotes {
     }
 
     UpdateConf() {
-        if (FileExist(this.sNotesConf) ~= "A|N")
+        if IsFile(this.sNotesConf)
             FileDelete this.sNotesConf
         for oNote in this.aNotes {
             sSection := oNote.sFileNameNoExt
             IniWrite oNote.sTimestamp, this.sNotesConf, sSection, "Timestamp"
-            IniWrite oNote.sCategory, this.sNotesConf, sSection, "Category"
+            IniWrite oNote.sGroup, this.sNotesConf, sSection, "Group"
         }
     }
 
@@ -295,17 +327,17 @@ Class ScritchNotes {
         sFileName      := ""
         sFileNameNoExt := ""
         sTimestamp     := ""
-        sCategory      := ""
-        __New(sFileName:="", sTimestamp:="", sCategory := "") {
+        sGroup         := ""
+        __New(sFileName:="", sTimestamp:="", sGroup := "") {
             if !sFileName or !sTimestamp
                 this.New
             else this.sFileName      := sFileName
                , this.sTimestamp     := sTimestamp
-               , this.sCategory      := "General"
                , this.sFileNameNoExt := StrSplit(sFileName, ".")[1]
+            this.sGroup := sGroup ? sGroup : "General"
         }
         New() {
-            this.sCategory := "General"
+            this.sGroup := "General"
             oTimestamp := GetLocalTime()
             for sName in oTimestamp.OwnProps() {
                 if StrLen(oTimestamp.%sName%) = 1
@@ -330,6 +362,34 @@ Class ScritchNotes {
         }
     }
 }
+
+
+
+Class ScritchConf {
+    __New() {
+        if !IsFile(A_ScriptDir "\Scritch.conf")
+            FileAppend "", A_ScriptDir "\Scritch.conf"
+        if IniRead(A_ScriptDir "\Scritch.conf", "Config", "Groups", 0) = 0
+            IniWrite("General", A_ScriptDir "\Scritch.conf", "Config", "Groups")
+    }
+
+    __Get(sName, aParams) {
+        for vParam in aParams
+            if IsAlnum(vParam)
+                Return IniRead(A_ScriptDir "\Scritch.conf", sName, vParam, 0)
+    }
+
+    __Set(sName, aParams, vValue) {
+        stdo "Name: " sName, "`tParam1: " aParams[1], "`tValue: " vValue
+        for vParam in aParams
+            if IsAlnum(StrReplace(vParam, A_Space, "")) and !IsObject(vValue) {
+                IniWrite vValue, A_ScriptDir "\Scritch.conf", sName, vParam
+                Return IniRead(A_ScriptDir "\Scritch.conf", sName, vParam, 0)
+            }
+        Return 0
+    }
+}
+
 
 /**
  * `ParseTimestampFromFileName(sFileName) -> {String}`
@@ -375,20 +435,20 @@ GetLocalTime() {
     }
 }
 
-
-
-
-
-
-
+IsFile(sFilePath) {
+    if (sExists := FileExist(sFilePath)) and (InStr(sExists, "A") 
+                                           or InStr(sExists, "N"))
+        Return True
+    else Return False
+}
 
 
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;  DEBUG FUNCTIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 _Debug_ClearNotes() {
-    if FileExist(A_ScriptDir "\scritches\*.note") ~= "A|N"
+    if IsFile(A_ScriptDir "\scritches\*.note")
         FileDelete A_ScriptDir "\scritches\*.note"
-    if FileExist(A_ScriptDir "\notes.conf") ~= "A|N"
+    if IsFile(A_ScriptDir "\notes.conf")
         FileDelete A_ScriptDir "\notes.conf"
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -411,21 +471,21 @@ _Debug_AddNotes(oScritchNotes) {
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 _Debug_LoopNoteInfo(oScritchNotes) {
     for tNote in oScritchNotes.aNotes
-        stdo tNote.sFileName, "`t" tNote.sTimestamp, "`t" tNote.sCategory
+        stdo tNote.sFileName, "`t" tNote.sTimestamp, "`t" tNote.sGroup
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;  DEBUG FUNCTIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  IF DEBUGGING  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 if A_ScriptName = "Scritch.ahk" {
-    _Debug_ClearNotes
-    testScritchNotes := ScritchNotes()
-    _Debug_AddNotes(testScritchNotes)
-    _Debug_LoopNoteInfo(testScritchNotes)
+    ; _Debug_ClearNotes
+    ; testScritchNotes := ScritchNotes()
+    ; _Debug_AddNotes(testScritchNotes)
+    ; _Debug_LoopNoteInfo(testScritchNotes)
     testScritchGui := ScritchGui()
+    Hotkey "<#v", ObjBindMethod(testScritchGui, "ToggleGui")
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  IF DEBUGGING  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -5,9 +5,21 @@ SetMouseDelay -1
 
 #Include <DBT>
 
-something := {x: "x", y: "y"}
+ts := [ "abcdefghijklmnopqrstuvwxyz"
+      , "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      , "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+      , "------abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789______"
+      , "------ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789 ______" ]
 
-somethingelse := something ?? "nothing"
-somethingelse := something.HasProp("y") ? something.y : "nothingy"
+patterns := [ "[a-z]+"
+            , "[a-zA-Z]+"
+            , "^[a-zA-Z0-9]+$"
+            , "[a-zA-Z0-9_\-]+"
+            , "[a-zA-Z0-9_\-\s]+" ]
 
-stdo somethingelse
+
+RegExMatch ts[2], patterns[2], &rMatch
+stdo rMatch[0]
+RegExMatch ts[4], patterns[5], &rMatch
+stdo rMatch[0]
+stdo (ts[3] ~= patterns[3])
