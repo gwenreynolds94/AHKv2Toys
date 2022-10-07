@@ -5,20 +5,21 @@
 #Include ..\Lib\DBT.ahk
 
 Class ScritchGui {
-    ;* Instance Variables
     ;
-
+    ;* General Instance Variables
+    oNotes := {}
     ;
+    ;* Gui Options Instance Variables
     sWindowName := "Scritches"
         ;
         ;
-        ;*  Gui Options
+        ;*  Main Gui Options
         ;
         , iWidth        := 750
         , iHeight       := 450
         , iXPosition    := A_ScreenWidth/2 - this.iWidth/2
         , iYPosition    := A_ScreenHeight/2 - this.iHeight/2
-        , sGuiOptsNew   := "-Caption +AlwaysOnTop"
+        , sGuiOptsNew   := "-Caption -AlwaysOnTop"
         , sGuiOpts      := "w" this.iWidth      " "
                          . "h" this.iHeight     " "
                          . "x" this.iXPosition  " "
@@ -27,23 +28,31 @@ Class ScritchGui {
         , sGuiFontOpts  := ""
         ;
         ;
-        ;*  BtnSubmit Options
+        ;*  Buttons Options
         ;
-        , iBtnBoxHeight := 50
+        , iBtnBoxHeight  := 30
+        , iBtnBoxWidth   := 200
+        , iBtnBoxPadding := 5
+        , iBtnNewNoteXPos   := this.iBtnBoxPadding
+        , iBtnNewNoteYPos   := this.iHeight 
+                               - this.iBtnBoxHeight 
+                               + this.iBtnBoxPadding
+        , iBtnNewNoteHeight := this.iBtnBoxHeight - this.iBtnBoxPadding*2
+        , iBtnNewNoteWidth  := this.iBtnBoxWidth/3 - this.iBtnBoxPadding*4
         ;
         ;
         ;*  Tree Options
         ;
         , iTreeHeight   := this.iHeight - this.iBtnBoxHeight
-        , iTreeWidth    := 200
+        , iTreeWidth    := this.iBtnBoxWidth
         , iTreeRows     := 20
-        ; , sTreeOpts     := "r20 x0 y0 w200 h" this.iHeight
         , sTreeOpts     := "r" this.iTreeRows  " "
                          . "x" 0               " "
                          . "y" 0               " "
                          . "w" this.iTreeWidth " "
                          . "h" this.iTreeHeight
         , sTreeRecentlySelected := ""
+        , sTreeRecentlySelectedText := ""
         ;
         ;
         ;*  Edit Options
@@ -54,85 +63,115 @@ Class ScritchGui {
                          . "w" this.iEditWidth  " "
                          . "h" this.iEditHeight " "
                          . "y" 0
-        , sEditPHText   := "Lorem Ipsum SAMPLE L>%@>%:@:<%@<%%}#$^%$%*(&)"
+        , sEditPHText   := ""
     
     __New() {
-        ScritchEventSink.cGuiParentClass := this
-        ; Instance of helper class to 
-        ;      store, get, and set info about note files
-        this.oNotes := ScritchNotes()
-
-        ; Main gui object
+        ScritchEventSink.cGuiParentClass := this  ; Share static reference to 
+        ;                                           instance with event sink
+        this.oNotes := ScritchNotes()  ; Create helper for managing notes/files
+        ;
+        ; MAIN GUI  .=================.
         gGui := Gui( this.sGuiOptsNew ;
                    , this.sWindowName ;
                    , ScritchEventSink )
-                   ;__________________;
-
-        ; Set main gui font 
-        gGui.SetFont( this.sGuiFontOpts ;
+        ;          '=================='
+        gGui.OnEvent "Close"     ; <Close>   
+                   , "Gui_Close" ; registration 
+        ;          '-,-----------\______
+        gGui.SetFont( this.sGuiFontOpts ; Set main gui font 
                     , this.sGuiFontName )
-                    ;___________________;
-
-        ; Set main gui margin 
-        gGui.MarginX := gGui.MarginY := 0
-
-        ; Treeview representing a log of all notes 
-        gTree := gGui.Add( "TreeView"     ;
-                         , this.sTreeOpts )
-                         ;________________;
-        gTree.OnEvent "ItemSelect", "Tree_ItemSelect"
-
-        ; Add items to Treeview representing notes 
-        mTreeItems := Map()
-        for oNote in this.oNotes.aNotes {
-            if !mTreeItems.Has(oNote.sCategory)
-                mTreeItems[oNote.sCategory] := 
+        ;           '-------------------'
+        ;
+        gGui.MarginX := gGui.MarginY := 0   ; Set Gui X and Y margins
+        ;
+        ; TREEVIEW        .===============.
+        gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
+                         , this.sTreeOpts ) ; notes to edit based on selection
+        ;                '================'   events
+        gTree.OnEvent "ItemSelect", "Tree_ItemSelect"  ; <ItemSelect>
+        ;                                                registration
+        ; TREEVIEW ITEMS 
+        mTreeItems := Map()                      ; Add items to Treeview
+        for oNote in this.oNotes.aNotes {        ; representing notes to edit
+            if !mTreeItems.Has(oNote.sCategory)  ;
+                mTreeItems[oNote.sCategory] :=   ;
                     Map("Head", gTree.Add(oNote.sCategory))
             mTreeItems[oNote.sCategory][oNote.sFileNameNoExt] :=
                 gTree.Add(
                     oNote.sTimestamp, mTreeItems[oNote.sCategory]["Head"])
         }
-
-        ; Hidden Default Submit button handling
-        ;      <Enter>/<^s>/Click events and its event registration
-        gBtnSubmit := gGui.Add( "Button"         ;
-                              , "Hidden Default" ;
-                              , "&ScritchSubmit" )
-                              ;__________________;
-
-        ; Hidden Destroy Gui button handling 
-        ;       <^d>/Click events and its event registration
-        gBtnDestroy := gGui.Add( "Button"          ;
-                               , "Hidden"          ;
-                               , "Scritch&Destroy" )
-                               ;___________________;
-
-        gBtnSubmit.OnEvent "Click", "BtnSubmit_Click"
-        gBtnDestroy.OnEvent  "Click", "BtnDestroy_Click"
-
-        gEdit := gGui.Add( "Edit"           ;
+        ;
+        ;   SUBMIT BUTTON      .=================.
+        gBtnSubmit := gGui.Add( "Button"         ;   Hidden submit button 
+                              , "Hidden Default" ;   triggered on {!s} always,
+                              , "&ScritchSubmit" ) ; and {Enter} if edit control
+        ;                  __/==================='   is not active
+        gBtnSubmit.OnEvent "Click"           ; <Click>
+                         , "BtnSubmit_Click" ; registration
+        ;                '-------------------'            
+        ;
+        ;   DESTROY BUTTON      .==================.
+        gBtnDestroy := gGui.Add( "Button"          ;   Hidden button used to
+                               , "Hidden"          ;   save note and destroy Gui
+                               , "Scritch&Destroy" ) ; on {!d} trigger
+        ;                   ___/==================='
+        gBtnDestroy.OnEvent  "Click"             ; <Click>
+                           , "BtnDestroy_Click"  ; registration
+        ;                  '---------------------'
+        ;
+        ;   EDIT CONTROL  .=================.
+        gEdit := gGui.Add( "Edit"           ; Edit control for editing notes
                          , this.sEditOpts   ;
                          , this.sEditPHText )
-                         ;__________________;
-
-        this.gGui       := gGui
-        this.gTree      := gTree
-        this.mTreeItems := mTreeItems
-        this.gBtnSubmit := gBtnSubmit
-        this.gEdit      := gEdit
-
+        ;                '=================='
+        ;
+        ;   NEW NOTE BUTTON     .=====================.
+        gBtnNewNote := gGui.Add( "Button"             ;   Button to create a new
+                               , this.iBtnNewNoteOpts ;   note, update stored
+                               , "&New Note"          ) ; info, and create file
+        ;                  ___/======================='
+        gBtnNewNote.OnEvent "Click"            ; <Click>
+                          , "BtnNewNote_Click" ; registration
+        ;                 '--------------------'
+        ;                                       
+        ; STORE GUI IN INSTANCE
+        this.gGui        := gGui
+        this.gTree       := gTree
+        this.mTreeItems  := mTreeItems
+        this.gBtnSubmit  := gBtnSubmit
+        this.gBtnDestroy := gBtnDestroy
+        this.gEdit       := gEdit
+        this.gBtnNewNote := gBtnNewNote
+        ;
+        ; SHOW GUI
         this.gGui.Show "w" this.iWidth " "
                      . "h" this.iHeight
+        ;
+        ; SELECT FIRST ITEM IN TREEVIEW
         ControlSend "{Right}{Right}", this.gTree, this.gGui
-
-        
+        ;
+        ; REGISTER HOTKEYS
         HotIf (*)=> this.gGui.Hwnd = WinExist("A") and this.gEdit.Focused
         Hotkey "<^Tab", ObjBindMethod(this, "OverrideEditTabFunction")
+        Hotkey "<^Enter", ObjBindMethod(this, "EditCtrlEnter")
         HotIf
     }
 
     OverrideEditTabFunction(*) {
         this.gTree.Focus
+    }
+
+    EditCtrlEnter(*) {
+        sTimestamp := this.gTree.GetText(this.gTree.GetSelection())
+        for oNote in this.oNotes.aNotes
+            if oNote.sTimestamp = sTimestamp
+                this.SaveEditToNote oNote
+    }
+
+    SaveEditToNote(oNote) {
+        oNoteFile := FileOpen(this.oNotes.sNotesDir "\" oNote.sFileName, "w")
+        oNoteFile.Write this.gEdit.Value
+        oNoteFile.Close
     }
 }
 
@@ -140,28 +179,58 @@ Class ScritchGui {
 
 Class ScritchEventSink {
     static cGuiParentClass := {}
+    static Gui_Close(gMainObj, *) {
+        cGui := this.cGuiParentClass
+        selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
+        if selectedText ~= "\d\d/\.*"
+            for oNote in cGui.oNotes.aNotes
+                if selectedText = oNote.sTimestamp
+                    cGui.SaveEditToNote oNote
+        gMainObj.Destroy
+        ExitApp
+    }
     static BtnSubmit_Click(gCtrl, *) {
         stdo "{ScritchGui.gBtnSubmit} <Click> event triggered"
             , "ClassNN: " gCtrl.ClassNN
-            , "Hwnd: " gCtrl.Hwnd
-            , "Type: " gCtrl.Type
-            , "Name: " gCtrl.Name
+            , "Hwnd:    " gCtrl.Hwnd
+            , "Type:    " gCtrl.Type
+            , "Name:    " gCtrl.Name
     }
     static BtnDestroy_Click(gCtrl, *) {
+        cGui := this.cGuiParentClass
+        selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
+        if selectedText ~= "\d\d/\.*"
+            for oNote in cGui.oNotes.aNotes
+                if selectedText = oNote.sTimestamp
+                    cGui.SaveEditToNote oNote
         gCtrl.Gui.Hide
         gCtrl.Gui.Destroy
         ExitApp
     }
+    static BtnNewNote_Click(gCtrl, *) {
+
+    }
     static Tree_ItemSelect(gCtrl, sItem, *) {
-        stdo sItem
-           , "`t" gCtrl.GetText(sItem)
-           , "`t" this.cGuiParentClass.sTreeRecentlySelected
+        cGui := this.cGuiParentClass
+        selectedText := gCtrl.GetText(sItem)
+        recentlySelectedText := cGui.sTreeRecentlySelectedText
+        cGui := this.cGuiParentClass
+        ; if recently selected item is a timestamp, 
+        ;       i.e. starts with 2 digits and a backslash
+        if recentlySelectedText ~= "\d\d/\.*"
+            for oNote in cGui.oNotes.aNotes
+                if recentlySelectedText = oNote.sTimestamp
+                    cGui.SaveEditToNote oNote
         ; if selected item is a timestamp, 
         ;       i.e. starts with 2 digits and a backslash
-        if gCtrl.GetText(sItem) ~= "\d\d/\.*"
-            stdo "Matched"
+        if selectedText ~= "\d\d/\.*"
+            for oNote in cGui.oNotes.aNotes
+                if selectedText = oNote.sTimestamp
+                    cGui.gEdit.Value := 
+                            FileRead(cGui.oNotes.sNotesDir "\" oNote.sFileName)
         ; sets recently selected item
-        this.cGuiParentClass.sTreeRecentlySelected := sItem
+        cGui.sTreeRecentlySelected := selectedText
+        cGui.sTreeRecentlySelectedText := selectedText
     }
 }
 
@@ -336,7 +405,8 @@ _Debug_AddNotes(oScritchNotes) {
         }
         oScritchNotes.UpdateNote oNote, sNote
     }
-    oScritchNotes.UpdateNote , "loremloremloremloremlorem", oScritchNotes.aNotes[1].sTimestamp
+    oScritchNotes.UpdateNote , "loremloremloremloremlorem"
+                             , oScritchNotes.aNotes[1].sTimestamp
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 _Debug_LoopNoteInfo(oScritchNotes) {
