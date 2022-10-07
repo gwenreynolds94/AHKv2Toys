@@ -139,12 +139,12 @@ Class ScritchGui {
         ControlSend "{Right}{Right}", this.gTree, this.gGui
         ; REGISTER HOTKEYS
         HotIf (*)=> this.gGui.Hwnd = WinExist("A") and this.gEdit.Focused
-        Hotkey "<^Tab", ObjBindMethod(this, "OverrideEditTabFunction")
+        Hotkey "<^Tab", ObjBindMethod(this, "EditCtrlTab")
         Hotkey "<^Enter", ObjBindMethod(this, "EditCtrlEnter")
         HotIf
     }
 
-    OverrideEditTabFunction(*) {
+    EditCtrlTab(*) {
         this.gTree.Focus
     }
 
@@ -391,25 +391,7 @@ Class ScritchConf {
 }
 
 
-/**
- * `ParseTimestampFromFileName(sFileName) -> {String}`
- * -----------------------------------------------------------------------------
- * -----------------------------------------------------------------------------
- * @param {String} sFileName - FileName property of Note instance
- *                             to be split every 2 characters
- * 
- *      sFileName String Format ->
- *      ... "{year}{month}{day}{hour}{minute}{second}{milliseconds}.note"
- * -----------------------------------------------------------------------------
- * @return {String} - Returns timestamp
- * 
- *      Return String Format ->
- *      ... "22/12/31 24:60:60.99"
- * -----------------------------------------------------------------------------
- * */
 ParseTimestampFromFileName(sFileName) {
-    /** @var {Array[String]} aFN - Variable name abbreviated 
-     *                             due to repetetive usage */
     aFN := []
     Loop 7 {
         aFN.Push SubStr(sFileName, (A_Index*2 - 1), 2)
