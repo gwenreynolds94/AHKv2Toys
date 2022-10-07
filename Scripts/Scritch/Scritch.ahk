@@ -66,6 +66,8 @@ Class ScritchGui {
         this.oNotes := ScritchNotes()  ; Create helper for managing notes/files
         this.oConf  := ScritchConf()   ; Create helper for Scritch.conf
 
+        ; GUI SETUP
+        ; ----------------------------------------------------------------------
         ;   MAIN GUI.=================.
         gGui := Gui( this.sGuiOptsNew ;
                    , this.sWindowName ;
@@ -78,7 +80,7 @@ Class ScritchGui {
                     , this.sGuiFontName )
         ;           '-------------------'
         gGui.MarginX := gGui.MarginY := 0  ; Set Gui X and Y margins
-
+        ; ----------------------------------------------------------------------
         ;   TREEVIEW      .===============.
         gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
                          , this.sTreeOpts ) ; notes to edit based on selection
@@ -86,7 +88,7 @@ Class ScritchGui {
         gTree.OnEvent "ItemSelect", "Tree_ItemSelect"  ; <ItemSelect>
         ;                                                registration
         gTree.OnEvent "ContextMenu", "Tree_ContextMenu"
-
+        ; ----------------------------------------------------------------------
         ;   TREEVIEW ITEMS 
         mTreeItems := Map()                      ; Add items to Treeview
         aGroups := StrSplit(this.oConf.Config["Groups"], "|")
@@ -97,7 +99,7 @@ Class ScritchGui {
                 gTree.Add(
                     oNote.sTimestamp, mTreeItems[oNote.sGroup]["Head"])
         }
-
+        ; ----------------------------------------------------------------------
         ;   TREEVIEW CONTEXT MENU
         gTreeCtxMenu := Menu()
         gTreeCtxMenu.Add("New Note", ObjBindMethod(this, "MenuNewNote"))
@@ -105,7 +107,7 @@ Class ScritchGui {
         gTreeCtxMenu.Add
         gTreeCtxMenu.Add("New Group", ObjBindMethod(this, "MenuNewGroup"))
         gTreeCtxMenu.Add("Delete Group", ObjBindMethod(this, "MenuDeleteGroup"))
-        
+        ; ----------------------------------------------------------------------
         ;   SUBMIT BUTTON      .=================.
         gBtnSubmit := gGui.Add( "Button"         ;   Hidden submit button 
                               , "Hidden Default" ;   triggered on {!s} always,
@@ -114,7 +116,7 @@ Class ScritchGui {
         gBtnSubmit.OnEvent "Click"           ; <Click>
                          , "BtnSubmit_Click" ; registration
         ;                '-------------------'            
-
+        ; ----------------------------------------------------------------------
         ;   DESTROY BUTTON      .==================.
         gBtnDestroy := gGui.Add( "Button"          ;   Hidden button used to
                                , "Hidden"          ;   save note and destroy Gui
@@ -123,13 +125,13 @@ Class ScritchGui {
         gBtnDestroy.OnEvent  "Click"             ; <Click>
                            , "BtnDestroy_Click"  ; registration
         ;                  '---------------------'
-
+        ; ----------------------------------------------------------------------
         ;   EDIT CONTROL  .=================.
         gEdit := gGui.Add( "Edit"           ; Edit control for editing notes
                          , this.sEditOpts   ;
                          , this.sEditPHText )
         ;                '=================='
-
+        ; ----------------------------------------------------------------------
         ; STORE GUI IN INSTANCE
         this.gGui         := gGui
         this.gTree        := gTree
@@ -138,17 +140,17 @@ Class ScritchGui {
         this.gBtnSubmit   := gBtnSubmit
         this.gBtnDestroy  := gBtnDestroy
         this.gEdit        := gEdit
-
+        ; ----------------------------------------------------------------------
         ; SHOW GUI
         this.gGui.Show "w" this.iWidth " "
                      . "h" this.iHeight
-
+        ; ----------------------------------------------------------------------
         ; SET GUI TRANSPARENCY
         WinSetTransparent(Round(this.fWinOpacity*255), this.sWindowName)
-
+        ; ----------------------------------------------------------------------
         ; SELECT FIRST ITEM IN TREEVIEW
         ControlSend "{Right}{Right}", this.gTree, this.gGui
-
+        ; ----------------------------------------------------------------------
         ; REGISTER HOTKEYS
         HotIf (*)=> this.gGui.Hwnd = WinExist("A") and this.gEdit.Focused
         Hotkey "<^Tab", ObjBindMethod(this, "EditCtrlTab")
