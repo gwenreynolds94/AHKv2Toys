@@ -107,7 +107,7 @@ Class ScritchGui {
 
         gBGPic := gBGGui.Add( "Picture"
                             , this.sBGPicOpts
-                            , A_ScriptDir "\bg34.png")
+                            , A_ScriptDir "\bg.png")
         ; ----------------------------------------------------------------------
         ;   TREEVIEW      
         ;                 .===============.
