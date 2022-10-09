@@ -4,55 +4,45 @@
 
 #Include "..\Lib\DBT.ahk"
 
-/** 
- ** Enumerate playlists
- ** Select playlist to manipulate
- ** Enumerate playlist tracks
- ** Select track(s)
- ** Add tracks to a custom currently playing queue structure
- ** Create playlist from custom structure
- ** Delete tracks from structure and/or playlist
- ** 
- */
 
- Null := 0
-
-Class ITPlaylistKind {
-            /** @prop {ITPlaylistKindUnknown}    Unknown    Unknown playlist kind.                  */
-    static  Unknown    :=(
-            0             )
-            /** @prop {ITPlaylistKindLibrary}    Library    Library playlist (IITLibraryPlaylist).  */
-          , Library    :=(
-            1             )
-            /** @prop {ITPlaylistKindUser}       User       User playlist (IITUserPlaylist).        */
-          , User       :=(
-            2             )
-            /** @prop {ITPlaylistKindCD}         CD         CD playlist (IITAudioCDPlaylist).       */
-          , CD         :=(
-            3             )
-            /** @prop {ITPlaylistKindDevice}     Device     Device playlist.                        */
-          , Device     :=(
-            4             )
-            /** @prop {ITPlaylistKindRadioTuner} RadioTuner Radio tuner playlist.                   */
-          , RadioTuner :=(
-            5             )     
+Null := 0
+Class iNotFoundError extends TargetError {
+    __New(msg, what:=-1) {
+        super.__New(msg, what)
+    }
 }
 
+
+ITPlaylistKind := Map(
+    "Unknown"       , 0     ; ITPlaylistKindUnknown
+  , "Library"       , 1     ; ITPlaylistKindLibrary
+  , "User"          , 2     ; ITPlaylistKindUser
+  , "CD"            , 3     ; ITPlaylistKindCD
+  , "Device"        , 4     ; ITPlaylistKindDevice
+  , "RadioTuner"    , 5     ; ITPlaylistKindRadioTuner
+)
+
+ITArtworkFormat := Map(
+    "Unknown"   , 0     ; ITArtworkFormatUnknown
+  , "jpg"       , 1     ; ITArtworkFormatJPEG
+  , "png"       , 2     ; ITArtworkFormatPNG
+  , "bmp"       , 3     ; ITArtworkFormatBMP
+)
+
 Class iTunesWrapper {
-    /** @prop {Map[String, iTunesWrapper.iPlaylist]} userPlaylists */
     userPlaylists := Map()
 
-    /** @param {iTunesApp} iApplication */
     __New(iApplication) {
         this.app := iApplication
         for pl in this.app.LibrarySource.Playlists
-            if (pl.Kind = ITPlaylistKind.User) 
+            if (pl.Kind = ITPlaylistKind["User"]) 
                     and !(pl.Name ~= ("(Audiobooks)|(Movies)|(Music)"
                                     . "|(Music\sVideos)|(Podcasts)|(TV\sShows)"))
                 this.userPlaylists[pl.Name] := iTunesWrapper.iPlaylist(pl)
     }
-    /** @prop {ITObject} COM*/
+
     COM[iObject] => this.app.GetITObjectByID(iObject.IDList*)
+
     Class iPlaylist {
         __New(IITPlaylist) {
             this.Name       := IITPlaylist.Name
@@ -63,30 +53,32 @@ Class iTunesWrapper {
             this.IDList     := [this.SourceID, this.PlaylistID, 0, 0]
         }
     }
+
     Class iTrackList {
-        /** @prop {Map[String|Integer, iTunesWrapper.iTrack]} Tracks */
         Tracks := Map()
 
-        __New(IITTrackCollection, iPlaylist_parent:=Null) {
-            ;! accept a single parameter instead {iTrackSource} and extract
-            ;!  ...tracks according to the type of object passed
-            iTrackSource := {}
+        __New(iTrackSource, iPlaylist_parent:=Null) {
             if Type(iTrackSource) = "ComObject" {
-                if ComObjType(iTrackSource) = "IITTrackCollection" {
-
-                } else if ComObjType(iTrackSource) = "IITUserPlaylist" {
-
+                if ComObjType(iTrackSource, "Name") = "IITTrackCollection" {
+                    IITTrackCollection := iTrackSource
+                } else if ComObjType(iTrackSource, "Name") = "IITUserPlaylist" {
+                    IITTrackCollection := iTrackSource.Tracks
+                } else {
+                    stdo "When iTrackSource is a ComObject type, it must "
+                       . "be either an IITTrackCollection or IITUserPlaylist."
+                    Return 0
                 }
+                for track in IITTrackCollection
+                    this.Tracks[track.PlayOrderIndex] := iTunesWrapper.iTrack(track)
             } else if Type(iTrackSource) = "Map" {
                 iTrackSource.__Enum().Call(&_k, &_v)
                 if _v is iTunesWrapper.iTrack {
-
-                }
+                    for idx, track in iTrackSource
+                        this.Tracks[idx] := track
+                } else stdo "When iTrackSource is a Map type, it must contain iTracks"
             }
+            this.Count := this.Tracks.Count
             this.Playlist   := iPlaylist_parent
-            this.Count      := IITTrackCollection.Count
-            for track in IITTrackCollection
-                this.tracks[track.PlayOrderIndex] := iTunesWrapper.iTrack(track)
         }
         SortTracks(sortBy:="name") {
             if (StrLower(sortBy) = "name") or (StrLower(sortBy) = "index") {
@@ -97,6 +89,7 @@ Class iTunesWrapper {
             }
         }
     }
+
     Class iTrack {
         __New(IITTrack) {
             this.Name   := IITTrack.Name
@@ -111,26 +104,72 @@ Class iTunesWrapper {
                                    , this.TrackID, this.TrackDatabaseID]
         }
     }
+
+    PlayPlaylist(playlistName) {
+        for pName, playlist in this.userPlaylists
+            if SubStr(pName, 1, StrLen(playlistName)) = playlistName{
+                this.COM[playlist].PlayFirstTrack()
+                Return 1
+            }
+        for pName, playlist in this.userPlaylists
+            if InStr(pName, playlistName){
+                this.COM[playlist].PlayFirstTrack()
+                Return 1
+            }
+        Return 0
+    }
+
+    PlayPause() {
+        this.app.PlayPause
+    }
+
+    Play() {
+        this.app.Play
+    }
+
+    Pause() {
+        this.app.Pause
+    }
+
+    Next() {
+        this.app.NextTrack
+    }
+
+    Prev() {
+        this.app.PreviousTrack
+    }
+
+    Back() {
+        this.app.BackTrack
+    }
+
+    SaveCurrentTrackArtwork(targetDir) {
+        cTrack := this.app.CurrentTrack
+        for art in cTrack.Artwork {
+            artFormat := art.Format
+            for fmt, fmtID in ITArtworkFormat {
+                if artFormat and fmtID = artFormat
+                    art.SaveArtworkToFile(targetDir "\" cTrack.TrackDatabaseID "." fmt)
+            }
+        }
+    }
+
+    SetShuffle(shouldShuffle:=True) {
+        if (shouldShuffle = False) or (shouldShuffle = True)
+            this.app.CurrentPlaylist.Shuffle := ComValue(0xB, shouldShuffle)
+    }
 }
 
 
 Class Test {
     __New() {
-        /** @var {iTunesApp} iApp*/
         iApp := ComObject("iTunes.Application")
-        this.iApp := iApp
-        ; ipl_RightNow    := iTunes.userPlaylists["RightNow"]
-        ; com_RightNow    := iTunes.COM[ipl_RightNow]
-        ; itl_RightNow    := iTunesWrapper.iTrackList(com_RightNow.Tracks, ipl_RightNow)
-        iTunes    := iTunesWrapper(this.iApp)
-        ; this.iApp.SoundVolume := 75
-        ; stdo ComObjType(iTunes.COM[iTunes.userPlaylists["ForMornin"]].Tracks, "Name")
+        iTunes    := iTunesWrapper(iApp)
 
-        iApp.SoundVolume := 50
+        iTunes.Pause
 
-        ; iTunes.userPlaylists.__Enum().Call(&upK, &upV)
-        ; stdo upK
         ; ComObjConnect(this.iApp, Test.iEventSink)
+        ExitApp
     }
     Class iEventSink {
         static OnPlayerPlayEvent(IITTrack, CallerObj) {
@@ -155,7 +194,7 @@ if A_ScriptName = "iTunesCOM2.ahk" {
 }
 OnExit ClearCOMOnExit
 ClearCOMOnExit(*) {
-    ComObjConnect(testing.iApp)
+    ; ComObjConnect(testing.iApp)
     global testing := {}
 }
 

@@ -1,0 +1,9 @@
+remake includes builder with new format
+
+build in a way to change the location of sublime text/ 
+...vscode installation in create new script as well as 
+...the location of the formatting template
+
+add option to include section headings unneccessary
+...for include building
+

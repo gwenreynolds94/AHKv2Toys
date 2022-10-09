@@ -26,11 +26,11 @@ Class ScritchGui {
                          . "x" this.iXPosition  " "
                          . "y" this.iYPosition
         , sGuiHideOpts  := this.sGuiOpts " Hide"
-        , sGuiFontName  := "Fira Code SemiBold"
+        , sGuiFontName  := "Fira Code"
         , sGuiFontOpts  := "s9"
         ; , sGuiBG        := "ce1cae4"
         , sGuiBG        := "cffccdd"
-        , fWinOpacity   := 0.6
+        , fWinOpacity   := 0.65
         ; ----------------------------------------------------------------------
         ;
         ;*  Tree Options
@@ -64,7 +64,7 @@ Class ScritchGui {
         ; ----------------------------------------------------------------------
         ;
         ;* BGGui/BGPic Options
-        , fBGOpacity   := 0.75
+        , fBGOpacity   := 0.7
         , iBGPicWidth  := this.iWidth
         , iBGPicHeight := this.iHeight
         , iBGPicXPos   := 0
