@@ -98,4 +98,15 @@ Specifies the reason the COM interface is being disabled.
       ---------------               ---------------
       ITCOMDisabledReasonOther      0 ...COM interface is being disabled for some other reason.
       ITCOMDisabledReasonDialog     1 ...COM interface is being disabled because a modal dialog is being displayed    
-      ITCOMDisabledReasonQuitting   2 ...COM interface is being disabled because iTunes is quitting. 
+      ITCOMDisabledReasonQuitting   2 ...COM interface is being disabled because iTunes is quitting.
+
+## **ITArtworkFormat enum**
+Specifies the artwork format.
+
+----
+      Names                         Values
+      ---------------               _______________
+      ITArtworkFormatUnknown        0 ...Unknown artwork format
+      ITArtworkFormatJPEG           1 ...JPEG image
+      ITArtworkFormatPNG            2 ...PNG image
+      ITArtworkFormatBMP            3 ...BMP image

@@ -13,11 +13,11 @@ ffdrive.Get(indexHTML)
 constants := ffdrive.FindElementsByClass("constant", 60, ComValue(0xB, True))
 urls := []
 
-Loop 251 {
-      urls.Push constants[A_Index+900].Attribute("href")
+Loop 1151 {
+      urls.Push constants[A_Index].Attribute("href")
 }
 
-Loop 251 {
+Loop 1151 {
       ffdrive.Get(urls[A_Index])
       constElement := ffdrive.FindElementByClass("const")
       constElementHTML := constElement.Attribute("innerHTML")

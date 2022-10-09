@@ -20,6 +20,7 @@ SendMessage SCI_SETADDITIONALSELECTIONTYPING, 1, 1, scintctrl, "ahk_id " mainGui
 SendMessage SCI_SETMULTIPASTE, 1, 1, scintctrl, "ahk_id " mainGui.HWND
 
 Sleep 2000
+SendMessage SCI_LINEUPEXTEND,,, scintctrl, "ahk_id " mainGui.Hwnd
 ; 
 ; SendMessage 2573, 1, 5, scintctrl, "ahk_id " mainGui.HWND
 ; SendMessage 2573, 10, 15, scintctrl, "ahk_id " mainGui.HWND
