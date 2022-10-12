@@ -38,7 +38,6 @@ ITArtworkFormat := Map(
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: END Constants ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 Class iTunesApplication {
-  /** @prop {iTunesApp} app - iTunes.Application ComObject */
     app := {}
     __New() {
         this.app := ComObject("iTunes.Application")
