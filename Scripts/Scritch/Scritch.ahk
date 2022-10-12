@@ -541,7 +541,7 @@ Class ScritchConf {
     __Set(sName, aParams, vValue) {
         for vParam in aParams
             if IsAlnum(StrReplace(vParam, A_Space, "")) and !IsObject(vValue) {
-                FileAppend vValue "`n`t" ScritchConf.sScritchWorkingDir "\Scritch.conf" "`n`t" sName "`n`t" vParam, "*"
+                ; FileAppend vValue "`n`t" ScritchConf.sScritchWorkingDir "\Scritch.conf" "`n`t" sName "`n`t" vParam, "*"
                 IniWrite vValue, ScritchConf.sScritchWorkingDir "\Scritch.conf", sName, vParam
                 Return IniRead(ScritchConf.sScritchWorkingDir "\Scritch.conf", sName, vParam, 0)
             }

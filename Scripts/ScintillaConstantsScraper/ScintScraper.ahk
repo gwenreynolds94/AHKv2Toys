@@ -7,7 +7,11 @@
 
 indexHTML := "https://docs.rs/scintilla-sys/4.0.3/scintilla_sys/index.html"
 
+; after running Selenium Basic install as administrator
+; ... the COM object will become available ->
+; ... http://florentbr.github.io/SeleniumBasic/
 ffdrive := ComObject("Selenium.IEDriver")
+
 ffdrive.Get(indexHTML)
 
 constants := ffdrive.FindElementsByClass("constant", 60, ComValue(0xB, True))
