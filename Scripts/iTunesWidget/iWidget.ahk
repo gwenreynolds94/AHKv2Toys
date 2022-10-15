@@ -20,6 +20,15 @@ else ISMAIN := False
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: Constants ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 Null := 0
 
+ITPlaylistSearchField := Map(
+    "All"       , 0     ; ITPlaylistSearchFieldAll
+  , "Visible"   , 1     ; ITPlaylistSearchFieldVisible
+  , "Artists"   , 2     ; ITPlaylistSearchFieldArtists
+  , "Albums"    , 3     ; ITPlaylistSearchFieldAlbums
+  , "Composers" , 4     ; ITPlaylistSearchFieldComposers
+  , "SongNames" , 5     ; ITPlaylistSearchFieldSongNames
+)
+
 ITPlaylistKind := Map(
     "Unknown"       , 0     ; ITPlaylistKindUnknown
   , "Library"       , 1     ; ITPlaylistKindLibrary
@@ -62,22 +71,43 @@ Class iTunesApplication {
         artwork := this.app.CurrentTrack.Artwork[1]
         for fmtName, fmtID in ITArtworkFormat
             if fmtID = artwork.Format
-                artwork.SaveArtworkToFile A_ScriptDir "\resources\currentTrack." fmtName
+                artwork.SaveArtworkToFile A_ScriptDir 
+                                            . "\resources\currentTrack." 
+                                            . fmtName
     }
     Class iCOMEventSink {
         static guiApp := {}
         static OnPlayerPlayEvent(IITTrack, iTunesApp) {
-            this.guiApp.UpdateCurrentTrack
+            stdo "<OnPlayerPlayEvent>"
+            this.guiApp.UpdateCurrentTrack()
         }
+    }
+    Class iTrack {
+        Name   := ""
+        Album  := ""
+        Artist := ""
+        IDList := ""
+        __New(IITTrack) {
+            this.Name   := IITTrack.Name
+            this.Album  := IITTrack.Album
+            this.Artist := IITTrack.Artist
+            ; The order of IDList is essential to be able to retrieve IITTrack
+            this.IDList := [ IITTrack.SourceID
+                           , IITTrack.PlaylistID
+                           , IITTrack.TrackID
+                           , IITTrack.TrackDatabaseID ]
+        }
+        COM[iTunesApp] => iTunesApp.GetITObjectByID(this.IDList*)
     }
 }
 
 Class iWidgetGui {
+    iTunesPath := "C:\Program Files\iTunes\iTunes.exe"
     winName := "iTunes Widget"
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Gui Options ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
         , guiOpts   := "-Caption +AlwaysOnTop"
         , guiMargin := 10
-        , guiColor := "7d94c3"
+        , guiColor := "b0d0f0"
         , guiSize   := { 
                 w: 300 + this.guiMargin*2
               , h: 420 + this.guiMargin*2
@@ -105,7 +135,9 @@ Class iWidgetGui {
         , controlGap  := (this.controlArea.w - this.controlBtnSize*3)/2
         , prevBtnDims := { 
               x: this.controlArea.x
-            , y: this.controlArea.y + (this.controlArea.h/2) - (this.controlBtnSize/2)
+            , y: this.controlArea.y 
+                 + (this.controlArea.h/2) 
+                 - (this.controlBtnSize/2)
             , w: this.controlBtnSize
             , h: this.controlBtnSize 
           }
@@ -116,7 +148,9 @@ Class iWidgetGui {
             , h: this.controlBtnSize 
           }
         , nextBtnDims := { 
-              x: this.playPauseBtnDims.x + this.playPauseBtnDims.w + this.controlGap
+              x: this.playPauseBtnDims.x 
+                 + this.playPauseBtnDims.w 
+                 + this.controlGap
             , y: this.playPauseBtnDims.y
             , w: this.controlBtnSize
             , h: this.controlBtnSize
@@ -179,14 +213,16 @@ Class iWidgetGui {
 
     __New() {
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Main Gui ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
-        this.gui           := Gui(this.guiOpts, this.winName, iWidgetGui.iGuiEventSink)
+        this.gui := Gui(this.guiOpts
+                      , this.winName
+                      , iWidgetGui.iGuiEventSink)
         this.gui.MarginX   := this.gui.MarginY := 0
         this.gui.BackColor := this.guiColor
 
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Current Art ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
         this.currentArt := this.gui.Add("Picture"
                                       , this.currentArtOpts
-                                      , A_ScriptDir "\resources\currentTrack.jpg")
+                                      , "")
         this.currentArt.OnEvent("Click", "CurrentArt_Click")
 
         ;:;:;:;:;:;:;:;:;:;:;:;:;: Current Track Info ;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -206,13 +242,16 @@ Class iWidgetGui {
         ;:;:;:;:;:;:;:;:;:;:;:;:;:; Player Controls ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
         this.prevBtn      := this.gui.Add("Picture"
                                         , this.prevBtnOpts     
-                                        , A_ScriptDir "\resources\highres\prev.png")
+                                        , A_ScriptDir 
+                                          . "\resources\highres\prev.png")
         this.playPauseBtn := this.gui.Add("Picture"
                                         , this.playPauseBtnOpts
-                                        , A_ScriptDir "\resources\highres\playPause.png")
+                                        , A_ScriptDir 
+                                          . "\resources\highres\playPause.png")
         this.nextBtn      := this.gui.Add("Picture"
                                         , this.nextBtnOpts     
-                                        , A_ScriptDir "\resources\highres\next.png")
+                                        , A_ScriptDir 
+                                          . "\resources\highres\next.png")
 
              this.prevBtn.OnEvent("Click", "PrevBtn_Click")
         this.playPauseBtn.OnEvent("Click", "PlayPauseBtn_Click")
@@ -228,8 +267,12 @@ Class iWidgetGui {
         iWidgetGui.iGuiEventSink.guiApp := this
         iTunesApplication.iCOMEventSink.guiApp := this
 
-        ;:;:;:;:;:;:;:;:; Load track info and current artwork ;:;:;:;:;:;:;:;:;:
-        this.UpdateCurrentTrack
+        if !(WinExist("ahk_exe iTunes.exe")) {
+            Run this.iTunesPath
+            Exit
+        } else {
+            this.UpdateCurrentTrack()
+        }
     }
 
     ;:;:;:;:;:; Get and set name, album, and artist of current track ;:;:;:;:;:;
@@ -250,10 +293,20 @@ Class iWidgetGui {
 
     ;:;:;:;:;:;:;:;: Get and set current track info and artwork ;:;:;:;:;:;:;:;:
     UpdateCurrentTrack() {
-        this.iTunes.SaveCurrentArtwork
-        Sleep 25
-        this.SetCurrentTrackInfo
-        this.currentArt.Value := A_ScriptDir "\resources\currentTrack.jpg"
+        Try {
+            this.iTunes.SaveCurrentArtwork
+            Sleep 25
+            this.SetCurrentTrackInfo
+            this.currentArt.Value := A_ScriptDir 
+                                       . "\resources\currentTrack.jpg"
+        } Catch Error as err {
+            stdo err.Message
+            this.currentArt.Value := A_ScriptDir 
+                                       . "\resources\highres\placeholder.png"
+            this.currentTrackName.Value       := 
+                this.currentTrackAlbum.Value  := 
+                this.currentTrackArtist.Value := ""
+        }
     }
 
     Show() {
@@ -283,12 +336,17 @@ Class iWidgetGui {
             this.guiApp.UpdateCurrentTrack
             gCtrl.Value := A_ScriptDir "\resources\highres\playPause.png"
         }
+
+        static CurrentArt_Click(*) {
+
+        }
     }
 }
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: if ISMAIN ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 if ISMAIN {
+    Hotkey "F8", (*)=> ExitApp()
 
     ; iTunes := iTunesApplication()
     ; iTunes.app.PlayPause
@@ -296,8 +354,7 @@ if ISMAIN {
     iGui := iWidgetGui()
     ; SetTimer (*)=> ExitApp(), 2000
 
-    
-    Hotkey "F8", (*)=> ExitApp()
+
     OnExit RunOnExit
     RunOnExit(*) {
         global iTunes := {}
