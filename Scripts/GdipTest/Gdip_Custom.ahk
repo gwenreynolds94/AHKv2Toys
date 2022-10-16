@@ -1551,81 +1551,134 @@ Gdip_BlurBitmap(pBitmap, Blur)
 
 ;#####################################################################################
 
-; Function:				Gdip_SaveBitmapToFile
-; Description:			Saves a bitmap to a file in any supported format onto disk
+; Function:        Gdip_SaveBitmapToFile
+; Description:     Saves a bitmap to a file in any supported format onto disk
 ;
-; pBitmap				Pointer to a bitmap
-; sOutput				The name of the file that the bitmap will be saved to. Supported extensions are: .BMP,.DIB,.RLE,.JPG,.JPEG,.JPE,.JFIF,.GIF,.TIF,.TIFF,.PNG
-; Quality				If saving as jpg (.JPG,.JPEG,.JPE,.JFIF) then quality can be 1-100 with default at maximum quality
+; pBitmap          Pointer to a bitmap
+; sOutput          The name of the file that the bitmap will be saved to. Supported extensions are: .BMP,.DIB,.RLE,.JPG,.JPEG,.JPE,.JFIF,.GIF,.TIF,.TIFF,.PNG
+; Quality          If saving as jpg (.JPG,.JPEG,.JPE,.JFIF) then quality can be 1-100 with default at maximum quality
+; toBase64         If set to 1, instead of saving the file to disk, the function will return on success the base64 data
+;                  A "base64" string is the binary image data encoded into text using only 64 characters.
+;                  To convert it back into an image use: Gdip_BitmapFromBase64()
 ;
-; return				If the function succeeds, the return value is zero, otherwise:
-;						-1 = Extension supplied is not a supported file format
-;						-2 = Could not get a list of encoders on system
-;						-3 = Could not find matching encoder for specified file format
-;						-4 = Could not get WideChar name of output file
-;						-5 = Could not save file to disk
+; return           If the function succeeds, the return value is zero, otherwise:
+;                 -1 = Extension supplied is not a supported file format
+;                 -2 = Could not get a list of encoders on system
+;                 -3 = Could not find matching encoder for specified file format
+;                 -4 = Could not get WideChar name of output file
+;                 -5 = Could not save file to disk
+;                 -6 = Could not save image to stream [for base64]
+;                 -7 = Could not convert to base64
 ;
-; notes					This function will use the extension supplied from the sOutput parameter to determine the output format
+; notes            This function will use the extension supplied from the sOutput parameter to determine the output format
 
-Gdip_SaveBitmapToFile(pBitmap, sOutput, Quality:=75)
-{
-	Ptr := A_PtrSize ? "UPtr" : "UInt"
-	nCount := 0
-	nSize := 0
+Gdip_SaveBitmapToFile(pBitmap, sOutput, Quality:=75, toBase64:=0) {
 	_p := 0
-
+ 
 	SplitPath sOutput,,, &Extension
-	if !RegExMatch(Extension, "^(?i:BMP|DIB|RLE|JPG|JPEG|JPE|JFIF|GIF|TIF|TIFF|PNG)$")
-		return -1
+	If !RegExMatch(Extension, "^(?i:BMP|DIB|RLE|JPG|JPEG|JPE|JFIF|GIF|TIF|TIFF|PNG)$")
+	   Return -1
+ 
 	Extension := "." Extension
-
-	DllCall("gdiplus\GdipGetImageEncodersSize", "uint*", &nCount, "uint*", &nSize)
+	DllCall("gdiplus\GdipGetImageEncodersSize", "uint*", &nCount:=0, "uint*", &nSize:=0)
 	ci := Buffer(nSize)
-	DllCall("gdiplus\GdipGetImageEncoders", "uint", nCount, "uint", nSize, Ptr, ci.Ptr)
-	if !(nCount && nSize)
-		return -2
-
-	StrGet_Name := "StrGet"
-
-	N := (A_AhkVersion < 2) ? nCount : "nCount"
-	Loop %N%
+	DllCall("gdiplus\GdipGetImageEncoders", "uint", nCount, "uint", nSize, "UPtr", ci.ptr)
+	If !(nCount && nSize)
+	   Return -2
+	 
+	Static IsUnicode := StrLen(Chr(0xFFFF))
+	If (IsUnicode)
 	{
-		sString := %StrGet_Name%(NumGet(ci, (idx := (48+7*A_PtrSize)*(A_Index-1))+32+3*A_PtrSize), "UTF-16")
-		if !InStr(sString, "*" Extension)
-			continue
-
-		pCodec := ci+idx
-		break
-	}
-
-	if !pCodec
-		return -3
-
-	if (Quality != 75)
+	   StrGet_Name := "StrGet"
+	   N := (SubStr(A_AhkVersion,1,1) < 2) ? nCount : "nCount"
+	   Loop %N%
+	   {
+		  sString := %StrGet_Name%(NumGet(ci, (idx := (48+7*A_PtrSize)*(A_Index-1))+32+3*A_PtrSize, "UPtr"), "UTF-16")
+		  If !InStr(sString, "*" Extension)
+			 Continue
+ 
+		  pCodec := ci.ptr+idx
+		  Break
+	   }
+	} Else
 	{
-		Quality := (Quality < 0) ? 0 : (Quality > 100) ? 100 : Quality
-		if RegExMatch(Extension, "^\.(?i:JPG|JPEG|JPE|JFIF)$")
-		{
-			DllCall("gdiplus\GdipGetEncoderParameterListSize", Ptr, pBitmap, Ptr, pCodec, "uint*", nSize)
-			EncoderParameters := Buffer(nSize, 0)
-			DllCall("gdiplus\GdipGetEncoderParameterList", Ptr, pBitmap, Ptr, pCodec, "uint", nSize, Ptr, &EncoderParameters)
-			nCount := NumGet(EncoderParameters, "UInt")
-			N := (A_AhkVersion < 2) ? nCount : "nCount"
-			Loop %N%
-			{
-				elem := (24+(A_PtrSize ? A_PtrSize : 4))*(A_Index-1) + 4 + (pad := A_PtrSize = 8 ? 4 : 0)
-				if (NumGet(EncoderParameters, elem+16, "UInt") = 1) && (NumGet(EncoderParameters, elem+20, "UInt") = 6)
-				{
-					_p := elem+EncoderParameters-pad-4
-					NumPut("UInt", Quality, NumGet("UInt", NumPut("UInt", 4, NumPut("UInt", 1, _p+0)+20)))
-					break
-				}
-			}
-		}
+	   N := (SubStr(A_AhkVersion,1,1) < 2) ? nCount : "nCount"
+	   Loop %N%
+	   {
+		  Location := NumGet(ci, 76*(A_Index-1)+44,"UPtr")
+		  nSize := DllCall("WideCharToMultiByte", "uint", 0, "uint", 0, "uint", Location, "int", -1, "uint", 0, "int",  0, "uint", 0, "uint", 0)
+		  sString := Buffer(nSize)
+		  DllCall("WideCharToMultiByte", "uint", 0, "uint", 0, "uint", Location, "int", -1, "str", sString, "int", nSize, "uint", 0, "uint", 0)
+		  If !InStr(sString, "*" Extension)
+			 Continue
+ 
+		  pCodec := ci.ptr+76*(A_Index-1)
+		  Break
+	   }
 	}
-
-	return 0
-}
+ 
+	If !pCodec
+	   Return -3
+ 
+	If (Quality!=75)
+	{
+	   Quality := (Quality < 0) ? 0 : (Quality > 100) ? 100 : Quality
+	   If (quality>90 && toBase64=1)
+		  Quality := 90
+ 
+	   If RegExMatch(Extension, "^\.(?i:JPG|JPEG|JPE|JFIF)$")
+	   {
+		  DllCall("gdiplus\GdipGetEncoderParameterListSize", "UPtr", pBitmap, "UPtr", pCodec, "uint*", &nSize)
+		  EncoderParameters := Buffer(nSize, 0)
+		  DllCall("gdiplus\GdipGetEncoderParameterList", "UPtr", pBitmap, "UPtr", pCodec, "uint", nSize, "UPtr", EncoderParameters.ptr)
+		  nCount := NumGet(EncoderParameters, "UInt")
+		  N := (SubStr(A_AhkVersion,1,1) < 2) ? nCount : "nCount"
+		  Loop %N%
+		  {
+			 elem := (24+A_PtrSize)*(A_Index-1) + 4 + (pad:=(A_PtrSize=8)?4:0)
+			 If (NumGet(EncoderParameters, elem+16, "UInt") = 1) && (NumGet(EncoderParameters, elem+20, "UInt") = 6)
+			 {
+				_p := elem+EncoderParameters.ptr-pad-4
+				NumPut(Quality, NumGet(NumPut(4, NumPut(1, _p+0, "UPtr")+20, "UInt"), "UPtr"), "UInt")
+				Break
+			 }
+		  }
+	   }
+	}
+ 
+	If (toBase64=1)
+	{
+	   ; part of the function extracted from ImagePut by iseahound
+	   ; https://www.autohotkey.com/boards/viewtopic.php?f=6&t=76301&sid=bfb7c648736849c3c53f08ea6b0b1309
+	   DllCall("ole32\CreateStreamOnHGlobal", "UPtr",0, "int",true, "UPtr*",&pStream:=0)
+	   _E := DllCall("gdiplus\GdipSaveImageToStream", "UPtr",pBitmap, "UPtr",pStream, "UPtr",pCodec, "uint", _p)
+	   If _E
+		  Return -6
+ 
+	   DllCall("ole32\GetHGlobalFromStream", "UPtr",pStream, "uint*",&hData)
+	   pData := DllCall("GlobalLock", "UPtr",hData, "UPtr")
+	   nSize := DllCall("GlobalSize", "uint",pData)
+ 
+	   bin := Buffer(nSize, 0)
+	   DllCall("RtlMoveMemory", "UPtr",bin.ptr, "UPtr",pData, "uptr",nSize)
+	   DllCall("GlobalUnlock", "UPtr",hData)
+	   ObjRelease(pStream)
+	   DllCall("GlobalFree", "UPtr",hData)
+ 
+	   ; Using CryptBinaryToStringA saves about 2MB in memory.
+	   DllCall("Crypt32.dll\CryptBinaryToStringA", "UPtr",bin.ptr, "uint",nSize, "uint",0x40000001, "UPtr",0, "uint*",&base64Length:=0)
+	   base64 := Buffer(base64Length, 0)
+	   _E := DllCall("Crypt32.dll\CryptBinaryToStringA", "UPtr",bin.ptr, "uint",nSize, "uint",0x40000001, "UPtr",&base64, "uint*",base64Length)
+	   If !_E
+		  Return -7
+ 
+	   bin := Buffer(0)
+	   Return StrGet(base64, base64Length, "CP0")
+	}
+ 
+	_E := DllCall("gdiplus\GdipSaveImageToFile", "UPtr", pBitmap, "WStr", sOutput, "UPtr", pCodec, "uint", _p)
+	Return _E ? -5 : 0
+ }
 
 ;#####################################################################################
 

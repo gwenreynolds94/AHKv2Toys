@@ -69,6 +69,7 @@ SetSliderKnobImage(slider_knob, fg:=0xFFBFCFEF) {
     ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Paint foreground ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
     Gdip_FillEllipse knob_graphics, fg_brush, 0, 0, knob_width, knob_height
     ;:;:;:;:;:;:;:;:;:; Create HBITMAP and set as knob image ;:;:;:;:;:;:;:;:;:;
+    Gdip_SaveBitmapToFile(knob_bitmap, A_ScriptDir "\tbm.png")
     knob_HBITMAP := Gdip_CreateHBITMAPFromBitmap(knob_bitmap)
     SetImage(slider_knob.Hwnd, knob_HBITMAP)
     ;:;:;:;:;:;:;:;: Delete brush, graphics, image, and bitmaps ;:;:;:;:;:;:;:;:

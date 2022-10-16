@@ -15,6 +15,8 @@ HotIf (*)=> (
     or WinActive("ahk_exe VSCodium.exe")
     or WinActive("ahk_exe sublime_text.exe"))
 Hotkey "<^+p", (*)=> FormatSingleLineComment()
+Hotkey "<^+o", (*)=> FormatSingleLineComment(" ", 5)
+Hotkey "<^+i", (*)=> FormatSingleLineComment("-", 5)
 Hotif
 
 Hotkey "F7", (*)=> Reload()

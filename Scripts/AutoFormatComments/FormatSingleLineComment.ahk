@@ -1,4 +1,4 @@
-FormatSingleLineComment(*) {
+FormatSingleLineComment(sep:=":", padWidth:=1) {
     SetKeyDelay 25, 5
     saveClip := A_Clipboard
     SendEvent "{End}{Shift Down}{Home}{Shift Up}{Ctrl Down}c{Ctrl up}"
@@ -17,18 +17,24 @@ FormatSingleLineComment(*) {
     lFill := (fillSpace-Mod(fillSpace,2)) / 2
     rFill := lFill+Mod(fillSpace,2)
     fString := leading
-    Loop lFill-1 {
+    Loop lFill-padWidth {
         if Mod(A_Index,2)
             fString .= ";"
         else
-            fString .= ":"
+            fString .= sep
     }
-    fString .= A_Space trimClip A_Space
-    Loop rFill-1 {
+    Loop padWidth {
+        fString .= " "
+    }
+    fString .= trimClip
+    Loop padWidth {
+        fString .= " "
+    }
+    Loop rFill-padWidth {
         if Mod(A_Index,2)
             fString .= ";"
         else
-            fString .= ":"
+            fString .= sep
     }
     A_Clipboard := fString
     Send "{Ctrl Down}v{Ctrl Up}"
