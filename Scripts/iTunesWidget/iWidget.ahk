@@ -498,6 +498,7 @@ Class iWidgetGui {
 OnExit ShutdownGdipOnExit
 ShutdownGdipOnExit(*){
     Gdip_Shutdown gtoken
+    stdo "...Shutting down Gdi+"
 }
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: END Gdip Shutdown ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
