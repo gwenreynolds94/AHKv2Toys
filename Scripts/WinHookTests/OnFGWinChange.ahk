@@ -20,20 +20,21 @@ WatchForegroundWindowChange(force_unhook:=False) {
 }
 
 OnForegroundWindowChange(hWinEventHook, event, hwnd, idObject, idChild, idEventThread, dwmsEventTime) {
-    stdo "hWinEventHook:`n"
-         . "`t" hWinEventHook "`n"
-       . "event:`n"
-         . "`t" event "`n"
-       . "hwnd:`n"
-         . "`t" hwnd "`n"
-       . "idObject:`n"
-         . "`t" idObject "`n"
-       . "idChild:`n"
-         . "`t" idChild "`n"
-       . "idEventThread:`n"
-         . "`t" idEventThread "`n"
-       . "dwmsEventTime:`n"
-         . "`t" dwmsEventTime "`n`n"
+    ; stdo "hWinEventHook:`n"
+    ;      . "`t" hWinEventHook "`n"
+    ;    . "event:`n"
+    ;      . "`t" event "`n"
+    ;    . "hwnd:`n"
+    ;      . "`t" hwnd "`n"
+    ;    . "idObject:`n"
+    ;      . "`t" idObject "`n"
+    ;    . "idChild:`n"
+    ;      . "`t" idChild "`n"
+    ;    . "idEventThread:`n"
+    ;      . "`t" idEventThread "`n"
+    ;    . "dwmsEventTime:`n"
+    ;      . "`t" dwmsEventTime "`n`n"
+    stdo "Foreground Window Changed: " hwnd
 }
 
 OnExit (*)=> WatchForegroundWindowChange(True)

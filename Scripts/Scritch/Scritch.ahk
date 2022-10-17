@@ -248,6 +248,10 @@ Class ScritchGui {
     ; Toggle gui window visibility
     ToggleGui(*) {
         if WinActive("ahk_id " this.gGui.Hwnd) {
+            sCurrentSelection := this.gTree.GetText(this.gTree.GetSelection())
+            for oNote in this.oNotes.aNotes
+                if (sCurrentSelection = oNote.sTimestamp)
+                    this.SaveEditToNote oNote
             this.gBGGui.Hide
             this.gGui.Hide
         } else {
