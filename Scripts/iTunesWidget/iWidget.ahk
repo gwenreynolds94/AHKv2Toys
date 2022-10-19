@@ -103,7 +103,7 @@ Class iTunesApplication {
             this.Name   := IITTrack.Name
             this.Album  := IITTrack.Album
             this.Artist := IITTrack.Artist
-            ; The order of IDList is essential to be able to retrieve IITTrack
+            ; The order of IDList is essential to be able to get COM property
             this.IDList := [ IITTrack.SourceID
                            , IITTrack.PlaylistID
                            , IITTrack.TrackID

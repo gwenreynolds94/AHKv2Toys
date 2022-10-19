@@ -17,9 +17,9 @@ tGui.Show("NA")
 
 hwnd := WinExist()
 
-
-if FileExist("..\iTunesWidget\resources\currentTrack.jpg") ~= "A|N"
-    upBitmap := Gdip_CreateBitmapFromFile("..\iTunesWidget\resources\currentTrack.jpg")
+upBitmap := 0
+if FileExist("..\iTunesWidget\resources\images\currentTrack.jpg") ~= "A|N"
+    upBitmap := Gdip_CreateBitmapFromFile("..\iTunesWidget\resources\images\currentTrack.jpg")
 if !upBitmap {
     MsgBox "Could not load image"
     ExitApp
