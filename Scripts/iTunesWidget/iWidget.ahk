@@ -78,10 +78,23 @@ Class iTunesApplication {
         artwork := this.app.CurrentTrack.Artwork[1]
         for fmtName, fmtID in ITArtworkFormat
             if fmtID = artwork.Format
-                artwork.SaveArtworkToFile A_ScriptDir 
-                                            . "\resources\images\currentTrack." 
+                artwork.SaveArtworkToFile A_ScriptDir
+                                            . "\resources\images\currentTrack."
                                             . fmtName
     }
+    Volume {
+        Get => this.app.SoundVolume
+        Set => this.app.SoundVolume := Value
+    }
+    TrackPos {
+        Get => this.app.PlayerPosition
+        Set => this.app.PlayerPosition := Value
+    }
+    TrackProgress {
+        Get => this.app.PlayerPosition / this.app.CurrentTrack.Duration
+        Set => this.app.PlayerPosition := this.app.CurrentTrack.Duration*Value
+    }
+    CurrentTrack => this.app.CurrentTrack
     Class iCOMEventSink {
         static guiApp := {}
         static OnPlayerPlayEvent(IITTrack, iTunesApp) {
@@ -122,7 +135,7 @@ Class iWidgetGui {
         , guiColor := "b0d0f0"
         , guiSize   := { 
                 w: 300 + this.guiMargin*2
-              , h: 420 + this.guiMargin*2
+              , h: 440 + this.guiMargin*2
           }
         , guiShowOpts := "w" this.guiSize.w " "
                        . "h" this.guiSize.h
@@ -140,6 +153,13 @@ Class iWidgetGui {
             , h: this.controlBtnSize 
                  + this.guiMargin*2
           }
+        , controlAreaPos := {
+            x: this.guiSize.w/2 
+               - this.controlAreaSize.w/2
+          , y: this.guiSize.h 
+               - this.controlAreaSize.h 
+               - 2
+          }
         , controlArea := { 
               x: this.guiSize.w/2 
                  - this.controlAreaSize.w/2
@@ -151,8 +171,8 @@ Class iWidgetGui {
           }
         , controlGap  := (this.controlArea.w - this.controlBtnSize*3)/2
         , prevBtnDims := { 
-              x: this.controlArea.x
-            , y: this.controlArea.y 
+              x: this.controlAreaPos.x
+            , y: this.controlAreaPos.y 
                  + (this.controlArea.h/2) 
                  - (this.controlBtnSize/2)
             , w: this.controlBtnSize
@@ -178,7 +198,7 @@ Class iWidgetGui {
         , currentTrackInfoLineHeight := 14
         , currentTrackNameDims := {
               x: 0
-            , y: this.controlArea.y 
+            , y: this.controlAreaPos.y 
                  - this.currentTrackInfoLineHeight*3
             , w: this.guiSize.w
             , h: this.currentTrackInfoLineHeight
@@ -198,8 +218,8 @@ Class iWidgetGui {
             , h: this.currentTrackInfoLineHeight
           }
         ;:;:;:;:;:;:;:;:;:;:;:;: Volume Slider Options ;:;:;:;:;:;:;:;:;:;:;:;:;
-        , volumeSliderColor := 0xFF90B0D0
-        , volumeKnobColor := 0xFFD0F0FF
+        , volumeSliderColor  := 0xFF90B0D0
+        , volumeKnobColor    := 0xFFD0F0FF
         , volumeSliderMargin := 24
         , volumeSliderThickness := 6
         , volumeSliderSize := {
@@ -223,6 +243,19 @@ Class iWidgetGui {
           }
         , volumeKnobXMax := this.volumeKnobPos.x+this.volumeSliderSize.w
         , volumeKnobLastSlide := A_TickCount
+        ;:;:;:;:;:;:;:;:;:;:;:;: Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:;
+        , trackSliderPrimaryColor := 0xFF90B0D0
+        , trackSliderSecondaryColor := 0xFF7090B0
+        , trackSliderMargin := this.volumeSliderMargin
+        , trackSliderThickness  := 12
+        , trackSliderSize := {
+              w: this.guiSize.w - this.trackSliderMargin*2
+            , h: 12
+        }
+        , trackSliderPos := {
+              x: this.trackSliderMargin
+            , y: this.volumeSliderPos.y - this.trackSliderSize.h
+        }
         ;:;:;:;:;:;:;:;:;:;:;:;:;:; Options Strings ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
         , currentArtOpts   := "x" this.currentArtPos.x    " "
                             . "y" this.currentArtPos.y    " "
@@ -268,53 +301,68 @@ Class iWidgetGui {
                             . "w" this.volumeKnobSize.w   " "
                             . "h" this.volumeKnobSize.h   " "
                             . "0xE BackgroundTrans"
-
+        , trackSliderOpts  := "x" this.trackSliderPos.x   " "
+                            . "y" this.trackSliderPos.y   " "
+                            . "w" this.trackSliderSize.w  " "
+                            . "h" this.trackSliderSize.h  " "
+                            . "0xE BackgroundCCCCCC"
     __New() {
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Main Gui ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
-        this.gui := Gui(this.guiOpts
-                      , this.winName
-                      , iWidgetGui.iGuiEventSink)
+        this.gui := Gui( this.guiOpts             ;
+                       , this.winName             ;
+                       , iWidgetGui.iGuiEventSink )
         this.gui.MarginX   := this.gui.MarginY := 0
         this.gui.BackColor := this.guiColor
 
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Current Art ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-        this.currentArt := this.gui.Add("Picture"
-                                      , this.currentArtOpts
-                                      , "")
+        this.currentArt := this.gui.Add( "Picture"           ;
+                                       , this.currentArtOpts ;
+                                       , ""                  )
         this.currentArt.OnEvent("Click", "CurrentArt_Click")
 
         ;:;:;:;:;:;:;:;:;:;:;:;:;: Current Track Info ;:;:;:;:;:;:;:;:;:;:;:;:;:
-        this.currentTrackName   := this.gui.Add("Text"
-                                              , this.currentTrackNameOpts, "")
-        this.currentTrackAlbum  := this.gui.Add("Text"
-                                              , this.currentTrackAlbumOpts, "")
-        this.currentTrackArtist := this.gui.Add("Text"
-                                              , this.currentTrackArtistOpts, "")
-        this.currentTrackName.SetFont(this.currentTrackNameFontOpts
-                                    , this.currentTrackInfoFontName)
-        this.currentTrackAlbum.SetFont(this.currentTrackInfoFontOpts
-                                     , this.currentTrackInfoFontName)
-        this.currentTrackArtist.SetFont(this.currentTrackInfoFontOpts
-                                      , this.currentTrackInfoFontName)
+        this.currentTrackName   := this.gui.Add( "Text"                      ;
+                                               , this.currentTrackNameOpts   ;
+                                               , ""                          )
+        this.currentTrackAlbum  := this.gui.Add( "Text"                      ;
+                                               , this.currentTrackAlbumOpts  ;
+                                               , ""                          )
+        this.currentTrackArtist := this.gui.Add( "Text"                      ;
+                                               , this.currentTrackArtistOpts ;
+                                               , ""                          )
+        this.currentTrackName.SetFont(   this.currentTrackNameFontOpts  ;
+                                       , this.currentTrackInfoFontName  )
+        this.currentTrackAlbum.SetFont(  this.currentTrackInfoFontOpts  ;
+                                       , this.currentTrackInfoFontName  )
+        this.currentTrackArtist.SetFont( this.currentTrackInfoFontOpts  ;
+                                       , this.currentTrackInfoFontName  )
 
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;: Volume Slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
-        this.volumeSlider := this.gui.Add("Picture", this.volumeSliderOpts, "")
-        this.volumeKnob   := this.gui.Add("Picture", this.volumeKnobOpts, "")
+        this.volumeSlider := this.gui.Add( "Picture"             ;
+                                         , this.volumeSliderOpts ;
+                                         , ""                    )
+        this.volumeKnob   := this.gui.Add( "Picture"             ;
+                                         , this.volumeKnobOpts   ;
+                                         , ""                    )
         this.volumeKnob.OnEvent("Click", "VolumeKnob_Click")
+
+        ;:;:;:;:;:;:;:;:;:;:;:;: Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:;
+        this.trackPosSlider := this.gui.Add("Picture", this.trackSliderOpts, "")
+        this.trackPosSlider.OnEvent("Click", "TrackPosSlider_Click")
         
         ;:;:;:;:;:;:;:;:;:;:;:;:;:; Player Controls ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-        this.prevBtn      := this.gui.Add("Picture"
-                                        , this.prevBtnOpts     
-                                        , A_ScriptDir 
-                                          . "\resources\images\prev.png")
-        this.playPauseBtn := this.gui.Add("Picture"
-                                        , this.playPauseBtnOpts
-                                        , A_ScriptDir 
-                                          . "\resources\images\playPause.png")
-        this.nextBtn      := this.gui.Add("Picture"
-                                        , this.nextBtnOpts     
-                                        , A_ScriptDir 
-                                          . "\resources\images\next.png")
+        this.prevBtn      := this.gui.Add( "Picture"                           ;
+                                         , this.prevBtnOpts                    ;
+                                         , A_ScriptDir                         ;
+                                           . "\resources\images\prev.png"      )
+        this.playPauseBtn := this.gui.Add( "Picture"                           ;
+                                         , this.playPauseBtnOpts               ;
+                                         , A_ScriptDir                         ;
+                                           . "\resources\images\playPause.png" )
+        this.nextBtn      := this.gui.Add( "Picture"                           ;
+                                         , this.nextBtnOpts                    ;
+                                         , A_ScriptDir                         ;
+                                           . "\resources\images\next.png"      )
 
              this.prevBtn.OnEvent("Click", "PrevBtn_Click")
         this.playPauseBtn.OnEvent("Click", "PlayPauseBtn_Click")
@@ -331,8 +379,9 @@ Class iWidgetGui {
         iWidgetGui.iGuiEventSink.iTunes := this.iTunes
         iWidgetGui.iGuiEventSink.guiApp := this
         iTunesApplication.iCOMEventSink.guiApp := this
-
+ 
         this.UpdateVolumeSlider(this.iTunes.app.SoundVolume)
+        this.PaintTrackPositionSlider(this.iTunes.TrackProgress)
 
         if !(WinExist("ahk_exe iTunes.exe")) {
             Run this.iTunesPath
@@ -342,7 +391,36 @@ Class iWidgetGui {
         }
     }
 
-    ;:;:;:;:;:;:;:;:;:;:;:;:;:;: Pain Volume Slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+    ;:;:;:;:;:;:;:;:;:;:;:; Paint Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:
+    PaintTrackPositionSlider(trackProg, primaryColor:=0xFF90B0D0
+                                      , secondaryColor:=0xFF7090B0) {
+        ;-;-;-;-;-;-;-;-;-;-;-;-     Create Brushes     ;-;-;-;-;-;-;-;-;-;-;-;-
+        primaryBrush := Gdip_BrushCreateSolid(primaryColor)
+        secondaryBrush := Gdip_BrushCreateSolid(secondaryColor)
+        ;-;-;-;-;-;-;-;     Initialize bitmaps and graphics     ;-;-;-;-;-;-;-;-
+        tpBitmap := Gdip_CreateBitmap( this.trackSliderSize.w
+                                     , this.trackSliderSize.h )
+        tpGraphics := Gdip_GraphicsFromImage(tpBitmap)
+        Gdip_SetSmoothingMode tpGraphics, 4
+        ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Paint slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+        Gdip_FillRectangle tpGraphics, secondaryBrush
+                         , 0, 0, this.trackSliderSize.w, this.trackSliderSize.h
+        Gdip_FillRectangle tpGraphics, primaryBrush
+                         , 0, 0
+                         , this.trackSliderSize.w*trackProg
+                         , this.trackSliderSize.h
+        ;-;-;-;-;-;-     Create HBITMAPS and set control images     ;-;-;-;-;-;-
+        tpHBITMAP := Gdip_CreateHBITMAPFromBitmap(tpBitmap)
+        SetImage this.trackPosSlider.Hwnd, tpHBITMAP
+        ;-;-;-;-;-;-;-;-;-     Dispose of Gdip resources     ;-;-;-;-;-;-;-;-;-;
+        Gdip_DeleteBrush primaryBrush
+        Gdip_DeleteBrush secondaryBrush
+        Gdip_DeleteGraphics tpGraphics
+        Gdip_DisposeImage tpBitmap
+        DeleteObject tpHBITMAP
+    }
+
+    ;:;:;:;:;:;:;:;:;:;:;:;:;:; Paint Volume Slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
     PaintVolumeSlider(sliderColor:=0xFF90B0D0, knobColor:=0xFFD0E0F0) {
         ;-;-;-;-;-;-;-;-;-;-;-;-     Create brushes     ;-;-;-;-;-;-;-;-;-;-;-;-
         sliderBrush := Gdip_BrushCreateSolid(sliderColor)
@@ -418,9 +496,9 @@ Class iWidgetGui {
             stdo "No track playing; Will use placeholder info/image"
             this.currentArt.Value := A_ScriptDir 
                                        . "\resources\images\placeholder.png"
-            this.currentTrackName.Value       := 
-                this.currentTrackAlbum.Value  := 
-                this.currentTrackArtist.Value := ""
+            this.currentTrackName.Value   := 
+            this.currentTrackAlbum.Value  := 
+            this.currentTrackArtist.Value := ""
         }
     }
     ;:;:;:;:;:;:;:;:;:;:;:;:;:; Show/hide widget gui ;:;:;:;:;:;:;:;:;:;:;:;:;:;
@@ -455,11 +533,13 @@ Class iWidgetGui {
             gCtrl.Value := A_ScriptDir "\resources\images\playPause.png"
             this.iTunes.PlayPause()
         }
-
+        ;:;:;:;:;:;:;:;:;:;:; Current Art Picture Control ;:;:;:;:;:;:;:;:;:;:;:
+        ; ; ; ; ; ; ; ; ; ; ; ; ; ;     <Click>     ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
         static CurrentArt_Click(*) {
 
         }
-
+        ;:;:;:;:;:;:;:;:;:;:;:;: Volume Knob Click/Drag ;:;:;:;:;:;:;:;:;:;:;:;:
+        ; ; ; ; ; ; ; ; ; ; ; ; ; ;     <Click>     ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
         static VolumeKnob_Click(gCtrl, gInfo) {
             ControlGetPos &knobX,,,, gCtrl
             MouseGetPos &mouseX
@@ -490,6 +570,9 @@ Class iWidgetGui {
             }
             SetTimer UpdateKnobPos, 10
         }
+        static TrackPosSlider_Click(gCtrl, gInfo) {
+
+        }
     }
 }
 
@@ -510,6 +593,7 @@ if ISMAIN {
 
 
     iGui := iWidgetGui()
+    iGui.iTunes.app.LibraryPlaylist.Search("Avey", ITPlaylistSearchField["Artists"])[1].Enabled := ComValue(0xB, True)
 
     OnExit RunOnExit
     RunOnExit(*) {
