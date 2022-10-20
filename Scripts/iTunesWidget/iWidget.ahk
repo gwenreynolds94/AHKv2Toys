@@ -28,12 +28,12 @@ else ISMAIN := False
 Null := 0
 
 ITPlaylistSearchField := Map(
-    "All"       , 0     ; ITPlaylistSearchFieldAll
-  , "Visible"   , 1     ; ITPlaylistSearchFieldVisible
-  , "Artists"   , 2     ; ITPlaylistSearchFieldArtists
-  , "Albums"    , 3     ; ITPlaylistSearchFieldAlbums
-  , "Composers" , 4     ; ITPlaylistSearchFieldComposers
-  , "SongNames" , 5     ; ITPlaylistSearchFieldSongNames
+    "All"           , 0     ; ITPlaylistSearchFieldAll
+  , "Visible"       , 1     ; ITPlaylistSearchFieldVisible
+  , "Artists"       , 2     ; ITPlaylistSearchFieldArtists
+  , "Albums"        , 3     ; ITPlaylistSearchFieldAlbums
+  , "Composers"     , 4     ; ITPlaylistSearchFieldComposers
+  , "SongNames"     , 5     ; ITPlaylistSearchFieldSongNames
 )
 
 ITPlaylistKind := Map(
@@ -46,10 +46,17 @@ ITPlaylistKind := Map(
 )
 
 ITArtworkFormat := Map(
-    "Unknown"   , 0     ; ITArtworkFormatUnknown
-  , "jpg"       , 1     ; ITArtworkFormatJPEG
-  , "png"       , 2     ; ITArtworkFormatPNG
-  , "bmp"       , 3     ; ITArtworkFormatBMP
+    "Unknown"       , 0     ; ITArtworkFormatUnknown
+  , "jpg"           , 1     ; ITArtworkFormatJPEG
+  , "png"           , 2     ; ITArtworkFormatPNG
+  , "bmp"           , 3     ; ITArtworkFormatBMP
+)
+
+ITPlayerState := Map(
+    "Stopped"        , 0     ; ITPlayerStateStopped
+  , "Playing"        , 1     ; ITPlayerStatePlaying
+  , "FastForward"    , 2     ; ITPlayerStateFastForward
+  , "Rewind"         , 3     ; ITPlayerStateRewind
 )
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: END Constants ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
@@ -81,6 +88,20 @@ Class iTunesApplication {
                 artwork.SaveArtworkToFile A_ScriptDir
                                             . "\resources\images\currentTrack."
                                             . fmtName
+    }
+    PlayerState {
+        Get {
+            currentState := this.app.PlayerState
+            for pState, psCode in ITPlayerState
+                if currentState=psCode
+                    Return pState
+        }
+        Set {
+            if IsAlpha(Value)
+                Return this.app.PlayerState := ITPlayerState[Value]
+            if IsNumber(Value)
+                Return this.app.PlayerState := Value
+        }
     }
     Volume {
         Get => this.app.SoundVolume
@@ -243,7 +264,7 @@ Class iWidgetGui {
           }
         , volumeKnobXMax := this.volumeKnobPos.x+this.volumeSliderSize.w
         , volumeKnobLastSlide := A_TickCount
-        ;:;:;:;:;:;:;:;:;:;:;:;: Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:;
+        ;:;:;:;:;:;:;:;:;:;: Track Position Slider Options ;:;:;:;:;:;:;:;:;:;:;
         , trackSliderPrimaryColor := 0xFF90B0D0
         , trackSliderSecondaryColor := 0xFF7090B0
         , trackSliderMargin := this.volumeSliderMargin
@@ -307,6 +328,13 @@ Class iWidgetGui {
                             . "h" this.trackSliderSize.h  " "
                             . "0xE BackgroundCCCCCC"
     __New() {
+        ;:;:;:;:;:;:;:;: Initialize iTunesApplication instance ;:;:;:;:;:;:;:;:;
+        ; ; ; ; ; ;      and static references for event sinks     ; ; ; ; ; ; ;
+        this.iTunes := iTunesApplication()
+        iWidgetGui.iGuiEventSink.iTunes := this.iTunes
+        iWidgetGui.iGuiEventSink.guiApp := this
+        iTunesApplication.iCOMEventSink.guiApp := this
+
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Main Gui ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
         this.gui := Gui( this.guiOpts             ;
                        , this.winName             ;
@@ -368,27 +396,19 @@ Class iWidgetGui {
         this.playPauseBtn.OnEvent("Click", "PlayPauseBtn_Click")
              this.nextBtn.OnEvent("Click", "NextBtn_Click")
 
-        ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Show Gui ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+        ;:;:;:;:;:;:;:;:;:; Show gui and paint Gdip controls ;:;:;:;:;:;:;:;:;:;
         this.gui.Show this.guiShowOpts
 
         this.PaintVolumeSlider(this.volumeSliderColor, this.volumeKnobColor)
-
-        ;:;:;:;:;:;:;:;: Initialize iTunesApplication instance ;:;:;:;:;:;:;:;:;
-        ; ; ; ; ; ;      and static references for event sinks     ; ; ; ; ; ; ;
-        this.iTunes := iTunesApplication()
-        iWidgetGui.iGuiEventSink.iTunes := this.iTunes
-        iWidgetGui.iGuiEventSink.guiApp := this
-        iTunesApplication.iCOMEventSink.guiApp := this
- 
         this.UpdateVolumeSlider(this.iTunes.app.SoundVolume)
-        this.PaintTrackPositionSlider(this.iTunes.TrackProgress)
 
-        if !(WinExist("ahk_exe iTunes.exe")) {
-            Run this.iTunesPath
-            Exit
-        } else {
-            this.UpdateCurrentTrack()
+        Try {
+            this.PaintTrackPositionSlider(this.iTunes.TrackProgress)
+        } Catch {
+            this.PaintTrackPositionSlider(0)
         }
+
+        this.UpdateCurrentTrack()
     }
 
     ;:;:;:;:;:;:;:;:;:;:;:; Paint Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:
@@ -398,26 +418,28 @@ Class iWidgetGui {
         primaryBrush := Gdip_BrushCreateSolid(primaryColor)
         secondaryBrush := Gdip_BrushCreateSolid(secondaryColor)
         ;-;-;-;-;-;-;-;     Initialize bitmaps and graphics     ;-;-;-;-;-;-;-;-
-        tpBitmap := Gdip_CreateBitmap( this.trackSliderSize.w
+        tpBitmap := Gdip_CreateBitmap( this.trackSliderSize.w ;
                                      , this.trackSliderSize.h )
         tpGraphics := Gdip_GraphicsFromImage(tpBitmap)
-        Gdip_SetSmoothingMode tpGraphics, 4
+        Gdip_SetSmoothingMode(tpGraphics, 4)
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Paint slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
-        Gdip_FillRectangle tpGraphics, secondaryBrush
-                         , 0, 0, this.trackSliderSize.w, this.trackSliderSize.h
-        Gdip_FillRectangle tpGraphics, primaryBrush
-                         , 0, 0
-                         , this.trackSliderSize.w*trackProg
-                         , this.trackSliderSize.h
+        Gdip_FillRectangle( tpGraphics, secondaryBrush ;
+                          , 0, 0                       ;
+                          , this.trackSliderSize.w     ;
+                          , this.trackSliderSize.h     )
+        Gdip_FillRectangle( tpGraphics, primaryBrush         ;
+                          , 0, 0                             ;
+                          , this.trackSliderSize.w*trackProg ;
+                          , this.trackSliderSize.h           )
         ;-;-;-;-;-;-     Create HBITMAPS and set control images     ;-;-;-;-;-;-
         tpHBITMAP := Gdip_CreateHBITMAPFromBitmap(tpBitmap)
-        SetImage this.trackPosSlider.Hwnd, tpHBITMAP
+        SetImage(this.trackPosSlider.Hwnd, tpHBITMAP)
         ;-;-;-;-;-;-;-;-;-     Dispose of Gdip resources     ;-;-;-;-;-;-;-;-;-;
-        Gdip_DeleteBrush primaryBrush
-        Gdip_DeleteBrush secondaryBrush
-        Gdip_DeleteGraphics tpGraphics
-        Gdip_DisposeImage tpBitmap
-        DeleteObject tpHBITMAP
+        Gdip_DeleteBrush(primaryBrush)
+        Gdip_DeleteBrush(secondaryBrush)
+        Gdip_DeleteGraphics(tpGraphics)
+        Gdip_DisposeImage(tpBitmap)
+        DeleteObject(tpHBITMAP)
     }
 
     ;:;:;:;:;:;:;:;:;:;:;:;:;:; Paint Volume Slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -426,38 +448,40 @@ Class iWidgetGui {
         sliderBrush := Gdip_BrushCreateSolid(sliderColor)
         knobBrush   := Gdip_BrushCreateSolid(knobColor)
         ;-;-;-;-;-;-;-;     Initialize bitmaps and graphics     ;-;-;-;-;-;-;-;-
-        sliderBitmap := Gdip_CreateBitmap( this.volumeSliderSize.w
+        sliderBitmap := Gdip_CreateBitmap( this.volumeSliderSize.w ;
                                          , this.volumeSliderSize.h )
-        knobBitmap   := Gdip_CreateBitmap( this.volumeKnobSize.w
+        knobBitmap   := Gdip_CreateBitmap( this.volumeKnobSize.w ;
                                          , this.volumeKnobSize.h )
         sliderGraphics := Gdip_GraphicsFromImage(sliderBitmap)
         knobGraphics   := Gdip_GraphicsFromImage(knobBitmap)
-        Gdip_SetSmoothingMode sliderGraphics, 4
-        Gdip_SetSmoothingMode knobGraphics, 4
+        Gdip_SetSmoothingMode(sliderGraphics, 4)
+        Gdip_SetSmoothingMode(knobGraphics, 4)
         ;-;-;-;-;-;-;-;-;-;-     Paint slider and knob     ;-;-;-;-;-;-;-;-;-;-;
-        Gdip_FillRoundedRectangle(sliderGraphics, sliderBrush
-                                , 0
-                                , this.volumeSliderSize.h/2 
-                                  - this.volumeSliderThickness/2
-                                , this.volumeSliderSize.w
-                                , this.volumeSliderThickness
-                                , this.volumeSliderThickness/2)
-        Gdip_FillEllipse(knobGraphics, knobBrush
-                       , 0, 0, this.volumeKnobSize.w-1, this.volumeKnobSize.h-1)
+        Gdip_FillRoundedRectangle( sliderGraphics, sliderBrush    ;
+                                 , 0                              ;
+                                 , this.volumeSliderSize.h/2      ;
+                                   - this.volumeSliderThickness/2 ;
+                                 , this.volumeSliderSize.w        ;
+                                 , this.volumeSliderThickness     ;
+                                 , this.volumeSliderThickness/2   )
+        Gdip_FillEllipse( knobGraphics, knobBrush ;
+                        , 0, 0                    ;
+                        , this.volumeKnobSize.w-1 ;
+                        , this.volumeKnobSize.h-1 )
         ;-;-;-;-;-;-     Create HBITMAPS and set control images     ;-;-;-;-;-;-
         sliderHBITMAP := Gdip_CreateHBITMAPFromBitmap(sliderBitmap)
         knobHBITMAP   := Gdip_CreateHBITMAPFromBitmap(knobBitmap)
-        SetImage this.volumeSlider.Hwnd, sliderHBITMAP
-        SetImage this.volumeKnob.Hwnd, knobHBITMAP
+        SetImage(this.volumeSlider.Hwnd, sliderHBITMAP)
+        SetImage(this.volumeKnob.Hwnd, knobHBITMAP)
         ;-;-;-;-;-     Delete brushes, graphics, images, bitmaps     ;-;-;-;-;-;
-        Gdip_DeleteBrush sliderBrush
-        Gdip_DeleteBrush knobBrush
-        Gdip_DeleteGraphics sliderGraphics
-        Gdip_DeleteGraphics knobGraphics
-        Gdip_DisposeImage sliderBitmap
-        Gdip_DisposeImage knobBitmap
-        DeleteObject sliderHBITMAP
-        DeleteObject knobHBITMAP
+        Gdip_DeleteBrush(sliderBrush)
+        Gdip_DeleteBrush(knobBrush)
+        Gdip_DeleteGraphics(sliderGraphics)
+        Gdip_DeleteGraphics(knobGraphics)
+        Gdip_DisposeImage(sliderBitmap)
+        Gdip_DisposeImage(knobBitmap)
+        DeleteObject(sliderHBITMAP)
+        DeleteObject(knobHBITMAP)
     }
 
     ;:;:;:;:;:;:;:;:;:;:;:;:;:; Update Volume Slider ;:;:;:;:;:;:;:;:;:;:;:;:;:;
@@ -465,22 +489,22 @@ Class iWidgetGui {
         volumePercentage := newVolume/100
         newKnobX := this.volumeSliderSize.w*volumePercentage
                     + this.volumeKnobPos.x
-        ControlMove newKnobX,,,, this.volumeKnob
+        ControlMove(newKnobX,,,, this.volumeKnob)
     }
 
     ;:;:;:;:;:; Get and set name, album, and artist of current track ;:;:;:;:;:;
     SetCurrentTrackInfo() {
-        currentTrackName := this.iTunes.app.CurrentTrack.Name
-        currentTrackAlbum := this.iTunes.app.CurrentTrack.Album
+        currentTrackName   := this.iTunes.app.CurrentTrack.Name
+        currentTrackAlbum  := this.iTunes.app.CurrentTrack.Album
         currentTrackArtist := this.iTunes.app.CurrentTrack.Artist
         if StrLen(currentTrackName) >= 39
-            currentTrackName := SubStr(currentTrackName, 1, 36) "..."
+            currentTrackName   := SubStr(currentTrackName, 1, 36) "..."
         if StrLen(currentTrackAlbum) >= 39
-            currentTrackAlbum := SubStr(currentTrackAlbum, 1, 36) "..."
+            currentTrackAlbum  := SubStr(currentTrackAlbum, 1, 36) "..."
         if StrLen(currentTrackArtist) >= 39
             currentTrackArtist := SubStr(currentTrackArtist, 1, 36) "..."
-        this.currentTrackName.Value := currentTrackName
-        this.currentTrackAlbum.Value := currentTrackAlbum
+        this.currentTrackName.Value   := currentTrackName
+        this.currentTrackAlbum.Value  := currentTrackAlbum
         this.currentTrackArtist.Value := currentTrackArtist
     }
 
@@ -491,11 +515,11 @@ Class iWidgetGui {
             Sleep 25
             this.SetCurrentTrackInfo
             this.currentArt.Value := A_ScriptDir 
-                                       . "\resources\images\currentTrack.jpg"
+                                     . "\resources\images\currentTrack.jpg"
         } Catch Error as err {
             stdo "No track playing; Will use placeholder info/image"
             this.currentArt.Value := A_ScriptDir 
-                                       . "\resources\images\placeholder.png"
+                                     . "\resources\images\placeholder.png"
             this.currentTrackName.Value   := 
             this.currentTrackAlbum.Value  := 
             this.currentTrackArtist.Value := ""
