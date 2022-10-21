@@ -2614,11 +2614,13 @@ Gdip_SetInterpolationMode(pGraphics, InterpolationMode)
 	return DllCall("gdiplus\GdipSetInterpolationMode", A_PtrSize ? "UPtr" : "UInt", pGraphics, "int", InterpolationMode)
 }
 
-; Default = 0
-; HighSpeed = 1
-; HighQuality = 2
-; None = 3
-; AntiAlias = 4
+/**
+ * 	    Default |> 0
+ * 	  HighSpeed |> 1
+ * 	HighQuality |> 2
+ * 	       None |> 3
+ * 	  AntiAlias |> 4
+ */
 Gdip_SetSmoothingMode(pGraphics, SmoothingMode)
 {
 	return DllCall("gdiplus\GdipSetSmoothingMode", A_PtrSize ? "UPtr" : "UInt", pGraphics, "int", SmoothingMode)
@@ -3012,7 +3014,7 @@ StrGetB(Address, Length:=-1, Encoding:=0)
 GetMonitorCount()
 {
 	Global _g_Monitors := MDMF_Enum()
-	for k,v in _g_Monitors
+	for _k,_v in _g_Monitors
 		count := A_Index
 	return count
 }
@@ -3020,17 +3022,17 @@ GetMonitorCount()
 GetMonitorInfo(MonitorNum)
 {
 	Global _g_Monitors := MDMF_Enum()
-	for k,v in _g_Monitors
-		if (v.Num = MonitorNum)
-			return v
+	for _k,_v in _g_Monitors
+		if (_v.Num = MonitorNum)
+			return _v
 }
 
 GetPrimaryMonitor()
 {
 	Global _g_Monitors := MDMF_Enum()
-	for k,v in _g_Monitors
-		If (v.Primary)
-			return v.Num
+	for _k,_v in _g_Monitors
+		If (_v.Primary)
+			return _v.Num
 }
 ; ----------------------------------------------------------------------------------------------------------------------
 ; Name ..........: MDMF - Multiple Display Monitor Functions

@@ -53,10 +53,10 @@ ITArtworkFormat := Map(
 )
 
 ITPlayerState := Map(
-    "Stopped"        , 0     ; ITPlayerStateStopped
-  , "Playing"        , 1     ; ITPlayerStatePlaying
-  , "FastForward"    , 2     ; ITPlayerStateFastForward
-  , "Rewind"         , 3     ; ITPlayerStateRewind
+    "Stopped"        , 0    ; ITPlayerStateStopped
+  , "Playing"        , 1    ; ITPlayerStatePlaying
+  , "FastForward"    , 2    ; ITPlayerStateFastForward
+  , "Rewind"         , 3    ; ITPlayerStateRewind
 )
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: END Constants ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
@@ -153,7 +153,7 @@ Class iWidgetGui {
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Gui Options ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
         , guiOpts   := "-Caption +AlwaysOnTop"
         , guiMargin := 10
-        , guiColor := "b0d0f0"
+        , guiColor  := "b0d0f0"
         , guiSize   := { 
                 w: 300 + this.guiMargin*2
               , h: 440 + this.guiMargin*2
@@ -162,7 +162,7 @@ Class iWidgetGui {
                        . "h" this.guiSize.h
         ;:;:;:;:;:;:;:;:;:;:;:;:; Current Art Options ;:;:;:;:;:;:;:;:;:;:;:;:;:
         , currentArtSize := this.guiSize.w - this.guiMargin*2
-        , currentArtPos := {
+        , currentArtPos  := {
               x: this.guiSize.w/2 
                  - this.currentArtSize/2
             , y: this.guiMargin
@@ -181,6 +181,7 @@ Class iWidgetGui {
                - this.controlAreaSize.h 
                - 2
           }
+        /*
         , controlArea := { 
               x: this.guiSize.w/2 
                  - this.controlAreaSize.w/2
@@ -190,11 +191,12 @@ Class iWidgetGui {
             , w: this.controlAreaSize.w
             , h: this.controlAreaSize.h 
           }
-        , controlGap  := (this.controlArea.w - this.controlBtnSize*3)/2
+        */
+        , controlGap  := (this.controlAreaSize.w - this.controlBtnSize*3)/2
         , prevBtnDims := { 
               x: this.controlAreaPos.x
             , y: this.controlAreaPos.y 
-                 + (this.controlArea.h/2) 
+                 + (this.controlAreaSize.h/2) 
                  - (this.controlBtnSize/2)
             , w: this.controlBtnSize
             , h: this.controlBtnSize 
@@ -375,7 +377,9 @@ Class iWidgetGui {
         this.volumeKnob.OnEvent("Click", "VolumeKnob_Click")
 
         ;:;:;:;:;:;:;:;:;:;:;:;: Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:;
-        this.trackPosSlider := this.gui.Add("Picture", this.trackSliderOpts, "")
+        this.trackPosSlider := this.gui.Add( "Picture"            ;
+                                           , this.trackSliderOpts ;
+                                           , ""                   )
         this.trackPosSlider.OnEvent("Click", "TrackPosSlider_Click")
         
         ;:;:;:;:;:;:;:;:;:;:;:;:;:; Player Controls ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -402,13 +406,16 @@ Class iWidgetGui {
         this.PaintVolumeSlider(this.volumeSliderColor, this.volumeKnobColor)
         this.UpdateVolumeSlider(this.iTunes.app.SoundVolume)
 
-        Try {
-            this.PaintTrackPositionSlider(this.iTunes.TrackProgress)
-        } Catch {
+        Try this.PaintTrackPositionSlider(this.iTunes.TrackProgress)
+        Catch 
             this.PaintTrackPositionSlider(0)
-        }
 
         this.UpdateCurrentTrack()
+    }
+
+    ;:;:;:;:;:;:;:;:;:;:; Paint Play/Pause Button Control ;:;:;:;:;:;:;:;:;:;:;:
+    PaintPlayPause(isPlaying:=True, secondaryColor:=0xFF7F7F7F) {
+
     }
 
     ;:;:;:;:;:;:;:;:;:;:;:; Paint Track Position Slider ;:;:;:;:;:;:;:;:;:;:;:;:
@@ -617,7 +624,14 @@ if ISMAIN {
 
 
     iGui := iWidgetGui()
-    iGui.iTunes.app.LibraryPlaylist.Search("Avey", ITPlaylistSearchField["Artists"])[1].Enabled := ComValue(0xB, True)
+    EucalpytusAveyTare := Map()
+    for IITTrack in iGui.iTunes.app.LibraryPlaylist.Search("Eucalyptus", ITPlaylistSearchField["Albums"]) {
+        if IITTrack.Artist = "Avey Tare" {
+            EucalpytusAveyTare[IITTrack.TrackNumber] := iTunesApplication.iTrack(IITTrack)
+        }
+    }
+    ; EucalpytusAveyTare[1].COM[iGui.iTunes.app].Play()
+    ; iGui.iTunes.PlayPause
 
     OnExit RunOnExit
     RunOnExit(*) {
