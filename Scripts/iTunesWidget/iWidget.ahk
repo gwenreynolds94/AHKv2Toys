@@ -151,184 +151,140 @@ Class iWidgetGui {
     iTunesPath := "C:\Program Files\iTunes\iTunes.exe"
     winName := "iTunes Widget"
         ;:;:;:;:;:;:;:;:;:;:;:;:;:;:; Gui Options ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-        , guiOpts   := "-Caption +AlwaysOnTop"
-        , guiMargin := 10
-        , guiColor  := "b0d0f0"
-        , guiSize   := { 
-                w: 300 + this.guiMargin*2
-              , h: 440 + this.guiMargin*2
-          }
-        , guiShowOpts := "w" this.guiSize.w " "
-                       . "h" this.guiSize.h
+        guiOpts     := "-Caption +AlwaysOnTop"
+        guiMargin   := 10
+        guiColor    := "b0d0f0"
+        guiSize     := { w: 300 + this.guiMargin*2 ;
+                       , h: 440 + this.guiMargin*2 }
+        guiShowOpts := "w" this.guiSize.w " "
+                     . "h" this.guiSize.h
         ;:;:;:;:;:;:;:;:;:;:;:;:; Current Art Options ;:;:;:;:;:;:;:;:;:;:;:;:;:
-        , currentArtSize := this.guiSize.w - this.guiMargin*2
-        , currentArtPos  := {
-              x: this.guiSize.w/2 
-                 - this.currentArtSize/2
-            , y: this.guiMargin
-          }
+        currentArtSize := this.guiSize.w - this.guiMargin*2
+        currentArtPos  := { x: this.guiSize.w/2      ;
+                             - this.currentArtSize/2 ;
+                          , y: this.guiMargin        }
         ;:;:;:;:;:;:;:;:;:;:;:; Player Controls Options ;:;:;:;:;:;:;:;:;:;:;:;:
-        , controlBtnSize  := 24
-        , controlAreaSize := {
-              w: 200
-            , h: this.controlBtnSize 
-                 + this.guiMargin*2
-          }
-        , controlAreaPos := {
-            x: this.guiSize.w/2 
-               - this.controlAreaSize.w/2
-          , y: this.guiSize.h 
-               - this.controlAreaSize.h 
-               - 2
-          }
-        /*
-        , controlArea := { 
-              x: this.guiSize.w/2 
-                 - this.controlAreaSize.w/2
-            , y: this.guiSize.h 
-                 - this.controlAreaSize.h 
-                 - 2
-            , w: this.controlAreaSize.w
-            , h: this.controlAreaSize.h 
-          }
-        */
-        , controlGap  := (this.controlAreaSize.w - this.controlBtnSize*3)/2
-        , prevBtnDims := { 
-              x: this.controlAreaPos.x
-            , y: this.controlAreaPos.y 
-                 + (this.controlAreaSize.h/2) 
-                 - (this.controlBtnSize/2)
-            , w: this.controlBtnSize
-            , h: this.controlBtnSize 
-          }
-        , playPauseBtnDims := { 
-              x: this.prevBtnDims.x 
-                 + this.prevBtnDims.w 
-                 + this.controlGap
-            , y: this.prevBtnDims.y
-            , w: this.controlBtnSize
-            , h: this.controlBtnSize 
-          }
-        , nextBtnDims := { 
-              x: this.playPauseBtnDims.x 
-                 + this.playPauseBtnDims.w 
-                 + this.controlGap
-            , y: this.playPauseBtnDims.y
-            , w: this.controlBtnSize
-            , h: this.controlBtnSize
-          }
+        controlBtnSize  := 24
+        controlAreaSize := { w: 200                                    ;
+                           , h: this.controlBtnSize + this.guiMargin*2 }
+        controlAreaPos  := { x: this.guiSize.w/2         ;
+                              - this.controlAreaSize.w/2 ;
+                           , y: this.guiSize.h           ;
+                              - this.controlAreaSize.h   ;
+                              - 2                        }
+        controlGap  := (this.controlAreaSize.w - this.controlBtnSize*3)/2
+        prevBtnDims := { x: this.controlAreaPos.x      ;
+                       , y: this.controlAreaPos.y      ;
+                          + (this.controlAreaSize.h/2) ;
+                          - (this.controlBtnSize/2)    ;
+                       , w: this.controlBtnSize        ;
+                       , h: this.controlBtnSize        }
+        playPauseBtnDims := { x: this.prevBtnDims.x  ;
+                               + this.prevBtnDims.w  ;
+                               + this.controlGap     ;
+                            , y: this.prevBtnDims.y  ;
+                            , w: this.controlBtnSize ;
+                            , h: this.controlBtnSize }
+        nextBtnDims := { x: this.playPauseBtnDims.x ;
+                          + this.playPauseBtnDims.w ;
+                          + this.controlGap         ;
+                       , y: this.playPauseBtnDims.y ;
+                       , w: this.controlBtnSize     ;
+                       , h: this.controlBtnSize     }
         ;:;:;:;:;:;:;:;:;:;:;: Current Track Info Options ;:;:;:;:;:;:;:;:;:;:;:
-        , currentTrackInfoLineHeight := 14
-        , currentTrackNameDims := {
-              x: 0
-            , y: this.controlAreaPos.y 
-                 - this.currentTrackInfoLineHeight*3
-            , w: this.guiSize.w
-            , h: this.currentTrackInfoLineHeight
-          }
-        , currentTrackAlbumDims := {
-              x: 0
-            , y: this.currentTrackNameDims.y 
-                 + this.currentTrackInfoLineHeight
-            , w: this.guiSize.w
-            , h: this.currentTrackInfoLineHeight
-          }
-        , currentTrackArtistDims := {
-              x: 0
-            , y: this.currentTrackAlbumDims.y 
-                 + this.currentTrackInfoLineHeight
-            , w: this.guiSize.w
-            , h: this.currentTrackInfoLineHeight
-          }
+        currentTrackInfoLineHeight := 14
+        currentTrackNameDims   := { x: 0                                   ;
+                                  , y: this.controlAreaPos.y               ;
+                                       - this.currentTrackInfoLineHeight*3 ;
+                                  , w: this.guiSize.w                      ;
+                                  , h: this.currentTrackInfoLineHeight     }
+        currentTrackAlbumDims  := { x: 0                                 ;
+                                  , y: this.currentTrackNameDims.y       ;
+                                       + this.currentTrackInfoLineHeight ;
+                                  , w: this.guiSize.w                    ;
+                                  , h: this.currentTrackInfoLineHeight   }
+        currentTrackArtistDims := { x: 0                                 ;
+                                  , y: this.currentTrackAlbumDims.y      ;
+                                       + this.currentTrackInfoLineHeight ;
+                                  , w: this.guiSize.w                    ;
+                                  , h: this.currentTrackInfoLineHeight   }
         ;:;:;:;:;:;:;:;:;:;:;:;: Volume Slider Options ;:;:;:;:;:;:;:;:;:;:;:;:;
-        , volumeSliderColor  := 0xFF90B0D0
-        , volumeKnobColor    := 0xFFD0F0FF
-        , volumeSliderMargin := 24
-        , volumeSliderThickness := 6
-        , volumeSliderSize := {
-              w: this.guiSize.w - this.volumeSliderMargin*2
-            , h: 24
-          }
-        , volumeSliderPos := {
-              x: this.volumeSliderMargin
-            , y: this.currentTrackNameDims.y - this.volumeSliderSize.h - 4
-          }
-        , volumeKnobSize := {
-              w: 16
-            , h: 12
-          }
-        , volumeKnobPos := {
-              x: this.volumeSliderPos.x 
-                 - this.volumeKnobSize.w/2
-            , y: this.volumeSliderPos.y 
-                 + this.volumeSliderSize.h/2
-                 - this.volumeKnobSize.h/2
-          }
-        , volumeKnobXMax := this.volumeKnobPos.x+this.volumeSliderSize.w
-        , volumeKnobLastSlide := A_TickCount
+        volumeSliderColor     := 0xFF90B0D0
+        volumeKnobColor       := 0xFFD0F0FF
+        volumeSliderMargin    := 24
+        volumeSliderThickness := 6
+        volumeSliderSize := { w: this.guiSize.w - this.volumeSliderMargin*2 ;
+                            , h: 24                                         }
+        volumeSliderPos  := { x: this.volumeSliderMargin     ;
+                            , y: this.currentTrackNameDims.y ; 
+                               - this.volumeSliderSize.h - 4 }
+        volumeKnobSize   := { w: 16, h: 12 }
+        volumeKnobPos    := { x: this.volumeSliderPos.x      ;
+                                 - this.volumeKnobSize.w/2   ;
+                            , y: this.volumeSliderPos.y      ;
+                                 + this.volumeSliderSize.h/2 ;
+                                 - this.volumeKnobSize.h/2   }
+        volumeKnobXMax      := this.volumeKnobPos.x+this.volumeSliderSize.w
+        volumeKnobLastSlide := A_TickCount
         ;:;:;:;:;:;:;:;:;:;: Track Position Slider Options ;:;:;:;:;:;:;:;:;:;:;
-        , trackSliderPrimaryColor := 0xFF90B0D0
-        , trackSliderSecondaryColor := 0xFF7090B0
-        , trackSliderMargin := this.volumeSliderMargin
-        , trackSliderThickness  := 12
-        , trackSliderSize := {
-              w: this.guiSize.w - this.trackSliderMargin*2
-            , h: 12
-        }
-        , trackSliderPos := {
-              x: this.trackSliderMargin
-            , y: this.volumeSliderPos.y - this.trackSliderSize.h
-        }
+        trackSliderPrimaryColor   := 0xFF90B0D0
+        trackSliderSecondaryColor := 0xFF7090B0
+        trackSliderMargin    := this.volumeSliderMargin
+        trackSliderThickness := 12
+        trackSliderSize := { w: this.guiSize.w - this.trackSliderMargin*2 ;
+                           , h: 12                                        }
+        trackSliderPos  := { x: this.trackSliderMargin                          ;
+                           , y: this.volumeSliderPos.y - this.trackSliderSize.h }
         ;:;:;:;:;:;:;:;:;:;:;:;:;:; Options Strings ;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-        , currentArtOpts   := "x" this.currentArtPos.x    " "
-                            . "y" this.currentArtPos.y    " "
-                            . "w" this.currentArtSize     " "
-                            . "h" this.currentArtSize   
-        , prevBtnOpts      := "x" this.prevBtnDims.x      " "
-                            . "y" this.prevBtnDims.y      " "
-                            . "w" this.prevBtnDims.w      " "
-                            . "h" this.prevBtnDims.h
-        , playPauseBtnOpts := "x" this.playPauseBtnDims.x " "
-                            . "y" this.playPauseBtnDims.y " "
-                            . "w" this.playPauseBtnDims.w " "
-                            . "h" this.playPauseBtnDims.h
-        , nextBtnOpts      := "x" this.nextBtnDims.x      " "
-                            . "y" this.nextBtnDims.y      " "
-                            . "w" this.nextBtnDims.w      " "
-                            . "h" this.nextBtnDims.h
-        , currentTrackNameOpts   := "x" this.currentTrackNameDims.x   " "
-                                  . "y" this.currentTrackNameDims.y   " "
-                                  . "w" this.currentTrackNameDims.w   " "
-                                  . "h" this.currentTrackNameDims.h   " "
-                                  . "Center 0x80"
-        , currentTrackAlbumOpts  := "x" this.currentTrackAlbumDims.x  " "
-                                  . "y" this.currentTrackAlbumDims.y  " "
-                                  . "w" this.currentTrackAlbumDims.w  " "
-                                  . "h" this.currentTrackAlbumDims.h  " "
-                                  . "Center 0x80"
-        , currentTrackArtistOpts := "x" this.currentTrackArtistDims.x " "
-                                  . "y" this.currentTrackArtistDims.y " "
-                                  . "w" this.currentTrackArtistDims.w " "
-                                  . "h" this.currentTrackArtistDims.h " "
-                                  . "Center 0x80"
-        , currentTrackInfoFontOpts := "s8"
-        , currentTrackInfoFontName := "Fira Code"
-        , currentTrackNameFontOpts := this.currentTrackInfoFontOpts " bold"
-        , volumeSliderOpts := "x" this.volumeSliderPos.x  " "
-                            . "y" this.volumeSliderPos.y  " "
-                            . "w" this.volumeSliderSize.w " "
-                            . "h" this.volumeSliderSize.h " "
-                            . "0xE"
-        , volumeKnobOpts   := "x" this.volumeKnobPos.x    " "
-                            . "y" this.volumeKnobPos.y    " "
-                            . "w" this.volumeKnobSize.w   " "
-                            . "h" this.volumeKnobSize.h   " "
-                            . "0xE BackgroundTrans"
-        , trackSliderOpts  := "x" this.trackSliderPos.x   " "
-                            . "y" this.trackSliderPos.y   " "
-                            . "w" this.trackSliderSize.w  " "
-                            . "h" this.trackSliderSize.h  " "
-                            . "0xE BackgroundCCCCCC"
+        currentArtOpts   := "x" this.currentArtPos.x    " "
+                          . "y" this.currentArtPos.y    " "
+                          . "w" this.currentArtSize     " "
+                          . "h" this.currentArtSize   
+        prevBtnOpts      := "x" this.prevBtnDims.x      " "
+                          . "y" this.prevBtnDims.y      " "
+                          . "w" this.prevBtnDims.w      " "
+                          . "h" this.prevBtnDims.h
+        playPauseBtnOpts := "x" this.playPauseBtnDims.x " "
+                          . "y" this.playPauseBtnDims.y " "
+                          . "w" this.playPauseBtnDims.w " "
+                          . "h" this.playPauseBtnDims.h
+        nextBtnOpts      := "x" this.nextBtnDims.x      " "
+                          . "y" this.nextBtnDims.y      " "
+                          . "w" this.nextBtnDims.w      " "
+                          . "h" this.nextBtnDims.h
+        currentTrackNameOpts   := "x" this.currentTrackNameDims.x   " "
+                                . "y" this.currentTrackNameDims.y   " "
+                                . "w" this.currentTrackNameDims.w   " "
+                                . "h" this.currentTrackNameDims.h   " "
+                                . "Center 0x80"
+        currentTrackAlbumOpts  := "x" this.currentTrackAlbumDims.x  " "
+                                . "y" this.currentTrackAlbumDims.y  " "
+                                . "w" this.currentTrackAlbumDims.w  " "
+                                . "h" this.currentTrackAlbumDims.h  " "
+                                . "Center 0x80"
+        currentTrackArtistOpts := "x" this.currentTrackArtistDims.x " "
+                                . "y" this.currentTrackArtistDims.y " "
+                                . "w" this.currentTrackArtistDims.w " "
+                                . "h" this.currentTrackArtistDims.h " "
+                                . "Center 0x80"
+        currentTrackInfoFontOpts := "s8"
+        currentTrackInfoFontName := "Fira Code"
+        currentTrackNameFontOpts := this.currentTrackInfoFontOpts " bold"
+        volumeSliderOpts := "x" this.volumeSliderPos.x  " "
+                          . "y" this.volumeSliderPos.y  " "
+                          . "w" this.volumeSliderSize.w " "
+                          . "h" this.volumeSliderSize.h " "
+                          . "0xE"
+        volumeKnobOpts   := "x" this.volumeKnobPos.x    " "
+                          . "y" this.volumeKnobPos.y    " "
+                          . "w" this.volumeKnobSize.w   " "
+                          . "h" this.volumeKnobSize.h   " "
+                          . "0xE BackgroundTrans"
+        trackSliderOpts  := "x" this.trackSliderPos.x   " "
+                          . "y" this.trackSliderPos.y   " "
+                          . "w" this.trackSliderSize.w  " "
+                          . "h" this.trackSliderSize.h  " "
+                          . "0xE BackgroundCCCCCC"
     __New() {
         ;:;:;:;:;:;:;:;: Initialize iTunesApplication instance ;:;:;:;:;:;:;:;:;
         ; ; ; ; ; ;      and static references for event sinks     ; ; ; ; ; ; ;
@@ -624,12 +580,12 @@ if ISMAIN {
 
 
     iGui := iWidgetGui()
-    EucalpytusAveyTare := Map()
-    for IITTrack in iGui.iTunes.app.LibraryPlaylist.Search("Eucalyptus", ITPlaylistSearchField["Albums"]) {
-        if IITTrack.Artist = "Avey Tare" {
-            EucalpytusAveyTare[IITTrack.TrackNumber] := iTunesApplication.iTrack(IITTrack)
-        }
-    }
+    ; EucalpytusAveyTare := Map()
+    ; for IITTrack in iGui.iTunes.app.LibraryPlaylist.Search("Eucalyptus", ITPlaylistSearchField["Albums"]) {
+    ;     if IITTrack.Artist = "Avey Tare" {
+    ;         EucalpytusAveyTare[IITTrack.TrackNumber] := iTunesApplication.iTrack(IITTrack)
+    ;     }
+    ; }
     ; EucalpytusAveyTare[1].COM[iGui.iTunes.app].Play()
     ; iGui.iTunes.PlayPause
 
