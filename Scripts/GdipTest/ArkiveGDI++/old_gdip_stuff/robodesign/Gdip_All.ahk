@@ -5605,25 +5605,25 @@ StrGetB(Address, Length:=-1, Encoding:=0) {
       ; No conversion necessary, but we might not want the whole string.
       if (Length == -1)
          Length := DllCall("lstrlen", "uint", Address)
-      String := Buffer(Length)
-      DllCall("lstrcpyn", "str", String, "uint", Address, "int", Length + 1)
+      bString := Buffer(Length)
+      DllCall("lstrcpyn", "str", bString, "uint", Address, "int", Length + 1)
    }
    else if (Encoding = 1200) ; UTF-16
    {
       char_count := DllCall("WideCharToMultiByte", "uint", 0, "uint", 0x400, "uint", Address, "int", Length, "uint", 0, "uint", 0, "uint", 0, "uint", 0)
-      String := Buffer(char_count)
-      DllCall("WideCharToMultiByte", "uint", 0, "uint", 0x400, "uint", Address, "int", Length, "str", String, "int", char_count, "uint", 0, "uint", 0)
+      bString := Buffer(char_count)
+      DllCall("WideCharToMultiByte", "uint", 0, "uint", 0x400, "uint", Address, "int", Length, "str", bString, "int", char_count, "uint", 0, "uint", 0)
    }
    else if IsInteger(Encoding)
    {
       ; Convert from target encoding to UTF-16 then to the active code page.
       char_count := DllCall("MultiByteToWideChar", "uint", Encoding, "uint", 0, "uint", Address, "int", Length, "uint", 0, "int", 0)
-      String := Buffer(char_count * 2)
-      char_count := DllCall("MultiByteToWideChar", "uint", Encoding, "uint", 0, "uint", Address, "int", Length, "UPtr", String.ptr, "int", char_count * 2)
-      String := StrGetB(String.ptr, char_count, 1200)
+      bString := Buffer(char_count * 2)
+      char_count := DllCall("MultiByteToWideChar", "uint", Encoding, "uint", 0, "uint", Address, "int", Length, "UPtr", bString.ptr, "int", char_count * 2)
+      bString := StrGetB(bString.ptr, char_count, 1200)
    }
 
-   return String
+   return bString
 }
 
 Gdip_Startup(multipleInstances:=0) {
@@ -7819,11 +7819,11 @@ ConvertRGBtoHSL(R, G, B) {
    G := (G / 255)
    B := (B / 255)
 
-   Min     := min(R, G, B)
-   Max     := max(R, G, B)
-   del_Max := Max - Min
+   _Min     := min(R, G, B)
+   _Max     := max(R, G, B)
+   del_Max := _Max - _Min
 
-   L := (Max + Min) / 2
+   L := (_Max + _Min) / 2
 
    if (del_Max = 0)
    {
@@ -7831,22 +7831,22 @@ ConvertRGBtoHSL(R, G, B) {
    } else
    {
       if (L < 0.5)
-         S := del_Max / (Max + Min)
+         S := del_Max / (_Max + _Min)
       else
-         S := del_Max / (2 - Max - Min)
+         S := del_Max / (2 - _Max - _Min)
 
-      del_R := (((Max - R) / 6) + (del_Max / 2)) / del_Max
-      del_G := (((Max - G) / 6) + (del_Max / 2)) / del_Max
-      del_B := (((Max - B) / 6) + (del_Max / 2)) / del_Max
+      del_R := (((_Max - R) / 6) + (del_Max / 2)) / del_Max
+      del_G := (((_Max - G) / 6) + (del_Max / 2)) / del_Max
+      del_B := (((_Max - B) / 6) + (del_Max / 2)) / del_Max
 
-      if (R = Max)
+      if (R = _Max)
       {
          H := del_B - del_G
       } else
       {
-         if (G = Max)
+         if (G = _Max)
             H := (1 / 3) + del_R - del_B
-         else if (B = Max)
+         else if (B = _Max)
             H := (2 / 3) + del_G - del_R
       }
       if (H < 0)

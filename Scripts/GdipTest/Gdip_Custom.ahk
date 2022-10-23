@@ -3244,7 +3244,7 @@ Gdip_SaveHICONToFile(_hIcon, _targetPath) {
         Return
     }
     h_hbmColor := NumGet(ICONINFO, 8 + A_PtrSize*2, "Ptr")
-    hbmColor := DllCall("CopyImage", "Ptr", h_hbmColor      ; h
+    hbmColor := DllCall("CopyImage", "Ptr", h_hbmColor       ; h
                                     , "UInt", IMAGE_BITMAP   ; type
                                     , "Int", 0, "Int", 0     ; cx, cy
                                     , "UInt", copyFlags      ; flags

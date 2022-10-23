@@ -16,6 +16,7 @@ FormatSingleLineComment(sep:=":", padWidth:=1) {
     fillSpace := 80-StrLen(clip)
     lFill := (fillSpace-Mod(fillSpace,2)) / 2
     rFill := lFill+Mod(fillSpace,2)
+    padWidth := StrLen(trimClip) ? padWidth : 0
     fString := leading
     Loop lFill-padWidth {
         if Mod(A_Index,2)
@@ -37,7 +38,7 @@ FormatSingleLineComment(sep:=":", padWidth:=1) {
             fString .= sep
     }
     A_Clipboard := fString
-    Send "{Ctrl Down}v{Ctrl Up}"
+    SendEvent "{Ctrl Down}v{Ctrl Up}"
     Sleep 25
     A_Clipboard := saveClip
 }

@@ -12,6 +12,7 @@ if (A_ScriptName="ConvertImageToIcon.ahk") {
     OnExit (*)=> Gdip_Shutdown(gdip_token)
     HotKey "F8", (*)=>ExitApp()
     itiGui := ITI_Gui()
+    Gdip_Shutdown(gdip_token)
 }
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;: END if current script ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
