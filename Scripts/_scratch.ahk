@@ -4,4 +4,4 @@
 
 #Include <DBT>
 
-((a)=>MsgBox(a)).Bind("hey").Call()
+stdo Class.Prototype.Clone
