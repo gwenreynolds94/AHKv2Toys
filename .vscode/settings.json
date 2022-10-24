@@ -4,5 +4,9 @@
     "editor.codeLensFontSize": 0,
     "editor.codeLensFontFamily": "Fira Code Retina",
     "workbench.tree.indent": 12,
-    "workbench.tree.renderIndentGuides": "always"
+    "workbench.tree.renderIndentGuides": "always",
+    "explorer.fileNesting.patterns": {
+        "_*.ahk": "*.${extname}"
+    },
+    "explorer.sortOrder": "foldersNestsFiles"
 }
