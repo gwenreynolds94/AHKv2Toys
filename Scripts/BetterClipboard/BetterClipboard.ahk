@@ -14,225 +14,155 @@ RunBC() {
 }
 
 Class BC_App {
-    /** @prop {Gui} gui */
-    gui := {}
-
-    /** @prop {BC_App.Gdip} gdip */
-    gdip := {}
-
-    /** @prop {Object} gui_size */
-    gui_size  := { w: 675, h: 450 }
-
-    /** @prop {String} size_opts */
-    size_opts := "w" this.gui_size.w " "
-               . "h" this.gui_size.h
-
-    opacity := "200"
-    border := 5
-    borderRadius := 8
-    edit_opts := "x" this.border " y" this.border    " "
-               . "w" this.gui_size.w - this.border*2 " "
-               . "h" this.gui_size.h - this.border*2 " BackgroundDDEEFF"
-    indexPic_pos  := { x: 50,  y: 50 }
-    indexPic_size := { w: 200, h: 75 }
-    indexPic_opts := "x1 y1 w50 h50 0xE BackgroundTrans"
+    gdip          := {}
+    gui           := {}
+    isGuiActive   := False
+    gui_size      := { w: 675, h: 450 }
+    size_opts     := "w" this.gui_size.w " "
+                   . "h" this.gui_size.h
+    opacity       := "225"
+    fadeSteps     := 10
+    interruptFade := False
+    border        := 4
+    edit_opts     := "x" this.border " y" this.border    " "
+                   . "w" this.gui_size.w - this.border*2 " "
+                   . "h" this.gui_size.h - this.border*2 " BackgroundDDEEFF"
     __New() {
         this.gui := Gui("-Caption +AlwaysOnTop")
-        ; this.gui.BackColor := "ADAFAE"
-        ; WinSetTransColor this.gui.BackColor, this.gui
-        this.gui.BackColor := "7FB089"
-        WinSetTransparent this.opacity, this.gui
+        this.gui.BackColor := 0x7FB089
         this.gui.OnEvent("Close", ObjBindMethod(this, "On_Gui_Close"))
-
         this.bgPic := this.gui.Add("Picture", "0xE x0 y0 " this.size_opts)
         this.edit  := this.gui.Add("Edit", this.edit_opts)
-        this.indexPic := this.gui.Add("Picture", this.indexPic_opts)
-
-        this.gdip := BC_App.Gdip()
-        this.gui.Show(this.size_opts)
-        ; this.PaintBackground()
-        this.PaintIndex
-        for ctrl in this.gui
-            ctrl.Redraw
-    }
-    __Delete() {
         
+        this.gui.Show("x" A_ScreenWidth " " this.size_opts)
+        WinSetTransparent this.opacity, this.gui
+        this.indexGui := BC_App.IndexOverlay(this.gui, 110+this.border, 36+this.border)
+        this.Hide()
+
+        Hotkey "F8", (*)=> ExitApp()
     }
     On_Gui_Close(gObj){
         ExitApp
     }
 
-    /** @param {Integer} Options
-     *      Specify **0** for toggle, **1** to show, and **-1** to hide */
-    Toggle(Options:=0) {
-
+    Show(stepDuration:=10) {
+        this.gui.Show("Center")
+        Hotkey "<#c", (*)=> this.Hide()
+        stepSize := this.opacity/this.fadeSteps
+        currStep := 0
+        this.interruptFade := False
+        SetTimer Step, stepDuration
+        Step(*) {
+            currStep += 1
+            currOp := currStep*stepSize
+            if !this.interruptFade {
+                if currOp >= this.opacity
+                    currOp:=this.opacity, this.indexGui.Show(24), SetTimer(,0)
+            WinSetTransparent Integer(currOp), this.gui
+            } else SetTimer(,0)
+        }
+        ; 
+    }
+    Hide() {
+        this.interruptFade := True
+        this.indexGui.Hide()
+        WinSetTransparent 0, this.gui
+        this.gui.Hide()
+        Hotkey "<#c", (*)=> this.Show()
     }
 
-    PaintBackground() {
-        gdip := this.gdip
-        bgCanvas := gdip.CreateCanvas(this.gui_size.w, this.gui_size.h)
-        bgCanvas.Smoothing := 6
-        gdip.CreateBrushPalette()
-        bgCanvas.FillBGRect(gdip.ahkgreen_light)
-        bgCanvas.FillRect(gdip.gray_light, this.border, this.border
-                                   , this.gui_size.w - this.border*2
-                                   , this.gui_size.h - this.border*2)
-        ; bgCanvas.FillBGRoundedRect(gdip.ahkgreen_light, this.borderRadius)
-        ; bgCanvas.FillRoundedRect(gdip.gray_light
-        ;                        , this.border, this.border
-        ;                        , this.gui_size.w - this.border*2
-        ;                        , this.gui_size.h - this.border*2
-        ;                        , this.borderRadius-2)
-        bgCanvas.SetImage this.bgPic.Hwnd
-        gdip.BurnBrushes()
-        bgCanvas.Dispose()
-    }
+    Class IndexOverlay {
+        gdip_token    := 0x0
+        parentGui     := {}
+        width         := 0
+        height        := 0
+        opacity       := "FF"
+        fontColor     := "FFFFFF"
+        fontName      := "Courier Prime"
+        fadeStepsEnum := ["00", "11", "22", "33", "44", "55", "66", "77"
+                        , "88", "99", "AA", "BB", "CC", "DD", "EE", "FF"]
+        firstDisplay  := True
+        interruptFade := False
+        __New(_pGui, _w, _h, _op:="DD") {
+            WS_EX_STATICEDGE:="E0x00020000" ; little baby window edge
+            WS_EX_NOACTIVATE:="E0x08000000" ; prevents window getting focus
+            this.width := _w, this.height := _h
+            this.parentGui := _pGui, this.opacity:=_op
+            this.fontColor := this.parentGui.BackColor
+            this.gui := Gui("+" WS_EX_NOACTIVATE " +E0x80000 "
+                          . "-Caption +Owner" _pGui.Hwnd)
+            this.gui.Show("x" 0 " y" (-5)-_h " w" _w " h" _h " NA")
 
-    PaintIndex() {
-        gd:=this.gdip
-        idxWidth := this.indexPic_size.w, idxHeight := this.indexPic_size.h
-        idxCvs := gd.CreateCanvas(idxWidth, idxHeight)
-        gd.CreateBrushPalette
-        idxCvs.FillBGRoundedRect(gd.black_trans50)
-        idxCvs.SetImage this.indexPic.Hwnd
-        gd.BurnBrushes
-        idxCvs.Dispose
-    }
+            GdipShutdownFunc(_token, *) {
+                if (_token) {
+                    Gdip_Shutdown _token
+                    stdo "Shutting down Gdi+..."
+                }
+            }
+            if this.gdip_token:=Gdip_Startup() {
+                this.PaintGui(this.opacity)
+                OnExit GdipShutdownFunc.Bind(this.gdip_token)
+            }
 
-    ; A class whose purpose is to store gdip components and share them among
-    ;       methods of a class as well as provide management of Gdip library
-    ;       and custom Gdip utilites
-    Class Gdip {
-        gdip_token := 0x0
-        brush_palette := Map()
-        default_brush_palette := Map(
-                       "black", 0xFF000000
-          ,    "black_trans50", 0xAA000000
-          ,            "white", 0xFFFFFFFF
-          ,    "white_trans50", 0xAAFFFFFF
-          ,       "gray_light", 0xFFCCCCCC
-          ,             "gray", 0xFFAAAAAA
-          ,        "gray_dark", 0xFF555555
-          ,   "ahkgreen_light", 0xFF7FB089
-          ,         "ahkgreen", 0xFF4BB560
-          ,    "ahkgreen_dark", 0xFF49614E
-          , "ahkgreen_trans50", 0xAA4BB560
-        )
-        __New() {
-            if !this.gdip_token:=Gdip_Startup()
-                MsgBox "Gdip failed to start"
-            else OnExit (*)=> ObjBindMethod(this, "__Delete").Call()
+            this.PaintGui("00")
+            this.gui.Hide()
+            this.Bound_Hide := ObjBindMethod(this, "Hide")
         }
-        __Delete() {
-            if this.brush_palette.Count
-                this.BurnBrushes()
-            if this.gdip_token
-                Gdip_Shutdown(this.gdip_token)
+        PaintGui(_opacity) {
+            _hbm := CreateDIBSection(_w:=this.width, _h:=this.height)
+            _hdc := CreateCompatibleDC()
+            _obm := SelectObject(_hdc, _hbm)
+            _gfx := Gdip_GraphicsFromHDC(_hdc)
+            _fontName := (Gdip_FontFamilyCreate(this.fontName)) ? this.fontName : "Arial"
+            _fontColor := _opacity . this.fontColor
+            _fontOpts := "x5p y5p w90p h90p vCenter c" _fontColor " r4 s30"
+            Gdip_TextToGraphics(_gfx, "9999", _fontOpts, _fontName, _w, _h)
+            newPos := this.NewIndexPos()
+            _retVal := UpdateLayeredWindow(this.gui.Hwnd, _hdc, newPos.x, newPos.y, _w, _h)
+            SelectObject(_hdc, _obm)
+            DeleteObject(_hbm)
+            DeleteDC(_hdc)
+            Gdip_DeleteGraphics(_gfx)
+            Return _retVal
         }
-
-        CreateBrushPalette(_Name_Value_Pairs*) {
-            this.brush_palette := Map(), palette_set := False
-            if !_Name_Value_Pairs.Length
-                this.brush_palette := this.default_brush_palette, palette_set := True
-            else if (_Name_Value_Pairs[1] is Map)
-                this.brush_palette := _Name_Value_Pairs[1], palette_set := True
-            if palette_set
-                for _name, _color in this.brush_palette
-                    this.%_name% := Gdip_BrushCreateSolid(_color)
-            else if !Mod(_Name_Value_Pairs, 2)
-                for _index, _value in _Name_Value_Pairs
-                    if Mod(_index, 2)
-                        this.%_value% := Gdip_BrushCreateSolid(
-                            this.brush_palette[%_value%] :=
-                                _Name_Value_Pairs[_index+1]   )
-            Return this.brush_palette
+        Show(stepDuration:=15) {
+            if this.firstDisplay
+                this.MatchParentGuiPos(True)
+            else this.gui.Show("NA")
+            currStep := 0
+            this.interruptFade := False
+            SetTimer Step, stepDuration
+            Step(*) {
+                if !this.interruptFade {
+                    currStep := currStep + 1
+                    currOp := this.fadeStepsEnum[currStep]
+                    if Integer("0x" currOp) >= Integer("0x" this.opacity)
+                        currOp := this.opacity, SetTimer(,0)
+                            , SetTimer(this.Bound_Hide, -2000)
+                    this.PaintGui(currOp)
+                } else SetTimer(,0)
+            }
         }
-
-        BurnBrushes() {
-            for _name, _color in this.brush_palette
-                this.%_name% := ""
-            this.brush_palette := Map()
+        Hide() {
+            SetTimer(this.Bound_Hide, 0)
+            this.interruptFade := True
+            this.PaintGui("00")
+            this.gui.Hide()
         }
-
-        Brush[_color] => Gdip_BrushCreateSolid(_color)
-
-        /**
-         * @param {Integer} _width
-         * @param {Integer} _height
-         * @return {BC_App.Gdip.Canvas}
-         */
-        CreateCanvas(_width, _height) {
-            Return BC_App.Gdip.Canvas(this, _width, _height)
+        NewIndexPos() {
+            this.parentGui.GetPos(&px, &py, &pw, &ph)
+            Return { x: px+pw-this.width, y: py+ph-this.height }
         }
-
-        DisposeCanvas(_canvas) {
-            _canvas.Dispose()
-            _canvas:={}
-        }
-
-        Class Canvas {
-            gdip:={}, pBitmap:=0x0, hBitmap:=0x0, gfx:=0x0
-            width:=0, height:=0 , _smoothing:=6, margin:=0, bgBRadius:=15 
-            __New(_gdip, _width, _height) {
-                this.gdip := _gdip
-                this.pBitmap := Gdip_CreateBitmap(this.width:=_width, this.height:=_height)
-                this.gfx := Gdip_GraphicsFromImage(this.pBitmap)
-                this.Smoothing := this._smoothing
-            }
-            __Delete() {
-                this.Dispose()
-            }
-
-            Dispose(){
-                Gdip_DeleteGraphics(this.gfx)
-                Gdip_DisposeImage(this.pBitmap)
-                DeleteObject(this.hBitmap)
-            }
-
-            FillRect(_pBrush, _x, _y, _w, _h) {
-                Gdip_FillRectangle(this.gfx, _pBrush, _x, _y, _w, _h)
-            }
-
-            FillRoundedRect(_pBrush, _x, _y, _w, _h, _r) {
-                Gdip_FillRoundedRectangle2(this.gfx, _pBrush, _x, _y, _w-1, _h-1, _r)
-            }
-
-            FillBGRect(_pBrush) {
-                Gdip_FillRectangle this.gfx   , _pBrush
-                                 , this.margin, this.margin
-                                 , this.width  - this.margin*2
-                                 , this.height - this.margin*2
-            }
-
-            FillBGRoundedRect(_pBrush, _bgBRadius:="") {
-                _bgBRadius := (_bgBRadius) ? _bgBRadius : this.bgBRadius
-                Gdip_FillRoundedRectangle2 this.gfx, _pBrush
-                                         , this.margin, this.margin
-                                         , this.width - this.margin*2 - 1
-                                         , this.height - this.margin*2 - 1
-                                         , _bgBRadius
-            }
-
-            SetImage(_hWnd) {
-                this.hBitmap := Gdip_CreateHBITMAPFromBitmap(this.pBitmap)
-                SetImage(_hWnd, this.hBitmap)
-            }
-
-            /**
-             * @prop {Integer} Smoothing
-             * 
-             *      0  Default     
-             *      1  HighSpeed   
-             *      2  HighQuality 
-             *      3  None        
-             *      4  AntiAlias   
-             *      5  AntiAlias8x4
-             *      6  AntiAlias8x8
-             */
-            Smoothing {
-                Get => this._smoothing
-                Set => Gdip_SetSmoothingMode(this.gfx, this._smoothing:=Value)
-            }
+        MatchParentGuiPos(_show:=False, _hide:=False) {
+            uFlags := (SWP_NOACTIVATE:=0x0010)|(SWP_NOSIZE:=0x0001)
+            uFlags := (_show) ? (uFlags|(SWP_SHOWWINDOW:=0x0040))
+                    : (_hide) ? (uFlags|(SWP_HIDEWINDOW:=0x0080)) : uFlags
+            newPos := this.NewIndexPos()
+            DllCall("SetWindowPos", "Ptr", this.gui.Hwnd
+                                  , "Ptr", -1
+                                  , "Int", newPos.x, "Int", newPos.y
+                                  , "Int", 0, "Int", 0
+                                  , "UInt", uFlags)
         }
     }
 }

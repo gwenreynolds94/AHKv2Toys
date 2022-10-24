@@ -14,6 +14,7 @@ OnExit RunOnExit
 gWidth := 500, gHeight := 300
 tGui := Gui("-Caption +E0x80000 +LastFound +AlwaysOnTop +ToolWindow +OwnDialogs")
 tGui.Show("NA")
+SetTimer (*)=> WinSetTransparent(100, tGui), -2000
 
 gBitmap := CreateDIBSection(gWidth, gHeight)
 devCtx := CreateCompatibleDC()
