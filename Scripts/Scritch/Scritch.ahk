@@ -2,8 +2,6 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\Lib\DBT.ahk
-
 
 Class ScritchGui {
     ;

@@ -2,68 +2,61 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include %A_ScriptDir%\Scripts
-#Include Lib\DBT.ahk
-
-
+#Include <DBT>
 
 /** Hotkeys List
  *  ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
  *  ... ... XButton1->LButton2  =>  Ctrl+v
  *  ... ... XButton1->RButton2  =>  Ctrl+x
  *  ... ... XButton1->XButton1  =>  Ctrl+c
- * 
+ *
  *  ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
  *  ... ... XButton2->LButton2  =>  Activate Previous Active Window
  *  ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
  *  ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
- * 
+ *
  *  ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
  *  ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
  *  ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
- * 
+ *
  *  ... "<#v"   ==>  Scritch Notes Application
  */
-
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-#Include Scritch\Scritch.ahk
+#Include Scripts\Scritch\Scritch.ahk
 ;
-NotesApp := ScritchGui( A_ScriptDir "\Resources\ScritchNotes",startHidden:=True)
-Hotkey "<#v", (*)=> NotesApp.ToggleGui()
+ScritchResourcePath := A_ScriptDir "\Resources\ScritchNotes"
+NotesApp := ScritchGui(ScritchResourcePath, startHidden := True)
+Hotkey "<#v", (*) => NotesApp.ToggleGui()
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
-
-
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-#Include AutoFormatComments\FormatSingleLineComment.ahk
+#Include Scripts\AutoFormatComments\FormatSingleLineComment.ahk
 ;
-HotIf (*)=> (
+HotIf (*) => (
     WinActive("ahk_exe code.exe")
     or WinActive("ahk_exe VSCodium.exe")
     or WinActive("ahk_exe sublime_text.exe"))
-Hotkey "<^+p", (*)=> FormatSingleLineComment()
-Hotkey "<^+o", (*)=> FormatSingleLineComment(" ")
-Hotkey "<^+i", (*)=> FormatSingleLineComment("-")
+Hotkey "<^+p", (*) => FormatSingleLineComment()
+Hotkey "<^+o", (*) => FormatSingleLineComment(" ")
+Hotkey "<^+i", (*) => FormatSingleLineComment("-")
 Hotif
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
-
-
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 ; Kick it all off
-$XButton1::     
+$XButton1::
 {
     ; Two XButton1 Up or Downs in 300 ms Sends <Copy>, cancels sending XButton1
     if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 300)
@@ -75,24 +68,24 @@ $XButton1::
     SetTimer SendXButton1, -300
 }
 ; Easier to activate when hand can move around mouse
-$XButton1 Up::Return    
+$XButton1 Up:: Return
 ; Send XButton1
-SendXButton1(*) {       
+SendXButton1(*) {
     SetTimer(, 0)
     Send("{XButton1}")
 }
 ; Send <Cut> and cancel XButton1 timer
-SendCut(*) {            
+SendCut(*) {
     SetTimer(SendXButton1, 0)
     Send("{LCtrl Down}x{LCtrl Up}")
 }
 ; Send <Paste> and cancel XButton1 timer
-SendPaste(*) {          
+SendPaste(*) {
     SetTimer(SendXButton1, 0)
     Send("{LCtrl Down}v{LCtrl Up}")
 }
 ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-HotIf (*)=> InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 300)
+HotIf (*) => InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 300)
 Hotkey("LButton", SendPaste)
 Hotkey("RButton", SendCut)
 HotIf
@@ -100,10 +93,8 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
-
-
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ;  XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ;  XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 $XButton2::
 {
@@ -111,7 +102,7 @@ $XButton2::
         Return SearchFirefoxFromClipboard() SetTimer(SendXButton2, 0)
     SetTimer(SendXButton2, -300)
 }
-$XButton2 Up::Return
+$XButton2 Up:: Return
 SendXButton2(*) {
     SetTimer(, 0)
     Send("{XButton2}")
@@ -120,18 +111,17 @@ LWin & AppsKey::
 SearchFirefoxFromClipboard(*) {
     SetTimer(SendXButton2, 0)
     SetTitleMatchMode "RegEx"
-    if !(wTitle:=WinExist("ahk_exe \w+fox.exe$"))
+    if !(wTitle := WinExist("ahk_exe \w+fox.exe$"))
         Return 0
     SetTitleMatchMode 2
-    wIDstr:=("ahk_id " wTitle)
-    WinGetPos ,, &wWidth
+    wIDstr := ("ahk_id " wTitle)
+    WinGetPos , , &wWidth
     if (wWidth < 701)
-        WinMove ,, 701,, wIDstr
+        WinMove , , 701, , wIDstr
     WinActivate wIDstr
     WinWait wIDstr
     SetKeyDelay 25, 5
     SendEvent "{LCtrl Down}tkv{LCtrl Up}{Enter}"
-
 }
 ; Activate window below current in the z-order
 ActivateZIndex3(*) {
@@ -148,7 +138,7 @@ ActivateZIndex4(*) {
     DetectHiddenWindows True
 }
 ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-HotIf (*)=> InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 300)
+HotIf (*) => InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 300)
 Hotkey("LButton", ActivateZIndex3)
 Hotkey("RButton", ActivateZIndex4)
 HotIf
@@ -156,15 +146,13 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
-
-
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-#Include WinSize&PosUtils.ahk
+#Include Scripts\WinSize&PosUtils.ahk
 ;
-#b::SizeWindow()
-#s::SizeWindowHalf()
+#b:: SizeWindow()
+#s:: SizeWindowHalf()
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
@@ -172,18 +160,12 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-#Include SearchV2Docs\searchdocs.ahk
+#Include Scripts\SearchV2Docs\searchdocs.ahk
 ;
-#z::SearchV2DocsFromClipboard()
+#z:: SearchV2DocsFromClipboard()
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
-
-
-
-
-
-
-Hotkey "F7" , (*)=> Reload() ;:;:;:;:;:;:;:;:;: DEBUG ;:;:;:;:;:;:;:;:;:;:;:;:;:
-Hotkey "#F7", (*)=> ExitApp()  ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+Hotkey "F7", (*) => Reload()    ;:;:;:;:;:;:;:;:;: DEBUG ;:;:;:;:;:;:;:;:;:;:;:;
+Hotkey "#F7", (*) => ExitApp()    ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:

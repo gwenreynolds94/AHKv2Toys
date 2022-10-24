@@ -2,8 +2,8 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include Lib\DBT.ahk
-#Include Lib\SciConstants.ahk
+#Include <DBT>
+#Include <SciConstants>
 
 sci_path := A_ScriptDir "\Lib\Scintilla.dll"
 sci_ptr := DllCall("LoadLibrary", "Str", sci_path, "Ptr")
