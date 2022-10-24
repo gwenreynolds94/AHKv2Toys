@@ -8,6 +8,7 @@
 
 if A_ScriptName="BetterClipboard.1.ahk" {
     RunBC()
+    Hotkey "F8", (*)=>ExitApp()
 }
 RunBC() {
     app:=BC_App()
@@ -32,7 +33,7 @@ Class BC_App {
     borderRadius := 8
     edit_opts := "x" this.border " y" this.border    " "
                . "w" this.gui_size.w - this.border*2 " "
-               . "h" this.gui_size.h - this.border*2 " BackgroundDDEEFF"
+               . "h" this.gui_size.h - this.border*2 " BackgroundDDEEFF 0x100"
     indexPic_pos  := { x: 50,  y: 50 }
     indexPic_size := { w: 200, h: 75 }
     indexPic_opts := "x" this.indexPic_pos.x  " y" this.indexPic_pos.y  " "
@@ -49,9 +50,32 @@ Class BC_App {
         this.bgPic := this.gui.Add("Picture", "0xE x0 y0 " this.size_opts)
         this.edit  := this.gui.Add("Edit", this.edit_opts)
         this.indexPic := this.gui.Add("Picture", this.indexPic_opts)
-
+        DllCall("SetParent", "Ptr", this.indexPic.Hwnd, "Ptr", this.edit.Hwnd)
+        ; DllCall("SetClassLongPtrW", "Ptr", this.indexPic.Hwnd
+        ;                           , "Int", -26, "Ptr", 0x0080|0x4000, "UPtr")
+        ; uFlags := (SWP_NOACTIVATE:=0x0010)|(SWP_NOSIZE:=0x0001)|(SWP_NOMOVE := 0x0002)
+        ; stdo DllCall("SetWindowPos", "Ptr", this.indexPic.Hwnd
+        ;                       , "Int", -1
+        ;                       , "UInt", 0, "UInt", 0
+        ;                       , "UInt", 0, "UInt", 0
+        ;                       , "UInt", uFlags)
+        ; stdo DllCall("SetWindowPos", "Ptr", this.edit.Hwnd
+        ;                       , "Int", -2
+        ;                       , "UInt", 0, "UInt", 0
+        ;                       , "UInt", 0, "UInt", 0
+        ;                       , "UInt", uFlags)
+; 
         this.gdip := BC_App.Gdip()
         this.gui.Show(this.size_opts)
+        Sleep 250
+        this.gui.Hide()
+        Sleep 250
+        uFlags := (SWP_NOSIZE:=0x0001)|(SWP_NOMOVE := 0x0002)|(SWP_SHOWWINDOW:=0x0040)
+        DllCall("SetWindowPos", "Ptr", this.gui.Hwnd
+                              , "Int", 0
+                              , "Int", this.border, "Int", this.border
+                              , "Int", this.gui_size.w, "Int", this.gui_size.h
+                              , "UInt", uFlags, "Int")
         ; this.PaintBackground()
         this.PaintIndex
         ; for ctrl in this.gui

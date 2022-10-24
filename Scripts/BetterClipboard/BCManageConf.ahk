@@ -1,10 +1,10 @@
 
 if A_ScriptName="BCManageConf.ahk" {
-    conf := BetterClipboardConfig
+    conf := BC_Config
     stdo conf.MaxIndex "`n" conf.CurIndex
 }
 
-Class BetterClipboardConfig {
+Class BC_Config {
     Static confPath := 
         A_AppData "\GwenReynoldsApps\BetterClipboard\conf\BetterClipboard.conf"
     Static __New() {
