@@ -1,4 +1,5 @@
-FormatSingleLineComment(sep:=":", commChar:=";", isSubl:=False, padWidth:=1) {
+
+FormatSingleLineComment(sep:=":", commChar:=";", padWidth:=1) {
     SetKeyDelay 25, 10
     saveClip := A_Clipboard
     SendEvent "{End}{Shift Down}{Home}{Shift Up}{Ctrl Down}c{Ctrl up}"
@@ -43,4 +44,5 @@ FormatSingleLineComment(sep:=":", commChar:=";", isSubl:=False, padWidth:=1) {
     SendEvent "{Ctrl Down}v{Ctrl Up}"
     Sleep 25
     A_Clipboard := saveClip
+    SetKeyDelay 10, 1
 }

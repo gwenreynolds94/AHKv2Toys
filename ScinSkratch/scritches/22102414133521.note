@@ -1,0 +1,2 @@
+
+git clone --depth=1 -b server https://github.com/thqby/vscode-autohotkey2-lsp

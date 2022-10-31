@@ -123,4 +123,4 @@ SetTimer (*)=>DllCall("AnimateWindow", "Ptr", tgui.Hwnd, "Int", 500
 
 
 F8::ExitApp
-#Include <Gdip_v2Ex>
+#Include <GdipLib\Gdip_v2Ex>

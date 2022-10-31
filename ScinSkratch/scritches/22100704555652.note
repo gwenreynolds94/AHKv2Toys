@@ -1,0 +1,30 @@
+https://macromates.com/manual/en/regular_expressions
+
+
+
+  block:
+    - match: \{
+      scope: punctuation.section.block.begin.ahk2
+      push:
+        - meta_scope: meta.block.ahk2
+        - match: \}
+          scope: punctuation.section.block.end.ahk2
+          pop: 1
+        - include: script
+    - include: stray-brace
+
+
+find_under_expand
+	{
+		"button": "button1", "count": 1, "modifiers": ["button2"],
+		"command": "expand_selection", "args": {"to": "line"},
+		"press_command": "drag_select"
+	},
+	{
+		"button": "button1", "count": 2, "modifiers": ["button2"],
+		"command": "expand_selection_to_paragraph"
+	},
+	{
+		"button": "button1", "count": 3, "modifiers": ["button2"],
+		"command": "copy"
+	},

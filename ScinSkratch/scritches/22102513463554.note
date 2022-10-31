@@ -1,0 +1,9 @@
+\b[[:alpha:]_][[:alnum:]_]*\b
+
+(#)(?=({{identifier}}\s+(.*?)\s*(;.*)?$))
+
+color_helper {"event": {"x": 157.5, "y": 170.5}, "mode": "info"}
+
+lsp_resolve_docs {"event": {"modifier_keys": {}, "x": 339.5, "y": 164.5}, "index": 0, "session_name": "lsp-ahk2"}
+
+#da991b

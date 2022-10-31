@@ -3,15 +3,11 @@
  * @param {String} _targetPath path to new .ico file
  * @return {String} Returns result of FileExist on newly created .ico file
  */
-
-/*
- Gdip_SaveHICONToFile(_hIcon, _targetPath) {
+Gdip_SaveHICONToFile(_hIcon, _targetPath) {
 	static IMAGE_BITMAP := 0
 		 , copyFlags := (LR_COPYDELETEORG := 0x0008) | (LR_CREATEDIBSECTION := 0x2000)
          , szICONHEADER := 6
          , szICONDIRENTRY := 16
-*/
-
          /**
           * ICONINFO
           * --------
@@ -24,9 +20,7 @@
           *     --------------------------------------
           *     BOOL x1, DWORD x2, pad04 x1 HBITMAP x2
         */
-/*
         , szICONINFO := 8 + A_PtrSize*3
-*/
          /**
           * BITMAP
           * ------
@@ -41,9 +35,7 @@
           *     -------------------------------------
           *     LONG x4, WORD x2, pad04 x1, LPVOID x1
          */
-/*
          , szBITMAP := (4*4) + A_PtrSize*2
-*/
          /**
           * BITMAPINFOHEADER
           * ----------------
@@ -61,9 +53,7 @@
           *     ----------------------------------
           *     DWORD x5, LONG x4, WORD x2
          */
-/*
 		 , szBITMAPINFOHEADER := (5*4) + (4*4) + (2*2)
-*/
          /**
           * DIBSECTION
           * ----------
@@ -77,7 +67,6 @@
           *     -------------------------------------------------------------
           *     BITMAP x1, BITMAPINFOHEADER x1, DWORD x4, HANDLE x1, pad04 x2
          */ 
-/*
          , szDIBSECTION := szBITMAP + szBITMAPINFOHEADER + 8 + A_PtrSize*3
 
     ICONINFO := Buffer(szICONINFO, 0) ; 4 Bytes of padding offset at 12
@@ -93,7 +82,7 @@
         Return
     }
     h_hbmColor := NumGet(ICONINFO, 8 + A_PtrSize*2, "Ptr")
-    hbmColor := DllCall("CopyImage", "Ptr", h_hbmColor      ; h
+    hbmColor := DllCall("CopyImage", "Ptr", h_hbmColor       ; h
                                     , "UInt", IMAGE_BITMAP   ; type
                                     , "Int", 0, "Int", 0     ; cx, cy
                                     , "UInt", copyFlags      ; flags
@@ -152,4 +141,3 @@
 
     Return FileExist(_targetPath)
 }
-*/

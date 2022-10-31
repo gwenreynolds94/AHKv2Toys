@@ -480,7 +480,7 @@ Class iWidgetGui {
             this.currentArt.Value := A_ScriptDir 
                                      . "\resources\images\currentTrack.jpg"
         } Catch Error as err {
-            stdo "No track playing; Will use placeholder info/image"
+            stdo "No track playing " ; Will use placeholder info/image
             this.currentArt.Value := A_ScriptDir 
                                      . "\resources\images\placeholder.png"
             this.currentTrackName.Value   := 

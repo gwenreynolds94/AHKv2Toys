@@ -1,0 +1,314 @@
+
+  variable:
+    - match: \b(?i:this|super)\b(?=\.)
+      scope: support.type.ahk2
+    - match: (?<!\.)\b(?i:thishotkey|value)\b
+      scope: variable.parameter.ahk2
+    - match: (\b\w+\b)(?=\.)
+      scope: storage.type.class.ahk2
+    - include: maybe-object-child
+    - match: \b\w+\b
+      scope: variable.ahk2
+
+  maybe-object-child:
+    - match: (?=\.\b\w+\b)
+      push:
+        - include: method-and-pop
+        - include: property-and-pop
+
+  property-and-pop:
+    - match: (\.)(?=\b\w+\b)
+      scope: punctuation.accessor.dot.ahk2
+      push:
+      - match: (\b\w+\b)(?!\.)
+        scope: variable.member.ahk
+        pop: 1
+      - match: (\b\w+\b)
+        scope: meta.path.ahk2
+    - include: immediately-pop
+
+  method-and-pop:
+    - match: (\b\w+\b)(?=\()
+      scope: entity.name.function.ahk2
+      push: parameters-and-pop
+
+  parameters-and-pop:
+    - match: ((\()(.*)?(\)))*
+      captures:
+        2: punctuation.section.group.begin.ahk2
+        3: variable.parameter.ahk2
+        4: punctuation.section.group.end.ahk2
+      pop: 1
+
+  else-pop:
+    - match: (?=\S)
+      pop: 1
+
+  immediately-pop:
+    - match: ''
+      pop: 1
+
+  hotkeyline:
+    - match: ^\s*(?i:((([<>$~*!+#^]*?)(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f]))|(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f])\s+&\s+~?(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f]))(\s+up)?)(::)\s*(['"]|`{)?
+      scope: meta.hotkeyline.ahk2 keyword.declaration.function.hotkey.ahk2
+
+  hotstrings:
+    - match: ^\s*(:(?i:\s|\*|\?0?|c[01]?|[pk]\d+|s[ipe]|[brto]0?|z)*:[\x09\x20-\x7E]+?)(::)(.*)$
+      scope: meta.block.hotstring.ahk2 keyword.declaration.hotstring.ahk2
+    - match: ^\s*(:(?i:\s|\*|\?0?|c[01]?|[pk]\d+|s[ipe]|[brto]0?|x|z)*:[\x09\x20-\x7E]+?)(::)
+      scope: meta.block.hotstring.ahk2
+
+  functions:
+    - match: \b\w+\b(?=\()
+      scope: entity.name.function.ahk2
+     # push:
+        # - match: \(
+        #   scope: punctuation.section.group.begin.ahk2
+        #   push: group
+        # - match: ''
+        #   pop: 1
+
+ #  group:
+ #    - match: ''
+
+  keywords:
+    - match: '(?<!\.)\b(?i:({{flow_keywords}}))\b'
+      scope: keyword.control.ahk2
+    - match: '(?<!\.)\b(?i:({{scope_modifier}}))\b'
+      scope: keyword.ahk2
+    - match: '(?<!\.)\b(?i:({{context_keywords}}))\b'
+      scope: keyword.context
+    - match: '\b{{known_variables}}\b'
+      scope: variable.language.ahk2
+    - match: (?<!\.)(\b{{known_functions}}\b)
+      scope: support.function.ahk2
+
+
+
+  operators:
+    - match: \+|-|\*|\^|/|&|#|!|~|\|
+      scope: keyword.operator.arithmetic.ahk2
+    - match: ':=|\.=|::|(?<![<>])=(>)?'
+      scope: keyword.operator.assignment.ahk2
+    - match: '<(=)?|>(=)?|<>|!=|(?<=[<>])='
+      scope: keyword.operator.comparison.ahk2
+
+
+ ############################### [ DIRECTIVES ] ################################
+
+  directives:
+    - match: '^\s*(#)(?!\S*::)'
+      captures:
+        1: punctuation.definition.directive.ahk2
+      push:
+        - meta_scope: meta.directive.line.ahk2
+        - match: '\b(?i:include|includeagain)\b'
+          scope: keyword.directive.include.ahk2
+          push:
+            - meta_content_scope: string.include.ahk2
+            - match: '\s+((\<)\S+(\>))|([^;]*)'
+              captures:
+                1: string.library-name.ahk2
+                2: punctuation.section.library-name.begin.ahk2
+                3: punctuation.section.library-name.end.ahk2
+                4: string.ahk2
+              pop: true
+        - match: '\b(?i:{{dirstringarg}})\b'
+          scope: keyword.directive.ahk2
+          push:
+            - meta_content_scope: string.ahk2
+            - match: '\s+([^;]*)'
+            - match: '(;.*)'
+              captures:
+                1: comment.line.ahk2
+              pop: true
+            - match: ''
+              pop: true
+        - match: '\b(?i:{{direxprarg}})\b'
+          scope: keyword.directive.ahk2
+          pop: true
+        - match: ''
+          pop: true
+      pop: true
+
+
+################################# [ CLASSES ] ##################################
+
+
+  classes:
+    - match: '^\s*((?i:class))\b'
+      captures:
+        1: keyword.declaration.class.ahk2
+      push:
+        - meta_scope: meta.class.ahk2
+        - match: "{"
+          scope: punctuation.section.class.begin.ahk2
+          pop: true
+        - match: '(?={{identifier}})'
+          push:
+            - meta_content_scope: storage.type.class.ahk2
+            - include: entity-name-class
+            - match: ''
+              pop: true
+
+  entity-name-class:
+    - include: generic-names
+    - include: illegal-names
+
+  generic-names:
+    - match: '{{identifier}}'
+      scope: meta.generic-name.ahk2
+
+  generic-name:
+    - match: '{{identifier}}'
+      scope: meta.generic-name.ahk2
+      pop: true
+
+  illegal-names:
+    - match: \b{{illegal_names}}\b
+      scope: meta.illegal.name.ahk2
+
+  illegal-name:
+    - match: \b{{illegal_names}}\b
+      scope: meta.illegal.name.ahk2
+      pop: true
+
+
+################################# [ LITERALS ] #################################
+
+
+  literals:
+    - include: literal-strings
+    - include: literal-numbers
+    - include: literal-constants
+
+  literal-constants:
+    - match: \b(?i:true|false)\b
+      scope: constant.language.boolean.ahk2
+
+  literal-numbers:
+    # hexadecimal
+    - match: \b(0[xX])(\h+)
+      scope: meta.number.imaginary.hexadecimal.ahk2
+      captures:
+        1: constant.numeric.base.ahk2
+        2: constant.numeric.value.ahk2
+    # floating point
+    - match: \b([1-9]\d*|0)\b
+      scope: meta.number.float.decimal.ahk2 constant.numeric.value.ahk2
+    # integer
+    - match: \b([1-9]\d*|0)\.([1-9]\d*|0)\b
+      scope: meta.number.integer.decimal.ahk2 constant.numeric.value.ahk2
+
+  literal-strings:
+    - match: "'"
+      scope: punctuation.definition.string.begin.ahk2
+      push: literal-single-quoted-string-body
+    - match: '"'
+      scope: punctuation.definition.string.begin.ahk2
+      push: literal-double-quoted-string-body
+
+
+  literal-double-quoted-string-body:
+    - meta_scope: string.quoted.double.ahk2
+    - match: '`{{escape_characters}}'
+      scope: constant.character.escape.ahk2
+    - match: ';'
+      scope: punctuation.definition.comment.ahk2
+      push: line-comment-body
+    - match: '^\s*\('
+      push: literal-double-quoted-continuation-body
+      pop: 1
+    - match: '"'
+      scope: punctuation.definition.string.end.ahk2
+      pop: 1
+
+  literal-single-quoted-string-body:
+    - meta_scope: string.quoted.single.ahk2
+    - match: '`{{escape_characters}}'
+      scope: constant.character.escape.ahk2
+    - match: ';'
+      scope: punctuation.definition.comment.ahk2
+      push: line-comment-body
+    - match: '^\s*\('
+      push: literal-single-quoted-continuation-body
+      pop: 1
+    - match: "'"
+      scope: punctuation.definition.string.end.ahk2
+      pop: 1
+
+  literal-double-quoted-continuation-body:
+    - meta_scope: string.quoted.double.continuation.ahk2
+    - match: '`{{escape_characters}}'
+      scope: constant.character.escape.ahk2
+    - match: '^\s*\)"'
+      pop: 1
+
+  literal-single-quoted-continuation-body:
+    - meta_scope: string.quoted.single.continuation.ahk2
+    - match: '`{{escape_characters}}'
+      scope: constant.character.escape.ahk2
+    - match: '^\s*\)'''
+      pop: 1
+
+
+
+###[ COMMENTS ]##########################
+
+  comments:
+    - include: line-comments
+    - include: block-comments
+
+  line-comments:
+    - match: ;+
+      scope: punctuation.definition.comment.ahk2
+      push: line-comment-body
+
+  line-comment-body:
+    - meta_include_prototype: false
+    - meta_scope: comment.line.ahk2
+    - include: jsdoc_typehint
+    - match: $
+      pop: 1
+
+  block-comments:
+    - match: '/\*\*+'
+      scope: punctuation.definition.comment.begin.ahk2
+      push: block-comment-jsdoc-body
+    - match: '/\*'
+      scope: punctuation.definition.comment.begin.ahk2
+      push: block-comment-body
+
+  block-comment-body:
+    - meta_include_prototype: false
+    - meta_scope: comment.block.ahk2
+    - match: '\*+/'
+      scope: punctuation.definition.comment.end.ahk2
+      pop: 1
+    - match: ^\s*(\*)(?![*/])
+      scope: punctuation.definition.comment.ahk2
+
+  block-comment-jsdoc-body:
+    - meta_include_prototype: false
+    - meta_scope: comment.block.documentation.ahk2
+    - include: jsdoc_typehint
+    - match: '\*+/'
+      scope: punctuation.definition.comment.end.ahk2
+      pop: 1
+    - match: ^\s*(\*)(?![*/])
+      scope: punctuation.definition.comment.ahk2
+
+  jsdoc_typehint:
+    - match: '\s*(@type|@return)\s+(\{)(.*?)(\})'
+      captures:
+        1: entity.name.tag.ahk2
+        2: meta.braces.ahk2 punctuation.section.braces.begin
+        3: entity.other.attribute-name.ahk2
+        4: meta.braces.ahk2 punctuation.section.braces.end
+    - match: '\s*(@var|@param|@prop)\s+(\{)(.*?)(\})\s+(\w+)'
+      captures:
+        1: entity.name.tag.ahk2
+        2: meta.braces.ahk2 punctuation.section.braces.begin
+        3: entity.other.attribute-name.ahk2
+        4: meta.braces.ahk2 punctuation.section.braces.end
+        5: variable.parameter.ahk2

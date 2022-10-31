@@ -2,28 +2,44 @@
 #Warn All, StdOut
 #SingleInstance Force
 
+; Debugging helper functions
 #Include <DBT>
+; BetterClipboard helper functions
+#Include <BCB>
+; Gdip library for AHK v2
 #Include <Gdip_v2Ex>
-#Include BCManageConf.ahk
-#Include ..\Lib\SciConstants.ahk
+; Every Scintilla constant defined as global variables
+#Include <SciConstants>
 
-SplitPath A_ScriptDir, &_, &parentDir
-scint := DllCall("LoadLibrary", "Str", parentDir "\Lib\Scintilla.dll", "Ptr")
-stdo scint
+
+
+; @var {Pointer} scint Scintilla Library
+scint := DllCall("LoadLibrary", "Str", A_ScriptDir "\Lib\Scintilla.dll", "Ptr")
 
 OnExit FreeScintilla
+; Free Scintilla library on script exit
 FreeScintilla(*) {
     DllCall("FreeLibrary", "Ptr", scint)
 }
 
+; Create instance of gui application if script is run directly and not included
 if A_ScriptName="BetterClipboard.ahk" {
-    RunBC()
+    StartBetterClipboard()
 }
-RunBC() {
+StartBetterClipboard() {
     app:=BC_App()
 }
 
 
+/** Retrieve direct references to a Scintilla function and pointer and store
+ *      them in static variables so as to avoid the overhead associated with
+ *      using SendMessage
+ * todo. asdlkja kdas
+ * @param {Int} msg
+ * @param {UInt} wparam
+ * @param {UInt} lparam
+ * @param {hWnd} hwnd
+ */
 Scendilla(msg, wparam:=0, lparam:=0, hwnd:="") {
     static init := False
          , DirectFunction := ""
@@ -42,6 +58,8 @@ Scendilla(msg, wparam:=0, lparam:=0, hwnd:="") {
                 , "UInt", lparam)
 }
 
+
+/** Wrapper class for a Scintilla edit control */
 Class ScEdit {
     static WRAPMODES := Map("none", SC_WRAP_NONE
                           , "char", SC_WRAP_CHAR
@@ -53,11 +71,9 @@ Class ScEdit {
     __New(guiParent, options:="") {
         this.gui := guiParent
         this.ctrl := this.gui.Add("Custom", "ClassScintilla " options)
-        Scendilla 0, 0, 0, this.ctrl.Hwnd
+        Scendilla(0, 0, 0, this.ctrl.Hwnd)
         this.Style := ScEdit.Style()
-
     }
-
     WordWrap {
         Get {
             mode := Scendilla(SCI_GETWRAPMODE)
@@ -67,40 +83,36 @@ Class ScEdit {
         }
         Set {
             if ScEdit.WRAPMODES.Has(StrLower(Value))
-                Scendilla SCI_SETWRAPMODE, ScEdit.WRAPMODES[StrLower(Value)]
+                Scendilla(SCI_SETWRAPMODE, ScEdit.WRAPMODES[StrLower(Value)])
         }
     }
-
     /** @prop {Boolean} MultipleSelection */
     MultipleSelection {
         Get => Scendilla(SCI_GETMULTIPLESELECTION)
         Set => Scendilla(SCI_SETMULTIPLESELECTION, Value)
     }
-
     /** @prop {String} Text */
     Text {
         Get {
             nLen := Scendilla(SCI_GETLENGTH)
             buf := Buffer(nLen+1)
-            Scendilla SCI_GETTEXT, nLen, buf.Ptr
+            Scendilla(SCI_GETTEXT, nLen, buf.Ptr)
             Return StrGet(buf,,"UTF-8")
         }
     }
-
+    ; Getter/Setters for visual styles
     Class Style {
         __New() {
             this.Selection := ScEdit.Style.Selection()
             this.Caret := ScEdit.Style.Caret()
         }
-
         Background {
             Get => Scendilla(SCI_STYLEGETBACK)
             Set {
-                Scendilla SCI_STYLESETBACK, STYLE_DEFAULT, Value
-                Scendilla SCI_STYLECLEARALL
+                Scendilla(SCI_STYLESETBACK, STYLE_DEFAULT, Value)
+                Scendilla(SCI_STYLECLEARALL)
             }
         }
-
         Class Caret {
             __New() {
                 this.Line := ScEdit.Style.Caret.Line()
@@ -112,7 +124,6 @@ Class ScEdit {
                 }
             }
         }
-        
         Class Selection {
             Background {
                 Get => Scendilla(SCI_GETELEMENTCOLOUR, SC_ELEMENT_SELECTION_BACK)
@@ -137,6 +148,7 @@ Class ScEdit {
 
 Class BC_App {
 
+    ; @prop {OBSOLETE} gdip
     gdip          := {}
     gui           := {}
     isGuiActive   := False
@@ -155,17 +167,18 @@ Class BC_App {
     __New() {
         this.gui := Gui("-Caption +AlwaysOnTop")
         this.gui.BackColor := 0x7FB089
-        this.bgPic := this.gui.Add("Picture", "0xE x0 y0 " this.sizeOpts)
-        ; this.edit  := this.gui.Add("Edit", this.editOpts)
+
         this.edit := ScEdit(this.gui, "w300 h300 " this.editOpts)
-        this.edit.Style.Background := this.editBG
-        this.edit.WordWrap := "word"
+        this.edit.Style.Background  := this.editBG
         this.edit.MultipleSelection := True
+        this.edit.WordWrap := "word"
         
         this.gui.Show("x" A_ScreenWidth " " this.sizeOpts)
-        WinSetTransparent this.opacity, this.gui
+        WinSetTransparent(this.opacity, this.gui)
         this.indexGui := BC_App.IndexOverlay(this.gui, 110+this.border, 36+this.border)
         this.Hide()
+
+        OnClipboardChange(ObjBindMethod(this, "ClipChange"))
 
         Hotkey "F8", (*)=> ExitApp()
         Hotkey "F9", ObjBindMethod(this, "GetEditValue")
@@ -175,10 +188,6 @@ Class BC_App {
         HotIf
     }
 
-    GetEditValue(*) {
-        stdo "something"
-    }
-
     Show(stepDuration:=10) {
         this.gui.Show("Center")
         this.indexGui.tmpIndex := this.indexGui.curIndex
@@ -186,7 +195,7 @@ Class BC_App {
         stepSize := this.opacity/this.fadeSteps
         currStep := 0
         this.interruptFade := False
-        SetTimer Step, stepDuration
+        SetTimer(Step, stepDuration)
         Step(*) {
             currStep += 1
             currOp := currStep*stepSize
@@ -202,9 +211,9 @@ Class BC_App {
     Hide() {
         this.interruptFade := True
         this.indexGui.Hide(0)
-        WinSetTransparent 0, this.gui
+        WinSetTransparent(0, this.gui)
         this.gui.Hide()
-        Hotkey "<#c", ObjBindMethod(this, "On_LWinC_Down", "Show")
+        Hotkey("<#c", ObjBindMethod(this, "On_LWinC_Down", "Show"))
     }
 
     On_LWinC_Down(_funcName, *) {
@@ -223,15 +232,31 @@ Class BC_App {
         } Hotkey("*c", "Off"), Hotkey("LWin", "Off")
     }
 
+    /**
+    * @param {Integer} type
+    *
+    *       0 = Empty
+    *       1 = Text
+    *       2 = Non-Text
+    */
+    ClipChange(type) {
 
+    }
+
+    /**
+    * ### Manages a second gui to display current index of clip
+    *     Uses Gdip+ to draw text onto a layered window
+    */
     Class IndexOverlay {
-
+        ; @type {BCB_Config}
         conf          := {}
+        ; @type {Gui}
+        parentGui     := {}
+        ; @type {Ptr}
+        gdipToken     := 0x0
         curIndex      := 0
         tmpIndex      := 0
         maxIndex      := 0
-        gdipToken     := 0x0
-        parentGui     := {}
         width         := 0
         height        := 0
         opacity       := "00"
@@ -247,11 +272,13 @@ Class BC_App {
         interruptHide := False
 
         __New(_pGui, _w, _h, _op:="DD") {
-            this.conf := BC_Config
-            this.tmpIndex := this.curIndex := BC_Config.CurIndex
-            this.maxIndex := BC_Config.MaxIndex
-            WS_EX_STATICEDGE:="E0x00020000" ; little baby window edge
-            WS_EX_NOACTIVATE:="E0x08000000" ; prevents window getting focus
+            this.conf := BCB_Config
+            this.tmpIndex := this.curIndex := BCB_Config.CurIndex
+            this.maxIndex := BCB_Config.MaxIndex
+            ; @type {String} Extended window style, little baby window edge
+            WS_EX_STATICEDGE:="E0x00020000"
+            ; @type {String} Extended window style, prevents window getting focus
+            WS_EX_NOACTIVATE:="E0x08000000"
             this.width := _w, this.height := _h
             this.parentGui := _pGui, this.recentOpacity:=this.opacity:=_op
             this.fontColor := this.parentGui.BackColor
@@ -259,15 +286,17 @@ Class BC_App {
                           . "-Caption +Owner" _pGui.Hwnd)
             this.gui.Show("x" 0 " y" (-5)-_h " w" _w " h" _h " NA")
 
+            ; ### Shutdown Gdi+
+            ; @param {Ptr} _token A pointer to Gdi+
             GdipShutdownFunc(_token, *) {
                 if (_token) {
                     Gdip_Shutdown(_token)
-                    stdo "Shutting down Gdi+..."
+                    FileAppend("Shutting down Gdi+...", "*")
                 }
             }
             if this.gdipToken:=Gdip_Startup() {
-                this.PaintGui(this.opacity)
                 OnExit GdipShutdownFunc.Bind(this.gdipToken)
+                this.PaintGui(this.opacity)
             }
 
             this.PaintGui("00")
@@ -328,9 +357,9 @@ Class BC_App {
         }
 
         NavigateClips(ThisHotkey, *) {
-            if (ThisHotkey="PgDn") and ((this.tmpIndex--) < 1)
+            if (ThisHotkey="PgDn") and ((--this.tmpIndex) < 1)
                 this.tmpIndex := this.maxIndex
-            else if (ThisHotkey="PgUp") and ((this.tmpIndex++) > this.maxIndex)
+            else if (ThisHotkey="PgUp") and ((++this.tmpIndex) > this.maxIndex)
                 this.tmpIndex := 1
             this.interruptHide := True
             this.Show(10)
@@ -373,3 +402,4 @@ Class BC_App {
         }
     }
 }
+

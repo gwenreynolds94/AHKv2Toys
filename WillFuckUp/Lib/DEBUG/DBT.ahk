@@ -1,19 +1,4 @@
 
-; stdo(_msg*) {
-;     _msg_out := ""
-;     for _m in _msg {
-;         if Type(_m) = "Map" {
-;             for _km, _vm in _m
-;                 _msg_out .= "<" _km ">`n"
-;         } else if IsObject(_m) {
-;             for _om in _m.OwnProps()
-;                 _msg_out .= "<" _om ">`n"
-;         } else {
-;             _msg_out .= _m "`n"
-;         }
-;     }
-;     FileAppend _msg_out, "*"
-; }
 
 stdo(msg*) {
     msg_out := ""
@@ -62,7 +47,7 @@ stdo(msg*) {
     for itm in msg {
         msg_out .= TryStringOut(itm)
     }
-    FileAppend(msg_out, "*")
+    FileAppend msg_out, "*"
 }
 
 stdoplain(_msg*) {

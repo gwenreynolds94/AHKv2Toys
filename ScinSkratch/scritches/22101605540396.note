@@ -1,0 +1,10 @@
+List all COM objects in system
+
+Get-ChildItem HKLM:\Software\Classes -ErrorAction SilentlyContinue | Where-Object {
+	$_.PSChildName -match '^\w+\.\w+$' -and (Test-Path -Path "$($_.PSPath)\CLSID")
+} | Select-Object -ExpandProperty PSChildName
+
+https://learn.microsoft.com/en-us/previous-versions/windows/desktop/jj152146(v=vs.85)
+
+https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ms757878(v=vs.85)
+https://stackoverflow.com/questions/14175690/parse-xml-for-a-value-in-autohotkey

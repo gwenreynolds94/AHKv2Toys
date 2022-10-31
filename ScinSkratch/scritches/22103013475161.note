@@ -1,0 +1,35 @@
+thqby.vscode-autohotkey2-lsp-1.6.8
+"C:\Users\jonat\Portables\VSCodium1.17.2\data\extensions\thqby.vscode-autohotkey2-lsp-1.6.8\syntaxes\ahk2.tmLanguage.json"
+
+Contributed webview context menus
+The new webview context menu API makes it easy for advanced webviews to customize the context menu that shows when a user right-clicks inside a webview. This new contribution point uses VS Code's normal context menus, so custom menus fit right in with the rest of the editor. Webviews can also show custom context menus for different sections of the webview.
+
+To add a new context menu item to your webview, first add a new entry in menus under the new webview/context section. Each contribution takes a command (which is also where the item's title comes from) and a when clause. The when clause should include webviewId == 'YOUR_WEBVIEW_VIEW_TYPE' to make sure the context menus only apply to your extension's webviews:
+
+"contributes": {
+  "menus": {
+    "webview/context": [
+      {
+        "command": "catCoding.yarn",
+        "when": "webviewId == 'catCoding'"
+      },
+      {
+        "command": "catCoding.insertLion",
+        "when": "webviewId == 'catCoding' && webviewSection == 'editor'"
+      }
+    ]
+  },
+  "commands": [
+    {
+      "command": "catCoding.yarn",
+      "title": "Yarn ??",
+      "category": "Cat Coding"
+    },
+    {
+      "command": "catCoding.insertLion",
+      "title": "Insert ??",
+      "category": "Cat Coding"
+    },
+    ...
+  ]
+}

@@ -62,7 +62,7 @@ stdo(msg*) {
     for itm in msg {
         msg_out .= TryStringOut(itm)
     }
-    FileAppend(msg_out, "*")
+    FileAppend msg_out, "*"
 }
 
 stdoplain(_msg*) {

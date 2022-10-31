@@ -1423,7 +1423,7 @@ UpdateLayeredWindow(hwnd, hdc, x:="", y:="", w:="", h:="", Alpha:=255) {
     if (sx="" && sy="" && sw="" && sh="")
     {
        sx := sy := 0
-       Gdip_GetImageDimensions(pBitmap, &sw, &sh)
+       Gdip_GetImageDimensions(pBitmap, sw, sh)
     }
  
     iCount := CreatePointsF(&PointsF, Points)
@@ -3868,7 +3868,7 @@ UpdateLayeredWindow(hwnd, hdc, x:="", y:="", w:="", h:="", Alpha:=255) {
     {
        ReturnRC := StrSplit(ReturnRC, "|")
        if (vPos[0] = "vCentre") || (vPos[0] = "vCenter")
-          ypos += (Height-ReturnRC[4])//2
+          ypos += Integer(Height-ReturnRC[4])//2
        else if (vPos[0] = "Top") || (vPos[0] = "Up")
           ypos += 0
        else if (vPos[0] = "Bottom") || (vPos[0] = "Down")
@@ -7149,7 +7149,7 @@ UpdateLayeredWindow(hwnd, hdc, x:="", y:="", w:="", h:="", Alpha:=255) {
     LevelsArray := []
     maxLevelIndex := maxLevelPixels := nrPixels := 9
     Gdip_GetImageDimensions(pBitmap, &Width, &Height)
-    Gdip_GetHistogram(pBitmap, HistogramFormat, &LevelsArray,&_arA0,&_arB1)
+    Gdip_GetHistogram(pBitmap, HistogramFormat, &LevelsArray, 0, 0)
     Loop 256
     {
         nrPixels := Round(LevelsArray[A_Index - 1])

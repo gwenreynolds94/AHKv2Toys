@@ -1,0 +1,165 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/syntax.html
+file_extensions:
+  - ahk
+  - ah2
+  - ahk2
+variables:
+  identifier: '\b[[:alpha:]_][[:alnum:]_]*\b'
+  dirstringarg: (?:Warn|Hotstring|Singleinstance|DllLoad|Requires|ErrorStdOut)
+  dirotherarg: (?:ClipboardTimeout|Hotif|HotIfTimeout|InputLevel|MaxThreads|MaxThreadsBuffer|MaxThreadsPerHotkey|NoTrayIcon|SuspendExempt|UseHook|WinActivateForce)
+  illegal_names: '(?:and|as|break|class|continue|goto|switch|throw|until|else|finally|for|global|local|static|if|in|is|not|or|return|try|while|catch)'
+scope: source.ahk2
+contexts:
+  main:
+    - meta_include_prototype: false
+    - match: ''
+      push: statements
+
+  statements:
+    - include: classes
+
+    - match: ^\s*(:(?i:\s|\*|\?0?|c[01]?|[pk]\d+|s[ipe]|[brto]0?|z)*:[\x09\x20-\x7E]+?)(::)(.*)$
+      scope: meta.block.hotstring.ahk2
+
+    - match: ^\s*(:(?i:\s|\*|\?0?|c[01]?|[pk]\d+|s[ipe]|[brto]0?|x|z)*:[\x09\x20-\x7E]+?)(::)
+      scope: meta.block.hotstring.ahk2
+
+    - match: ^\s*(?i:((([<>$~*!+#^]*?)(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f]))|(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f])\s+&\s+~?(`;|[\x21-\x3A\x3C-\x7E]|[a-z]\w+|[^\x00-\x7f]))(\s+up)?)(::)\s*(['"]|`{)?
+      scope: meta.hotkeyline.ahk2
+
+      # All non-Include directives
+    - match: (#)(?:(?:((?i:{{dirstringarg}}))\s+(.*?))|(?:((?i:{{dirotherarg}}))\s+(.*?)))\s*(;.*)?$
+      scope: meta.preprocessor.ahk2
+      captures:
+        1: punctuation.definition.directive.ahk2
+        2: keyword.control.directive.ahk2
+        3: string.ahk2
+        4: keyword.control.directive.ahk2
+        5: variable.other.ahk2
+        6: comment.line.ahk2
+
+    # Include directives
+    - match: (#)((?i:includeagain|include))\s+(.*?)\s*(;.*)?$
+      scope: meta.preprocessor.include.ahk2
+      captures:
+        1: punctuation.definition.directive.ahk2
+        2: keyword.control.directive.ahk2
+        3: string.literal.include.ahk2
+        4: comment.line.ahk2
+
+    # Strings begin and end with quotes, and use backslashes as an escape
+    # character
+    - match: '("|'')'
+      scope: punctuation.definition.string.begin.ahk2
+      push: double_quoted_string
+
+    # Comments
+    - match: '^\s*;|(?<=\s);'
+      scope: punctuation.definition.comment.ahk2
+      push: line_comment
+
+    - match: '^\s*/\*'
+      scope: punctuation.definition.comment.ahk2
+      push: block_comment
+
+    # Classes
+    - match: '^\s*((?i:class))\b'
+      captures:
+        1: keyword.declaration.class.ahk2
+      push:
+        - meta_scope: meta.class.ahk2
+        - match: "{"
+          scope: punctuation.section.class.begin.ahk2
+          pop: true
+        - match: '(?={{identifier}})'
+          push:
+            - meta_content_scope: entity.name.class.ahk2
+            - include: entity-name-class
+            - match: ''
+              pop: true
+
+    # Keywords are if, else for and while.
+    # Note that blackslashes don't need to be escaped within single quoted
+    # strings in YAML. When using single quoted strings, only single quotes
+    # need to be escaped: this is done by using two single quotes next to each
+    # other.
+    - match: '(?<!\.)\b(?i:(static|local|global|class))\b'
+      scope: keyword.ahk2
+
+    - match: '(?<!\.)\b(?i:(break|continue|until|else|for|goto|switch|if|throw|try|finally|return|while))\b'
+      scope: keyword.control.ahk2
+
+    - match: '^\s*\b(?i:(case|default))\b'
+      scope: keyword.control.ahk2
+
+    # Numbers
+    - match: '\b-?[0-9.]+\b|0[xX][\da-fA-F]+'
+      scope: constant.numeric.ahk2
+
+    - match: \b\w+\b(?=\()
+      scope: variable.function.ahk2
+
+    - match: \b\w+\b
+      scope: variable.ahk2
+
+    # Operators
+    - match: \+|-|\*|\^|/|&|#|!|~|\|
+      scope: keyword.operator.arithmetic.ahk2
+    - match: ':=|\.=|::|(?<![<>])='
+      scope: keyword.operator.assignment.ahk2
+    - match: '<|>|<>|!=|(?<=[<>])='
+      scope: keyword.operator.comparison.ahk2
+
+  entity-name-class:
+    - include: generic-names
+    - include: illegal-names
+
+  generic-names:
+    - match: '{{identifier}}'
+      scope: meta.generic-name.ahk2
+
+  generic-name:
+    - match: '{{identifier}}'
+      scope: meta.generic-name.ahk2
+      pop: true
+
+  illegal-names:
+    - match: \b{{illegal_names}}\b
+      scope: meta.illegal.name.ahk2
+
+  illegal-name:
+    - match: \b{{illegal_names}}\b
+      scope: meta.illegal.name.ahk2
+      pop: true
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double.ahk2
+    - match: '`.'
+      scope: constant.character.escape.ahk2
+    - match: '\s;'
+      scope: punctuation.definition.comment.ahk2
+      push: line_comment
+    - match: '^\s*\('
+      push: string_continuation
+    - match: '\1'
+      scope: punctuation.definition.string.end.ahk2
+      pop: true
+
+  line_comment:
+    - meta_scope: comment.line.ahk2
+    - match: $
+      pop: true
+
+  block_comment:
+    - meta_scope: comment.block.ahk2
+    - match: '\*/'
+      pop: true
+
+  string_continuation:
+    - meta_scope: string.quoted.double.ahk2
+    - match: '`.'
+      scope: constant.character.escape.ahk2
+    - match: '^\s*\)'
+      pop: true
