@@ -4,6 +4,8 @@
 
 ; #Include <DEBUG\DBT>
 
+#Include <GdipLib\Gdip_Custom>
+
 /** Hotkeys List
  *  ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
  *  ... ... XButton1->LButton2  =>  Ctrl+v
@@ -183,51 +185,78 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-LWin & WheelUp::SoundSetVolume("+2")
-LWin & WheelDown::SoundSetVolume("-2")
+LWin & WheelUp::AlterSound__ShowInfo("+2")
+LWin & WheelDown::AlterSound__ShowInfo("-2")
 <#MButton::SoundSetMute("+1")
-#HotIf GetKeyState("LWin")
+;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+
 
 /**
- * @param {Integer} _volume
- * @param {Boolean} _toggle *
- * ### `0` ... mute if not already muted
- * ### `100` ... unmute if not already unmuted
- * ### `1-100` ... set volume level
+ * @param {Integer | String} _volume
+ *
+ * `0-100` Set volume level
+ * 
+ * `+n` Increment volume level
+ * 
+ * `-n` Decremement volume level
+ *
+ * `toggle` Toggle mute/unmute
+ *
+ * `mute` Mute if not muted
+ *
+ * `unmute` Unmute if not unmuted
  */
-AlterSound__ShowInfo(_volume:=0, _toggle:=False) {
+AlterSound__ShowInfo(_volume:="", _guiWidth:=35, _guiHeight:=100
+                                , _guiDuration:=2000, _guiOpacity:=200) {
     static   sound_gui :={}
-         , _gw:=35, _gh:=100
-         ,   _duration :=0x07D0
-         ,    _opacity :=0xFF
+         ,  sound_prog :={}
          ,     AW_HIDE :=0x00010000
          , AW_ACTIVATE :=0x00020000
          ,    AW_BLEND :=0x00080000
+        /* @type {String} ExStyle, prevents window getting focus */
+         , WS_EX_NOACTIVATE:="E0x08000000"
+
     if !(sound_gui is Gui)
         _Initialize_Sound_Gui()
 
+    if (_volume ~= "^[\+\-](0|1)?[0-9][0-9]?$") {
+        SoundSetVolume(_volume)
+        _currentVolume := Round(SoundGetVolume())
+        _currentMute := SoundGetMute()
+        sound_prog.Value := _currentVolume
+        ToolTip(_currentVolume ", " (_currentMute ? "On" : "Off"))
+        SetTimer((*)=>Tooltip(), -1000)
+    } else if (_volume ~= "^(1[0-9]{2}|[1-9][0-9]|[0-9])$") {
+        
+    }
+    
+    if ControlGetVisible(sound_prog) {
+        SetTimer _Hide_Sound_Gui, -2000
+    } else {
+        _Show_Sound_Gui()
+        SetTimer _Hide_Sound_Gui, -2000
+    }
+
     _Show_Sound_Gui(*) {
         DllCall( "AnimateWindow", "Ptr", sound_gui.Hwnd
-                                , "Int", 500
+                                , "Int", 250
                                 , "UInt", AW_ACTIVATE|AW_BLEND )
     }
-    _Hide_Sound_Gui(*){
+    _Hide_Sound_Gui(*) {
         DllCall( "AnimateWindow", "Ptr", sound_gui.Hwnd
-                                , "Int", 500
+                                , "Int", 250
                                 , "UInt", AW_HIDE|AW_BLEND )
     }
     _Initialize_Sound_Gui(*) {
-        ; @type {String} ExStyle, prevents window getting focus
-        WS_EX_NOACTIVATE:="E0x08000000"
         sound_gui := Gui("+AlwaysOnTop -Caption +" WS_EX_NOACTIVATE)
         sound_gui.MarginX := sound_gui.MarginY := 0
-        sound_gui.Add("Text", "x0 y0 w35 h100")
         sound_gui.SetFont("s14 cc35166", "Cousine")
-        sound_gui.Show("x" 10 " y" (A_ScreenHeight-10-_gh) " w" _gw " h" _gh)
+        sound_prog := sound_gui.Add("Progress", "x0 y0 w35 h100 Vertical Smooth", SoundGetVolume())
+        sound_gui.Show("x" 10 " y" (A_ScreenHeight-10-_guiHeight) " w" _guiWidth " h" _guiHeight " Hide NA")
     }
 }
-
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+Hotkey "F8", (*) => AlterSound__ShowInfo()
 
 
 Hotkey "F7", (*) => Reload()    ;:;:;:;:;:;:;:;:;: DEBUG ;:;:;:;:;:;:;:;:;:;:;:;

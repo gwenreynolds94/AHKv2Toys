@@ -102,9 +102,11 @@ CS_DROPSHADOW:=0x0080
 
 FADEOUT:=AW_HIDE|AW_SLIDE|AW_VER_NEGATIVE
 FADEIN:=AW_ACTIVATE|AW_BLEND
+CS_DROPSHADOW := 0x00020000
+DLGFRAME := "0x400000"
+WS_THICKFRAME := "0x40000"
 
-
-tgui := Gui("+Resize -Caption 0x0")
+tgui := Gui("+Resize -Caption -0x40000")
 tedit := tgui.Add("Edit", "x5 y5 w700 h200")
 tgui.Show("x10 y10 w" (A_ScreenWidth-40) " h400")
 stdo DllCall("GetParent", "Ptr", tedit.Hwnd)
@@ -112,7 +114,10 @@ stdo tedit.Hwnd, tgui.Hwnd
 ; tgui.BackColor := "BBDDFF"
 ; gtoken:=Gdip_Startup()
 ; bgBrush := Gdip_BrushCreateSolid(0xFFFF0000)
-stdo DllCall("SetClassLongPtrW", "Ptr", tedit.Hwnd, "Int", -26, "Ptr", CS_DROPSHADOW, "UPtr")
+classStyle := DllCall("SetClassLongPtrW", "Ptr", tedit.Hwnd, "Int", -26, "UPtr")
+stdo classStyleSansShadow := classStyle & ~CS_DROPSHADOW
+stdo DllCall("SetClassLongPtrW", "Ptr", tedit.Hwnd, "Int", -26, "Ptr", classStyleSansShadow, "UPtr")
+; stdo DllCall("SetClassLongPtrW", "Ptr", tedit.Hwnd, "Int", -26, "Ptr", CS_DROPSHADOW, "UPtr")
 ; stdo DllCall("SetClassLongPtrW", "Ptr", tgui.Hwnd, "Int", -10, "Int", bgBrush, "UPtr")
 stdo DllCall("RedrawWindow", "Ptr", tgui.Hwnd, "Ptr", 0, "Ptr", 0, "UInt", 0x00000400|0x00000001|0x00000100|0x00000080)
 ; Gdip_Shutdown(gtoken)
@@ -123,4 +128,4 @@ SetTimer (*)=>DllCall("AnimateWindow", "Ptr", tgui.Hwnd, "Int", 500
 
 
 F8::ExitApp
-#Include <GdipLib\Gdip_v2Ex>
+; #Include <GdipLib\Gdip_v2Ex>

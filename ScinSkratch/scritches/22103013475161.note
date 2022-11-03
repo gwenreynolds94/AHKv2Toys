@@ -33,3 +33,9 @@ To add a new context menu item to your webview, first add a new entry in menus u
     ...
   ]
 }
+
+
+gh repo clone gwenreynolds94/traumatizedsloth
+https://github.com/gwenreynolds94/traumatizedsloth.git
+
+docker run --name repo alpine/git clone 

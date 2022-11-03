@@ -1,0 +1,13 @@
+shell script # symbol
+/workspaces/VSCode_color_settings_reference/C:\Users\jonat
+
+docker login -u="gwen.reynolds.94@gmail.com" -p="1F7vCUAIT5fH0Jzb7E8eaQ" containers.intersystems.com
+
+1F7vCUAIT5fH0Jzb7E8eaQ
+
+docker login -u="gwen.reynolds.94@gmail.com" -p="2ilZFylBQmyF7oqq2rkHaF9LY1aPiRvMJDanZ3587Qob" containers.intersystems.com
+docker login --username="gwen.reynolds.94@gmail.com" --password-stdin="2ilZFylBQmyF7oqq2rkHaF9LY1aPiRvMJDanZ3587Qob" containers.intersystems.com
+docker login containers.intersystems.com -u="gwen.reynolds.94@gmail.com" -p="2ilZFylBQmyF7oqq2rkHaF9LY1aPiRvMJDanZ3587Qob" 
+
+
+echo "2ilZFylBQmyF7oqq2rkHaF9LY1aPiRvMJDanZ3587Qob" > docker login --username="gwen.reynolds.94@gmail.com" containers.intersystems.com
