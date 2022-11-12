@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+    ],
+    "settings": {
+        "workbench.tree.indent": 12,
+        "explorer.sortOrder": "foldersNestsFiles",
+        "files.autoSave": "afterDelay",
+        "peacock.color": "#3d3432",
+        "peacock.affectStatusBar": true,
+        "peacock.affectTabActiveBorder": false,
+        "peacock.affectTitleBar": true,
+        "peacock.affectSashHover": false,
+        "peacock.affectStatusAndTitleBorders": false,
+        "peacock.affectSideBarBorder": false,
+        "peacock.affectPanelBorder": false,
+        "peacock.affectEditorGroupBorder": false,
+        "peacock.affectDebuggingStatusBar": true,
+        "peacock.affectActivityBar": false,
+        "workbench.colorCustomizations": {
+            "statusBar.background": "#3d3432",
+            "statusBar.debuggingBackground": "#323b3d",
+            "statusBar.debuggingForeground": "#89b482",
+            "statusBar.foreground": "#89b482",
+            "statusBarItem.hoverBackground": "#594c49",
+            "statusBarItem.remoteBackground": "#3d3432",
+            "statusBarItem.remoteForeground": "#89b482",
+            "commandCenter.border": "#89b48299",
+            "titleBar.activeBackground": "#3d3432",
+            "titleBar.activeForeground": "#89b482",
+            "titleBar.inactiveBackground": "#3d343299",
+            "titleBar.inactiveForeground": "#89b48299"
+        }
+    }
+}

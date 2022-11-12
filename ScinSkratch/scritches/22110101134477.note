@@ -11,3 +11,6 @@ docker login containers.intersystems.com -u="gwen.reynolds.94@gmail.com" -p="2il
 
 
 echo "2ilZFylBQmyF7oqq2rkHaF9LY1aPiRvMJDanZ3587Qob" > docker login --username="gwen.reynolds.94@gmail.com" containers.intersystems.com
+
+PS C:\Users\jonat\psmods\psmtesta>
+
