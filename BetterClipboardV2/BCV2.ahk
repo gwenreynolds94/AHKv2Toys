@@ -11,13 +11,13 @@ if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
 #Include SciLib\SciConstants.ahk
 #Include SciLib\SciLoad.ahk
 
-; Path to Scintilla.dll
+; @prop {String} Path to Scintilla.dll
 SCI_DLL_PATH := "..\Lib\SciLib\Scintilla.dll"
 
-; Path to BetterClipboard configuration file
+; @prop {String} Path to BetterClipboard configuration file
 BCB_CONF_PATH := A_AppData "\BetterClipboard\BCB.ini"
 
-; Path to directory storing clipboard entries
+; @prop {String} Path to directory storing clipboard entries
 BCB_CLIPS_DIR := A_AppData "\BetterClipboard\clips"
 
 
@@ -76,38 +76,38 @@ Class BCBConf {
 
 ; A class to help manage the indicator gui for the currently shown index
 Class BCBIndexGui {
-    /* @prop {Boolean} active */
+    ; @prop {Boolean} active
     active := False
 
-    /* @prop {Gui} gui */
+    ; @prop {Gui} gui
     gui := {}
-    /* @prop {Gui.Text} text */
+    ; @prop {Gui.Text} text
     text := {}
-    /* @prop {Gui} parentgui */
+    ; @prop {Gui} parentgui
     parentgui := {}
 
-    /* @prop {Integer} width */
+    ; @prop {Integer} width
     width := 100
-    /* @prop {Integer} height */
+    ; @prop {Integer} height
     height := 48
 
-    /* @prop {Integer} fadeSteps Number of transparency steps in fade animation */
+    ; @prop {Integer} fadeSteps Number of transparency steps in fade animation
     fadeSteps := 10
-    /* @prop {Integer} fadeRest Ticks between transparency steps in fade animation */
+    ; @prop {Integer} fadeRest Ticks between transparency steps in fade animation
     fadeRest := 1
-    /* @prop {Integer} opacity 0-255 */
+    ; @prop {Integer} opacity 0-255
     opacity := 125
-    /* @prop {Integer} currentOp Current gui opacity [1-255] */
+    ; @prop {Integer} currentOp Current gui opacity [1-255]
     currentOp := 0
 
-    /* @prop {String} fontOpts */
+    ; @prop {String} fontOpts
     fontOpts := "s28"
-    /* @prop {String} fontName */
+    ; @prop {String} fontName
     fontName := "JetBrains Mono"
 
-    /* @prop {Integer} timeout */
+    ; @prop {Integer} timeout
     timeout := 1000
-    /* @prop {Func} hideGuiBF */
+    ; @prop {Func} hideGuiBF
     hideGuiBF := {}
 
     /**
