@@ -228,18 +228,18 @@ Class BCBIndexGui {
 
 ; A class to help manage a custom Scintilla edit control
 Class BCBEdit {
-    /** @prop {Map} _TECHMODES Dictionary of Scintilla technology modes */
+    ; @prop {Map} _TECHMODES Dictionary of Scintilla technology modes
     _TECHMODES := Map( "default"  , SC_TECHNOLOGY_DEFAULT             ; 0
                      , "dw"       , SC_TECHNOLOGY_DIRECTWRITE         ; 1
                      , "dw_retain", SC_TECHNOLOGY_DIRECTWRITERETAIN   ; 2
                      , "dw_dc"    , SC_TECHNOLOGY_DIRECTWRITEDC     ) ; 3
-    /** @prop {Map} _VIRTSPACEOPTS Dictionary of Scintilla virtual space bit flags */
+    ; @prop {Map} _VIRTSPACEOPTS Dictionary of Scintilla virtual space bit flags
     _VIRTSPACEOPTS := Map( "none"  , SCVS_NONE                   ; 0
                          , "rect"  , SCVS_RECTANGULARSELECTION   ; 1
                          , "user"  , SCVS_USERACCESSIBLE         ; 2
                          , "nowrap", SCVS_NOWRAPLINESTART      ) ; 4
 
-    /** @prop {Boolean} _MultiSelect */
+    ; @prop {Boolean} _MultiSelect
     _MultiSelect := False
 
     /**
@@ -249,18 +249,18 @@ Class BCBEdit {
      * @param {Integer} _lp lParam
      */
     Send := {}
-    /** @prop {Method} Redo Sends a SCI_REDO command to the control */
+    ; @prop {Method} Redo Sends a SCI_REDO command to the control
     Redo := {}
-    /** @prop {Method} Duplicate Sends a SCI_SELECTIONDUPLICATE command to the control */
+    ; @prop {Method} Duplicate Sends a SCI_SELECTIONDUPLICATE command to the control
     Duplicate := {}
 
-    /** @prop {BCBEdit.Wrap} Wrap */
+    ; @prop {BCBEdit.Wrap} Wrap
     Wrap := {}
-    /** @prop {BCBEdit.Selection} Selection */
+    ; @prop {BCBEdit.Selection} Selection
     Selection := {}
-    /** @prop {BCBEdit.WhiteSpace} WhiteSpace */
+    ; @prop {BCBEdit.WhiteSpace} WhiteSpace
     WhiteSpace := {}
-    /** @prop {BCBEdit.Caret} Caret */
+    ; @prop {BCBEdit.Caret} Caret
     Caret := {}
 
     /**
@@ -372,19 +372,19 @@ Class BCBEdit {
         Set => this.Send(SCI_SETENDATLASTLINE, !!Value)
     }
 
-    /** @prop {Boolean} MultipleSelection */
+    ; @prop {Boolean} MultipleSelection
     MultipleSelection {
         Get => this.Send(SCI_GETMULTIPLESELECTION)
         Set => this.Send(SCI_SETMULTIPLESELECTION, !!(Value))
     }
 
-    /** @prop {Boolean} AdditionalSelectionTyping */
+    ; @prop {Boolean} AdditionalSelectionTyping
     AdditionalSelectionTyping {
         Get => this.Send(SCI_GETADDITIONALSELECTIONTYPING)
         Set => this.Send(SCI_SETADDITIONALSELECTIONTYPING, !!(Value))
     }
 
-    /** @prop {Boolean} MultiPaste */
+    ; @prop {Boolean} MultiPaste
     MultiPaste {
         Get => this.Send(SCI_GETMULTIPASTE)
         Set => this.Send(SCI_SETMULTIPASTE, !!(Value))
@@ -447,10 +447,10 @@ Class BCBEdit {
     }
 
     Class Wrap {
-        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
 
-        /** @prop {Map} _WRAPMODES Dictionary of Scintilla wrap modes */
+        ; @prop {Map} _WRAPMODES Dictionary of Scintilla wrap modes
         _WRAPMODES := Map( "none"  , SC_WRAP_NONE         ; 0
                          , "word"  , SC_WRAP_WORD         ; 1
                          , "char"  , SC_WRAP_CHAR         ; 2
@@ -540,7 +540,8 @@ Class BCBEdit {
             }
         }
 
-        /** @prop {Integer} Indent
+        /**
+         * @prop {Integer} Indent
          *
          * Get and set the size of the indentation for sublines of wrapped text
          */
@@ -551,10 +552,10 @@ Class BCBEdit {
     }
 
     Class Caret {
-        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
 
-        /** @prop {Map} _STICKYMODES */
+        ; @prop {Map} _STICKYMODES
         _STICKYMODES := Map( "off"       , SC_CARETSTICKY_OFF           ; 0
                            , "on"        , SC_CARETSTICKY_ON            ; 1
                            , "whitespace", SC_CARETSTICKY_WHITESPACE  ) ; 2
@@ -621,7 +622,8 @@ Class BCBEdit {
             }
         }
 
-        /** @prop {Integer} Width
+        /**
+         * @prop {Integer} Width
          *
          * Get and set the width in pixels of the caret
          */
@@ -630,7 +632,8 @@ Class BCBEdit {
             Set => this.p.Send(SCI_SETCARETWIDTH, Value)
         }
 
-        /** @prop {Boolean} FrameDraw
+        /**
+         * @prop {Boolean} FrameDraw
          *
          * Toggle the appearance of a frame around the caret line (not filling it in)
          */
@@ -641,18 +644,18 @@ Class BCBEdit {
     }
 
     Class WhiteSpace {
-        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
 
-        /** @prop {Boolean} _UseIndents */
+        ; @prop {Boolean} _UseIndents
         _UseIndents := False
 
-        /** @prop {Map} _VISMODES */
+        ; @prop {Map} _VISMODES
         _VISMODES := Map( "always_off"  , SCWS_INVISIBLE             ; 0
                         , "always_on"   , SCWS_VISIBLEALWAYS         ; 1
                         , "after_indent", SCWS_VISIBLEAFTERINDENT    ; 2
                         , "only_indent" , SCWS_VISIBLEONLYININDENT ) ; 3
-        /** @prop {Map} _TABMODES */
+        ; @prop {Map} _TABMODES
         _TABMODES := Map( "arrow" , SCTD_LONGARROW   ; 0
                         , "strike", SCTD_STRIKEOUT ) ; 1
 
@@ -749,7 +752,8 @@ Class BCBEdit {
             Set => this.p.Send(SCI_SETUSETABS, !!(Value))
         }
 
-        /** @prop {Boolean} UseIndents
+        /**
+         * @prop {Boolean} UseIndents
          *
          * Toggle whether the tab and backspace keys insert/delete characters or
          * indent/unindent the current line
@@ -775,7 +779,7 @@ Class BCBEdit {
     }
 
     Class Selection {
-        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
 
         /**
@@ -819,19 +823,19 @@ Class BCBEdit {
 ; `BCBApp` starts the **BetterClipboard** application upon the intialization
 ; of a new instance
 Class BCBApp {
-    /** @prop {Boolean} active */
+    ; @prop {Boolean} active
     active := False
-    /** @prop {Boolean} updatingClip */
+    ; @prop {Boolean} updatingClip
     updatingClip := False
 
-    /** @prop {Gui} gui */
+    ; @prop {Gui} gui
     gui := {}
-    /** @prop {BCBEdit} edit */
+    ; @prop {BCBEdit} edit
     edit := {}
-    /** @prop {BCBIndexGui} idxGui */
+    ; @prop {BCBIndexGui} idxGui
     idxGui := {}
 
-    /** @prop {Object} colors */
+    ; @prop {Object} colors
     colors := {
         bg:        "080e09",    ;  RGB
         fg:        "b6ffb1",    ;  RGB
@@ -844,25 +848,25 @@ Class BCBApp {
         selfg:   "ff001000",    ; ARGB
         whitefg: "5595d58a"     ; ARGB
     }
-    /** @prop {String} fontName */
+    ; @prop {String} fontName
     fontName := "Fira Code"
 
-    /** @prop {Integer} fadeSteps Number of transparency steps in fade animation */
+    ; @prop {Integer} fadeSteps Number of transparency steps in fade animation
     fadeSteps := 5
-    /** @prop {Integer} fadeRest Ticks between transparency steps in fade animation */
+    ; @prop {Integer} fadeRest Ticks between transparency steps in fade animation
     fadeRest := 1
-    /** @prop {Integer} opacity 0-255 */
+    ; @prop {Integer} opacity 0-255
     opacity := 225
-    /** @prop {Integer} currentOp Current gui opacity [1-255] */
+    ; @prop {Integer} currentOp Current gui opacity [1-255]
     currentOp := 0
 
-    /** @prop {Integer} indexDuration */
+    ; @prop {Integer} indexDuration
     indexDuration := 500
-    /** @prop {Integer} shownIndex */
+    ; @prop {Integer} shownIndex
     shownIndex := 0
-    /** @prop {Integer} maxIndex */
+    ; @prop {Integer} maxIndex
     maxIndex := 0
-    /** @prop {Integer} curIndex */
+    ; @prop {Integer} curIndex
     curIndex := 0
 
     __New() {
@@ -915,7 +919,7 @@ Class BCBApp {
         OnClipboardChange(ObjBindMethod(this, "ClipChange"))
     }
 
-    /** @param {Integer} _index */
+    ; @param {Integer} _index
     SetClip(_index) {
         this.edit.Text := FileRead(BCB_CLIPS_DIR "\" _index ".clip")
         this.idxGui.text.Value := _index
