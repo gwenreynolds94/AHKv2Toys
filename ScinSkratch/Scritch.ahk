@@ -334,7 +334,7 @@ Class ScritchGui {
 
 Class ScritchEventSink {
     static cGuiParentClass := {}
-    ;   GUI <CLOSE>
+    ;   GUI <_CLOSE_>
     static Gui_Close(gMainObj, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
@@ -346,7 +346,7 @@ Class ScritchEventSink {
         ; gMainObj.Destroy
         ExitApp
     }
-    ;   BTNDESTROY <CLICK>
+    ;   BTNDESTROY <_CLICK_>
     static BtnDestroy_Click(gCtrl, *) {
         cGui := this.cGuiParentClass
         selectedText := cGui.gTree.GetText(cGui.gTree.GetSelection())
@@ -360,7 +360,7 @@ Class ScritchEventSink {
         ; gCtrl.Gui.Destroy
         ExitApp
     }
-    ;   TREE <ITEMSELECT>
+    ;   TREE <_ITEMSELECT_>
     static Tree_ItemSelect(gCtrl, sItem, *) {
         cGui := this.cGuiParentClass
         selectedText := gCtrl.GetText(sItem)
@@ -383,7 +383,7 @@ Class ScritchEventSink {
         cGui.sTreeRecentlySelected := selectedText
         cGui.sTreeRecentlySelectedText := selectedText
     }
-    ;   TREE <CONTEXTMENU>
+    ;   TREE <_CONTEXTMENU_>
     static Tree_ContextMenu(gCtrl, sItem, *) {
         cGui := this.cGuiParentClass
         gCtxMenu := cGui.gTreeCtxMenu

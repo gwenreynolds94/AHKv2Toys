@@ -1,0 +1,11 @@
+
+
+    NextClip(*) {
+        newIndex := this.shownIndex + 1
+        if (newIndex > BCBConf.Index["Current"])
+            newIndex := 1
+        if (FileExist(BCB_CLIPS_DIR "\" newIndex ".clip") ~= "A|N")
+            this.SetClip(newIndex)
+        this.idxGui.ShowGui()
+        this.idxGui.StartTimeout()
+    }

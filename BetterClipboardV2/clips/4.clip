@@ -1,0 +1,13 @@
+
+            this.NewClip()
+    }
+
+    InitHotkeys() {
+        HotIf (*) => this.active
+        Hotkey("<#c", ObjBindMethod(this, "HideGui"))
+        Hotkey("PgDn", ObjBindMethod(this, "PrevClip"))
+        Hotkey("PgUp", ObjBindMethod(this, "NextClip"))
+        HotIf (*) => !(this.active)
+        Hotkey("<#c", ObjBindMethod(this, "ShowGui"))
+        HotIf()
+    }
