@@ -4,32 +4,36 @@
 
 ; #Include <DEBUG\DBT>
 
-#Include <GdipLib\Gdip_Custom>
+; #Include <GdipLib\Gdip_Custom>
 
 /**
- *<:> Hotkeys
- *<.>  ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
- *<.>  ... ... XButton1->LButton2  =>  Ctrl+v
- *<.>  ... ... XButton1->RButton2  =>  Ctrl+x
- *<.>  ... ... XButton1->XButton1  =>  Ctrl+c
- *<.>
- *<.>  ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
- *<.>  ... ... XButton2->LButton2  =>  Activate Previous Active Window
- *<.>  ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
- *<.>  ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
- *<.>
- *<.>  ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
- *<.>  ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
- *<.>  ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
- *<.>
- *<.>  ... "<#v"   ==>  Scritch Notes Application
+ *<]*>  Hotkey Overview
+ * <.> ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
+ *<`\> ... ... XButton1->LButton2  =>  Ctrl+v
+ *<`\> ... ... XButton1->RButton2  =>  Ctrl+x
+ *<`\> ... ... XButton1->XButton1  =>  Ctrl+c
+ *
+ * <.> ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
+ *<`\> ... ... XButton2->LButton2  =>  Activate Previous Active Window
+ *<`\> ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
+ *<`\> ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
+ *
+ *<`\> ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
+ *<`\> ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
+ *<`\> ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
+ *
+ *<`\> ... "<#v"   ==>  Scritch Notes Application
  */
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  CLOSE CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; FUCK CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-
+FuckCortana(*) {
+    if ProcessExist("Cortana.exe")
+        ProcessClose("Cortana.exe")
+}
+SetTimer FuckCortana, (1000 * 5)
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
@@ -37,15 +41,14 @@
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-;</> if !ProcessExist("BCV2.exe")
-;</>     Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe")
-;</> ;
-;</> ExitBCB(*) {
-;</>     if ProcessExist("BCV2.exe")
-;</>         WinClose("ahk_exe BCV2.exe")
-;</> }
-;
-;</> OnExit ExitBCB
+if !ProcessExist("BCV2.exe") {
+    Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe")
+}
+ExitBCB(ExitReason, ExitCode) {
+    if (ExitReason!="Reload")
+        Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe DoExit")
+}
+OnExit ExitBCB
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
@@ -304,5 +307,4 @@ AlterSound__ShowInfo(_volume:="", _guiWidth:=35, _guiHeight:=100
 ; Hotkey "F8", (*) => AlterSound__ShowInfo()
 
 
-Hotkey "F7", (*) => Reload()    ;:;:;:;:;:;:;:;:;: DEBUG ;:;:;:;:;:;:;:;:;:;:;:;
 Hotkey "#F7", (*) => ExitApp()    ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:

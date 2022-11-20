@@ -4,6 +4,9 @@
 SetWorkingDir A_ScriptDir
 TraySetIcon("BCB.ico")
 
+if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
+    ExitApp
+
 #Include ..\Lib
 #Include SciLib\SciConstants.ahk
 #Include SciLib\SciLoad.ahk
@@ -35,23 +38,6 @@ OnExit (*) => SciFree(SciPtr)
  * Initializi
  */
 App := BCBApp()
-
-/*
-    !! DEBUGGING ! REMOVE !
-        !! DEBUGGING ! REMOVE !
-            !! DEBUGGING ! REMOVE !
-                !! DEBUGGING ! REMOVE !
-                    !! DEBUGGING ! REMOVE !
-*/
-F8::ExitApp         ; !! DEBUGGING ! REMOVE !
-/*
-                    !! DEBUGGING ! REMOVE !
-                !! DEBUGGING ! REMOVE !
-            !! DEBUGGING ! REMOVE !
-        !! DEBUGGING ! REMOVE !
-    !! DEBUGGING ! REMOVE !
-*/
-
 
 /**
  * Helper class for setting/getting keys in configuration file as defined by
@@ -242,11 +228,6 @@ Class BCBIndexGui {
 
 ; A class to help manage a custom Scintilla edit control
 Class BCBEdit {
-    /** @prop {Map} _WRAPMODES Dictionary of Scintilla wrap modes */
-    _WRAPMODES := Map( "none"  , SC_WRAP_NONE         ; 0
-                     , "word"  , SC_WRAP_WORD         ; 1
-                     , "char"  , SC_WRAP_CHAR         ; 2
-                     , "white" , SC_WRAP_WHITESPACE ) ; 3
     /** @prop {Map} _TECHMODES Dictionary of Scintilla technology modes */
     _TECHMODES := Map( "default"  , SC_TECHNOLOGY_DEFAULT             ; 0
                      , "dw"       , SC_TECHNOLOGY_DIRECTWRITE         ; 1
@@ -268,10 +249,13 @@ Class BCBEdit {
      * @param {Integer} _lp lParam
      */
     Send := {}
-
-    /** @prop {Method} Redo A method to send a redo message to the Scintilla control */
+    /** @prop {Method} Redo Sends a SCI_REDO command to the control */
     Redo := {}
+    /** @prop {Method} Duplicate Sends a SCI_SELECTIONDUPLICATE command to the control */
+    Duplicate := {}
 
+    /** @prop {BCBEdit.Wrap} Wrap */
+    Wrap := {}
     /** @prop {BCBEdit.Selection} Selection */
     Selection := {}
     /** @prop {BCBEdit.WhiteSpace} WhiteSpace */
@@ -289,6 +273,8 @@ Class BCBEdit {
         this.Send := (_this, _msg, _wp:=0, _lp:=0) =>
                                             this.ctrl.Send(_msg, _wp, _lp)
         this.Redo := (*)=> this.Send(SCI_REDO)
+        this.Duplicate := (*)=> this.Send(SCI_SELECTIONDUPLICATE)
+        this.Wrap := BCBEdit.Wrap(this)
         this.Selection := BCBEdit.Selection(this)
         this.WhiteSpace := BCBEdit.WhiteSpace(this)
         this.Caret := BCBEdit.Caret(this)
@@ -302,12 +288,18 @@ Class BCBEdit {
         ctrlPgUp := SCK_PRIOR + (SCMOD_CTRL << 16)
         altDn := SCK_DOWN + (SCMOD_ALT << 16)
         altUp := SCK_UP + (SCMOD_ALT << 16)
+        altHome := SCK_HOME + (SCMOD_ALT << 16)
+        altEnd := SCK_END + (SCMOD_ALT << 16)
         this.Send(SCI_ASSIGNCMDKEY, ctrlPgDn, SCI_PAGEDOWN) ; Ctrl+PgDn => PageDown
         this.Send(SCI_ASSIGNCMDKEY, ctrlPgUp, SCI_PAGEUP)   ; Ctrl+PgUp => PageUp
         ; Alt+Down => Move selected lines down
         this.Send(SCI_ASSIGNCMDKEY, altDn, SCI_MOVESELECTEDLINESDOWN)
         ; Alt+Up => Move selected lines up
         this.Send(SCI_ASSIGNCMDKEY, altUp, SCI_MOVESELECTEDLINESUP)
+        ; Alt+Home => Uppercase
+        this.Send(SCI_ASSIGNCMDKEY, altHome, SCI_UPPERCASE)
+        ; Alt+End => Lowercase
+        this.Send(SCI_ASSIGNCMDKEY, altEnd, SCI_LOWERCASE)
     }
 
     /**
@@ -428,21 +420,6 @@ Class BCBEdit {
         }
     }
 
-    ; </> /**
-    ; </>  * @prop {Hex Color} Caret
-    ; </>  *
-    ; </>  * A **6-8** digit **(A)RGB** hex color as a string or integer defining the color of
-    ; </>  * the control's caret
-    ; </>  */
-    ; </> Caret {
-    ; </>     Get => this.Send(SCI_GETCARETFORE)
-    ; </>     Set {
-    ; </>         _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
-    ; </>         this.Send(SCI_SETCARETFORE, _col)
-    ; </>         this.Send(SCI_STYLECLEARALL)
-    ; </>     }
-    ; </> }
-
     /**
      * @prop {String} Technology
      *
@@ -469,43 +446,109 @@ Class BCBEdit {
         }
     }
 
-    /**
-     * @prop {String} WrapMode
-     *
-     * This value can be any key in `BCBEdit()._WRAPMODES`
-     *
-     *      BCBEdit()._WRAPMODES := Map(
-     *          "none",  SC_WRAP_NONE       := 0,
-     *          "word",  SC_WRAP_WORD       := 1,
-     *          "char",  SC_WRAP_CHAR       := 2,
-     *          "white", SC_WRAP_WHITESPACE := 3
-     *      )
-     */
-    WrapMode {
-        Get {
-            _wrap := this.Send(SCI_GETWRAPMODE)
-            for wpname, wpval in this._WRAPMODES
-                if (_wrap = wpval)
-                    Return wpname
+    Class Wrap {
+        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        p := {}
+
+        /** @prop {Map} _WRAPMODES Dictionary of Scintilla wrap modes */
+        _WRAPMODES := Map( "none"  , SC_WRAP_NONE         ; 0
+                         , "word"  , SC_WRAP_WORD         ; 1
+                         , "char"  , SC_WRAP_CHAR         ; 2
+                         , "white" , SC_WRAP_WHITESPACE ) ; 3
+        /**
+         *  @prop {Map} _VISUALFLAGSFLAGS
+         *      Dictionary of Scintilla flags for wrap visual flags
+         */
+        _VISUALFLAGSFLAGS := Map( "none",   SC_WRAPVISUALFLAG_NONE     ; 0
+                                , "end",    SC_WRAPVISUALFLAG_END      ; 1
+                                , "start",  SC_WRAPVISUALFLAG_START    ; 2
+                                , "margin", SC_WRAPVISUALFLAG_MARGIN ) ; 4
+
+        /**
+          * @param {BCBEdit} _BCBEdit
+          *
+          * The instance of `BCBEdit` to interact with
+          */
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
         }
-        Set {
-            for wpname, wpval in this._WRAPMODES
-                if (wpname = Value)
-                    this.Send(SCI_SETWRAPMODE, wpval)
+
+        /**
+         * @prop {String} Mode
+         *
+         * This value can be any key in `BCBEdit.Wrap()._WRAPMODES`
+         *
+         *      BCBEdit.Wrap()._WRAPMODES := Map(
+         *          "none",  SC_WRAP_NONE       := 0,
+         *          "word",  SC_WRAP_WORD       := 1,
+         *          "char",  SC_WRAP_CHAR       := 2,
+         *          "white", SC_WRAP_WHITESPACE := 3
+         *      )
+         */
+        Mode {
+            Get {
+                _wrap := this.p.Send(SCI_GETWRAPMODE)
+                for wpname, wpval in this._WRAPMODES
+                    if (_wrap = wpval)
+                        Return wpname
+            }
+            Set {
+                for wpname, wpval in this._WRAPMODES
+                    if (wpname = Value)
+                        this.p.Send(SCI_SETWRAPMODE, wpval)
+            }
+        }
+
+        /**
+         * @prop {Array} VisualFlags
+         *
+         * This value can be any combination of keys in `BCBEdit.Wrap._VISUALFLAGSFLAGS`,
+         * stored inside an array
+         *
+         *      BCBEdit.Wrap._VISUALFLAGSFLAGS := Map(
+         *          "none",   SC_WRAPVISUALFLAG_NONE   := 0x0000,
+         *          "end",    SC_WRAPVISUALFLAG_END    := 0x0001,
+         *          "start",  SC_WRAPVISUALFLAG_START  := 0x0002,
+         *          "margin", SC_WRAPVISUALFLAG_MARGIN := 0x0004
+         *      )
+         */
+        VisualFlags {
+            Get {
+                _flagBits := this.p.Send(SCI_GETWRAPVISUALFLAGS)
+                _flags := !!(_flagBits) ? [] : ["none"]
+                if _flagBits >= (_mgn:=this._VISUALFLAGSFLAGS["margin"]) {
+                    _flagBits -= _mgn
+                    _flags.Push("margin")
+                }
+                if _flagBits >= (_st:=this._VISUALFLAGSFLAGS["start"]) {
+                    _flagBits -= _st
+                    _flags.Push("start")
+                }
+                if _flagBits >= (_end:=this._VISUALFLAGSFLAGS["end"]) {
+                    _flagBits -= _end
+                    _flags.Push("end")
+                }
+                Return _flags
+            }
+            Set {
+                _bitflag := 0x00
+                for flagName in Value
+                    for flagNameRef, flagBitRef in this._VISUALFLAGSFLAGS
+                        if (flagName=flagNameRef)
+                            _bitflag += flagBitRef
+                this.p.Send(SCI_SETWRAPVISUALFLAGS, _bitflag)
+            }
+        }
+
+        /** @prop {Integer} Indent
+         *
+         * Get and set the size of the indentation for sublines of wrapped text
+         */
+        Indent {
+            Get => this.p.Send(SCI_GETWRAPSTARTINDENT)
+            Set => this.p.Send(SCI_SETWRAPSTARTINDENT, Value)
         }
     }
-
-    ;<`>    Class WhiteSpace {
-    ;<`>        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
-    ;<`>        p := {}
-    ;<`>
-    ;<`>        /**
-    ;<`>          * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
-    ;<`>          */
-    ;<`>        __New(_BCBEdit) {
-    ;<`>            this.p := _BCBEdit
-    ;<`>        }
-    ;<`>    }
 
     Class Caret {
         /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
@@ -515,9 +558,11 @@ Class BCBEdit {
         _STICKYMODES := Map( "off"       , SC_CARETSTICKY_OFF           ; 0
                            , "on"        , SC_CARETSTICKY_ON            ; 1
                            , "whitespace", SC_CARETSTICKY_WHITESPACE  ) ; 2
-    
+
         /**
-          * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+          * @param {BCBEdit} _BCBEdit
+          *
+          * The instance of `BCBEdit` to interact with
           */
         __New(_BCBEdit) {
             this.p := _BCBEdit
@@ -539,7 +584,7 @@ Class BCBEdit {
 
         /**
          * @prop {Hex Color} LineBackground
-         * 
+         *
          * An **8** digit **ARGB** hex color as a string or integer defining the color of
          * the background of the line the caret is on
          */
@@ -553,9 +598,9 @@ Class BCBEdit {
 
         /**
          * @prop {String} Sticky
-         * 
+         *
          * This value can be any of the keys in `BCBEdit.Caret()._STICKYMODES`
-         * 
+         *
          *      BCBEdit.Caret()._STICKYMODES := Map(
          *          "off"       , SC_CARETSTICKY_OFF        := 0,
          *          "on"        , SC_CARETSTICKY_ON         := 1,
@@ -576,8 +621,8 @@ Class BCBEdit {
             }
         }
 
-        /** @prop {Integer} Width 
-         * 
+        /** @prop {Integer} Width
+         *
          * Get and set the width in pixels of the caret
          */
         Width {
@@ -586,7 +631,7 @@ Class BCBEdit {
         }
 
         /** @prop {Boolean} FrameDraw
-         * 
+         *
          * Toggle the appearance of a frame around the caret line (not filling it in)
          */
         FrameDraw {
@@ -612,8 +657,8 @@ Class BCBEdit {
                         , "strike", SCTD_STRIKEOUT ) ; 1
 
         /**
-         * @param {BCBEdit} _BCBEdit 
-         * 
+         * @param {BCBEdit} _BCBEdit
+         *
          * The instance of `BCBEdit` to interact with
          */
         __New(_BCBEdit) {
@@ -636,9 +681,9 @@ Class BCBEdit {
 
         /**
          * @prop {String} Visibility
-         * 
+         *
          * This value can be any key in `BCBEdit.WhiteSpace()._VISMODES`
-         * 
+         *
          *      BCBEdit.WhiteSpace()._VISMODES := Map(
          *          "always_off"  , SCWS_INVISIBLE           := 0,
          *          "always_on"   , SCWS_VISIBLEALWAYS       := 1,
@@ -662,9 +707,9 @@ Class BCBEdit {
 
         /**
          * @prop {String} TabStyle
-         * 
+         *
          * This value can be either of the keys in `BCBEdit.WhiteSpace()._TABMODES`
-         * 
+         *
          *      BCBEdit.WhiteSpace()._TABMODES := Map(
          *          "arrow" , SCTD_LONGARROW := 0,  ; Default
          *          "strike", SCTD_STRIKEOUT := 1
@@ -686,7 +731,7 @@ Class BCBEdit {
 
         /**
          * @prop {Integer} TabWidth
-         * 
+         *
          * Get and set the size of the tabs used in the control
          */
         TabWidth {
@@ -696,7 +741,7 @@ Class BCBEdit {
 
         /**
          * @prop {Boolean} UseTabs
-         * 
+         *
          * Toggle whether the control uses tabs or spaces
          */
         UseTabs {
@@ -705,7 +750,7 @@ Class BCBEdit {
         }
 
         /** @prop {Boolean} UseIndents
-         * 
+         *
          * Toggle whether the tab and backspace keys insert/delete characters or
          * indent/unindent the current line
          */
@@ -720,7 +765,7 @@ Class BCBEdit {
 
         /**
          * @prop {Integer} Size
-         * 
+         *
          * Get and set the size of the whitespace markers in the control
          */
         Size {
@@ -794,7 +839,7 @@ Class BCBApp {
         indexbg:   "2a392b",    ;  RGB
         indexfg:   "5a8b5e",    ;  RGB
         caret:   "c0fafffa",    ; ARGB
-        caretln: "101a3020",    ; ARGB
+        caretln: "0a1a2a1a",    ; ARGB
         selbg:   "aa579261",    ; ARGB
         selfg:   "ff001000",    ; ARGB
         whitefg: "5595d58a"     ; ARGB
@@ -832,7 +877,9 @@ Class BCBApp {
 
         this.edit := BCBEdit(this.gui, "w700 h400")
         this.edit.Font := this.fontName
-        this.edit.WrapMode := "word"
+        this.edit.Wrap.Mode := "word"
+        this.edit.Wrap.VisualFlags := ["start"]
+        this.edit.Wrap.Indent := 2
         this.edit.Technology := "dw"
         this.edit.MarginWidth := 0
         this.edit.MultipleSelection := True
@@ -926,6 +973,7 @@ Class BCBApp {
         Hotkey("PgUp", ObjBindMethod(this, "NextClip"))
         Hotkey("<^Enter", ObjBindMethod(this, "UpdateClipboardFromEdit"))
         Hotkey("^+z", ObjBindMethod(this.edit, "Redo"))
+        Hotkey("^+d", ObjBindMethod(this.edit, "Duplicate"))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))
         HotIf()

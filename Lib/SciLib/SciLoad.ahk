@@ -41,7 +41,8 @@ SciLoad(_dll_path:="") {
  * @param {`Pointer`} _sci_pointer A Pointer to the Scintilla.dll library
  */
 SciFree(_sci_pointer) {
-    FileAppend("Freeing the Scintilla.dll Library...`n", "*")
+    Try
+        FileAppend("Freeing the Scintilla.dll Library...`n", "*")
     DllCall("FreeLibrary", "Ptr", _sci_pointer)
 }
 
