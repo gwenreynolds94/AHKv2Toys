@@ -8,7 +8,7 @@
         "workbench.tree.indent": 12,
         "explorer.sortOrder": "foldersNestsFiles",
         "files.autoSave": "afterDelay",
-        "peacock.color": "#3d3432",
+        "peacock.color": "#393838",
         "peacock.affectStatusBar": true,
         "peacock.affectTabActiveBorder": false,
         "peacock.affectTitleBar": true,
@@ -20,18 +20,38 @@
         "peacock.affectDebuggingStatusBar": true,
         "peacock.affectActivityBar": false,
         "workbench.colorCustomizations": {
-            "statusBar.background": "#3d3432",
-            "statusBar.debuggingBackground": "#323b3d",
+            "commandCenter.border": "#89b48299",
+            "statusBar.background": "#393838",
+            "statusBar.debuggingBackground": "#383939",
             "statusBar.debuggingForeground": "#89b482",
             "statusBar.foreground": "#89b482",
-            "statusBarItem.hoverBackground": "#594c49",
-            "statusBarItem.remoteBackground": "#3d3432",
+            "statusBarItem.hoverBackground": "#535151",
+            "statusBarItem.remoteBackground": "#393838",
             "statusBarItem.remoteForeground": "#89b482",
-            "commandCenter.border": "#89b48299",
-            "titleBar.activeBackground": "#3d3432",
+            "titleBar.activeBackground": "#393838",
             "titleBar.activeForeground": "#89b482",
-            "titleBar.inactiveBackground": "#3d343299",
-            "titleBar.inactiveForeground": "#89b48299"
-        }
+            "titleBar.inactiveBackground": "#39383899",
+            "titleBar.inactiveForeground": "#89b48299",
+            "editorWhitespace.foreground": "#47554caf"
+        },
+        "editor.tokenColorCustomizations": {
+            "textMateRules": [
+                {
+                    "scope": ["comment"],
+                    "settings": {
+                        "fontStyle": ""
+                    }
+                }
+            ]
+        },
+        "scm.inputFontSize": 12,
+        "debug.console.fontSize": 10,
+        "markdown.preview.fontSize": 10,
+        "terminal.integrated.fontSize": 10,
+        "notebook.outputFontSize": 10,
+        "editor.fontSize": 10,
+        "editor.rulers": [
+            89, 90
+        ]
     }
 }

@@ -1,7 +1,5 @@
 https://macromates.com/manual/en/regular_expressions
 
-
-
   block:
     - match: \{
       scope: punctuation.section.block.begin.ahk2

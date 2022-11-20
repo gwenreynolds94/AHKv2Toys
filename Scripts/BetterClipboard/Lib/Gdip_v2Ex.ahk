@@ -5554,6 +5554,9 @@ UpdateLayeredWindow(hwnd, hdc, x:="", y:="", w:="", h:="", Alpha:=255) {
  
  ;#####################################################################################
  
+ /**
+  * @return {ARGB Hexadecimal}
+  */
  Gdip_ToARGB(A, R, G, B) {
     return (A << 24) | (R << 16) | (G << 8) | B
  }

@@ -1,0 +1,17 @@
+
+#Include SciLib\SciLoad.ahk
+
+/** @type {String} Path to Scintilla.dll */
+SCI_DLL_PATH := "..\Lib\SciLib\Scintilla.dll"
+
+/** @type {String} Path to BetterClipboard configuration file */
+BCB_CONF_PATH := A_ScriptDir "\BCB.ini"
+
+/** @type {String} Path to directory storing clipboard entries */
+BCB_CLIPS_DIR := A_ScriptDir "\clips"
+
+
+/**
+ * @param {Pointer} SciPtr A pointer to the Scintilla DLL library. Upon variable
+ *      initialization, the method *`SciAdd`* is added to the global Gui class for the
+ *      creation of a Scintilla control with a custom **`Send`**
