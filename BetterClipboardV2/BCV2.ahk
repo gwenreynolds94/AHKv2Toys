@@ -12,10 +12,10 @@ TraySetIcon("BCB.ico")
 SCI_DLL_PATH := "..\Lib\SciLib\Scintilla.dll"
 
 /** @type {String} Path to BetterClipboard configuration file */
-BCB_CONF_PATH := A_ScriptDir "\BCB.ini"
+BCB_CONF_PATH := A_AppData "\BetterClipboard\BCB.ini"
 
 /** @type {String} Path to directory storing clipboard entries */
-BCB_CLIPS_DIR := A_ScriptDir "\clips"
+BCB_CLIPS_DIR := A_AppData "\BetterClipboard\clips"
 
 
 /**
@@ -67,7 +67,7 @@ Class BCBConf {
         if !(FileExist(BCB_CONF_PATH) ~= "A|N") {
             SplitPath BCB_CONF_PATH,, &conf_dir
             if DirExist(conf_dir) {
-                IniWrite 0   , BCB_CONF_PATH, "Index", "Current"
+                IniWrite 1   , BCB_CONF_PATH, "Index", "Current"
                 IniWrite 9999, BCB_CONF_PATH, "Index", "Max"
             } else {
                 MsgBox( "Neither file or directory of given path to "
@@ -243,15 +243,34 @@ Class BCBIndexGui {
 ; A class to help manage a custom Scintilla edit control
 Class BCBEdit {
     /** @prop {Map} _WRAPMODES Dictionary of Scintilla wrap modes */
-    _WRAPMODES := Map( "none"  , SC_WRAP_NONE
-                     , "word"  , SC_WRAP_WORD
-                     , "char"  , SC_WRAP_CHAR
-                     , "white" , SC_WRAP_WHITESPACE )
-    /** @prop {Map} _TECHMODES Dictionary of Scintilla Technology modes */
-    _TECHMODES := Map( "default" , SC_TECHNOLOGY_DEFAULT
-                     , "dw"      , SC_TECHNOLOGY_DIRECTWRITE
-                     , "dwretain", SC_TECHNOLOGY_DIRECTWRITERETAIN
-                     , "dwdc"    , SC_TECHNOLOGY_DIRECTWRITEDC     )
+    _WRAPMODES := Map( "none"  , SC_WRAP_NONE         ; 0
+                     , "word"  , SC_WRAP_WORD         ; 1
+                     , "char"  , SC_WRAP_CHAR         ; 2
+                     , "white" , SC_WRAP_WHITESPACE ) ; 3
+    /** @prop {Map} _TECHMODES Dictionary of Scintilla technology modes */
+    _TECHMODES := Map( "default" , SC_TECHNOLOGY_DEFAULT             ; 0
+                     , "dw"      , SC_TECHNOLOGY_DIRECTWRITE         ; 1
+                     , "dwretain", SC_TECHNOLOGY_DIRECTWRITERETAIN   ; 2
+                     , "dwdc"    , SC_TECHNOLOGY_DIRECTWRITEDC     ) ; 3
+    /** @prop {Map} _VIRTSPACEOPTS Dictionary of Scintilla virtual space bit flags */
+    _VIRTSPACEOPTS := Map( "none"  , SCVS_NONE                   ; 0
+                         , "rect"  , SCVS_RECTANGULARSELECTION   ; 1
+                         , "user"  , SCVS_USERACCESSIBLE         ; 2
+                         , "nowrap", SCVS_NOWRAPLINESTART      ) ; 4
+
+    /** @prop {Boolean} _MultiSelect */
+    _MultiSelect := False
+
+    /**
+     * @prop {Method} Send
+     * @param {Integer} _msg Message to send to the Scintilla control
+     * @param {Integer} _wp wParam
+     * @param {Integer} _lp lParam
+     */
+    Send := {}
+
+    /** @prop {Method} Redo A method to send a redo message to the Scintilla control */
+    Redo := {}
 
     /**
      * @param {Gui} _gui A reference to the parent Gui object
@@ -262,6 +281,23 @@ Class BCBEdit {
         this.gui := _gui
         this.Send := (_this, _msg, _wp:=0, _lp:=0) =>
                                             this.ctrl.Send(_msg, _wp, _lp)
+        this.Redo := (*)=> this.Send(SCI_REDO)
+        this.SetShortcuts()
+    }
+
+    ; Enable keyboard shortcuts for the Scintilla control, handled by Scintilla
+    SetShortcuts(*) {
+        ; keyDefinition := keyCode + (keyMod << 16)
+        ctrlPgDn := SCK_NEXT  + (SCMOD_CTRL << 16)
+        ctrlPgUp := SCK_PRIOR + (SCMOD_CTRL << 16)
+        altDn := SCK_DOWN + (SCMOD_ALT << 16)
+        altUp := SCK_UP + (SCMOD_ALT << 16)
+        this.Send(SCI_ASSIGNCMDKEY, ctrlPgDn, SCI_PAGEDOWN) ; Ctrl+PgDn => PageDown
+        this.Send(SCI_ASSIGNCMDKEY, ctrlPgUp, SCI_PAGEUP)   ; Ctrl+PgUp => PageUp
+        ; Alt+Down => Move selected lines down
+        this.Send(SCI_ASSIGNCMDKEY, altDn, SCI_MOVESELECTEDLINESDOWN)
+        ; Alt+Up => Move selected lines up
+        this.Send(SCI_ASSIGNCMDKEY, altUp, SCI_MOVESELECTEDLINESUP)
     }
 
     /**
@@ -375,6 +411,33 @@ Class BCBEdit {
     ScrollBar {
         Get => this.Send(SCI_GETVSCROLLBAR)
         Set => this.Send(SCI_SETVSCROLLBAR)
+    }
+
+    /** @prop {Boolean} ScrollPastEnd
+     *
+     * Get and set ability to scroll past the last line
+     */
+    ScrollPastEnd {
+        Get => this.Send(SCI_GETENDATLASTLINE)
+        Set => this.Send(SCI_SETENDATLASTLINE, !!Value)
+    }
+
+    /** @prop {Boolean} MultipleSelection */
+    MultipleSelection {
+        Get => this.Send(SCI_GETMULTIPLESELECTION)
+        Set => this.Send(SCI_SETMULTIPLESELECTION, !!(Value))
+    }
+
+    /** @prop {Boolean} AdditionalSelectionTyping */
+    AdditionalSelectionTyping {
+        Get => this.Send(SCI_GETADDITIONALSELECTIONTYPING)
+        Set => this.Send(SCI_SETADDITIONALSELECTIONTYPING, !!(Value))
+    }
+
+    /** @prop {Boolean} MultiPaste */
+    MultiPaste {
+        Get => this.Send(SCI_GETMULTIPASTE)
+        Set => this.Send(SCI_SETMULTIPASTE, !!(Value))
     }
 
     /**
@@ -508,6 +571,10 @@ Class BCBApp {
         this.edit.Font := this.fontName
         this.edit.MarginWidth := 0
         this.edit.ScrollBar := False
+        this.edit.MultipleSelection := True
+        this.edit.AdditionalSelectionTyping := True
+        this.edit.MultiPaste := True
+        this.edit.ScrollPastEnd := False
 
         this.gui.Show("NA x" A_ScreenWidth)
         WinSetTransparent(0, this.gui)
@@ -577,6 +644,7 @@ Class BCBApp {
         Hotkey("PgDn", ObjBindMethod(this, "PrevClip"))
         Hotkey("PgUp", ObjBindMethod(this, "NextClip"))
         Hotkey("<^Enter", ObjBindMethod(this, "UpdateClipboardFromEdit"))
+        Hotkey("^+z", ObjBindMethod(this.edit, "Redo"))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))
         HotIf()

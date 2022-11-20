@@ -41,7 +41,7 @@ if !ProcessExist("BCV2.exe")
 ;
 ExitBCB(*) {
     if ProcessExist("BCV2.exe")
-        ProcessClose("BCV2.exe")
+        WinClose("ahk_exe BCV2.exe")
 }
 ;
 OnExit ExitBCB
