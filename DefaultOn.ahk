@@ -6,22 +6,23 @@
 
 #Include <GdipLib\Gdip_Custom>
 
-/** Hotkeys List **
- *  ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
- *  ... ... XButton1->LButton2  =>  Ctrl+v
- *  ... ... XButton1->RButton2  =>  Ctrl+x
- *  ... ... XButton1->XButton1  =>  Ctrl+c
- *
- *  ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
- *  ... ... XButton2->LButton2  =>  Activate Previous Active Window
- *  ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
- *  ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
- *
- *  ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
- *  ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
- *  ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
- *
- *  ... "<#v"   ==>  Scritch Notes Application
+/**
+ *<:> Hotkeys
+ *<.>  ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
+ *<.>  ... ... XButton1->LButton2  =>  Ctrl+v
+ *<.>  ... ... XButton1->RButton2  =>  Ctrl+x
+ *<.>  ... ... XButton1->XButton1  =>  Ctrl+c
+ *<.>
+ *<.>  ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
+ *<.>  ... ... XButton2->LButton2  =>  Activate Previous Active Window
+ *<.>  ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
+ *<.>  ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
+ *<.>
+ *<.>  ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
+ *<.>  ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
+ *<.>  ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
+ *<.>
+ *<.>  ... "<#v"   ==>  Scritch Notes Application
  */
 
 
@@ -36,15 +37,15 @@
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-if !ProcessExist("BCV2.exe")
-    Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe")
+;</> if !ProcessExist("BCV2.exe")
+;</>     Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe")
+;</> ;
+;</> ExitBCB(*) {
+;</>     if ProcessExist("BCV2.exe")
+;</>         WinClose("ahk_exe BCV2.exe")
+;</> }
 ;
-ExitBCB(*) {
-    if ProcessExist("BCV2.exe")
-        WinClose("ahk_exe BCV2.exe")
-}
-;
-OnExit ExitBCB
+;</> OnExit ExitBCB
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 

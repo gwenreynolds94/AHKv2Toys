@@ -37,19 +37,19 @@ OnExit (*) => SciFree(SciPtr)
 App := BCBApp()
 
 /*
-    ! DEBUGGING ! REMOVE !
-        ! DEBUGGING ! REMOVE !
-            ! DEBUGGING ! REMOVE !
-                ! DEBUGGING ! REMOVE !
-                    ! DEBUGGING ! REMOVE !
+    !! DEBUGGING ! REMOVE !
+        !! DEBUGGING ! REMOVE !
+            !! DEBUGGING ! REMOVE !
+                !! DEBUGGING ! REMOVE !
+                    !! DEBUGGING ! REMOVE !
 */
-F8::ExitApp
+F8::ExitApp         ; !! DEBUGGING ! REMOVE !
 /*
-                    ! DEBUGGING ! REMOVE !
-                ! DEBUGGING ! REMOVE !
-            ! DEBUGGING ! REMOVE !
-        ! DEBUGGING ! REMOVE !
-    ! DEBUGGING ! REMOVE !
+                    !! DEBUGGING ! REMOVE !
+                !! DEBUGGING ! REMOVE !
+            !! DEBUGGING ! REMOVE !
+        !! DEBUGGING ! REMOVE !
+    !! DEBUGGING ! REMOVE !
 */
 
 
@@ -248,10 +248,10 @@ Class BCBEdit {
                      , "char"  , SC_WRAP_CHAR         ; 2
                      , "white" , SC_WRAP_WHITESPACE ) ; 3
     /** @prop {Map} _TECHMODES Dictionary of Scintilla technology modes */
-    _TECHMODES := Map( "default" , SC_TECHNOLOGY_DEFAULT             ; 0
-                     , "dw"      , SC_TECHNOLOGY_DIRECTWRITE         ; 1
-                     , "dwretain", SC_TECHNOLOGY_DIRECTWRITERETAIN   ; 2
-                     , "dwdc"    , SC_TECHNOLOGY_DIRECTWRITEDC     ) ; 3
+    _TECHMODES := Map( "default"  , SC_TECHNOLOGY_DEFAULT             ; 0
+                     , "dw"       , SC_TECHNOLOGY_DIRECTWRITE         ; 1
+                     , "dw_retain", SC_TECHNOLOGY_DIRECTWRITERETAIN   ; 2
+                     , "dw_dc"    , SC_TECHNOLOGY_DIRECTWRITEDC     ) ; 3
     /** @prop {Map} _VIRTSPACEOPTS Dictionary of Scintilla virtual space bit flags */
     _VIRTSPACEOPTS := Map( "none"  , SCVS_NONE                   ; 0
                          , "rect"  , SCVS_RECTANGULARSELECTION   ; 1
@@ -272,6 +272,13 @@ Class BCBEdit {
     /** @prop {Method} Redo A method to send a redo message to the Scintilla control */
     Redo := {}
 
+    /** @prop {BCBEdit.Selection} Selection */
+    Selection := {}
+    /** @prop {BCBEdit.WhiteSpace} WhiteSpace */
+    WhiteSpace := {}
+    /** @prop {BCBEdit.Caret} Caret */
+    Caret := {}
+
     /**
      * @param {Gui} _gui A reference to the parent Gui object
      * @param {String} _options A string containing options for the edit control
@@ -282,6 +289,9 @@ Class BCBEdit {
         this.Send := (_this, _msg, _wp:=0, _lp:=0) =>
                                             this.ctrl.Send(_msg, _wp, _lp)
         this.Redo := (*)=> this.Send(SCI_REDO)
+        this.Selection := BCBEdit.Selection(this)
+        this.WhiteSpace := BCBEdit.WhiteSpace(this)
+        this.Caret := BCBEdit.Caret(this)
         this.SetShortcuts()
     }
 
@@ -317,58 +327,6 @@ Class BCBEdit {
             buf := Buffer(str_size, 0)
             StrPut(Value, buf, "UTF-8")
             this.Send(SCI_SETTEXT,, buf.Ptr)
-        }
-    }
-
-    /**
-     * @prop {String} Technology
-     *
-     * This value can be any key in `BCBEdit._TECHMODES`
-     *
-     *      BCBEdit._TECHMODES := Map(
-     *           "default" , SC_TECHNOLOGY_DEFAULT           := 0,
-     *           "dw"      , SC_TECHNOLOGY_DIRECTWRITE       := 1,
-     *           "dwretain", SC_TECHNOLOGY_DIRECTWRITERETAIN := 2,
-     *           "dwdc"    , SC_TECHNOLOGY_DIRECTWRITEDC     := 3
-     *      )
-     */
-    Technology {
-        Get {
-            _tech := this.Send(SCI_GETTECHNOLOGY)
-            for techname, techval in this._TECHMODES
-                if (_tech = techval)
-                    Return techname
-        }
-        Set {
-            for techname, techval in this._TECHMODES
-                if (techname = StrLower(Value))
-                    this.Send(SCI_SETTECHNOLOGY, techval)
-        }
-    }
-
-    /**
-     * @prop {String} WrapMode
-     *
-     * This value can be any key in `BCBEdit._WRAPMODES`
-     *
-     *      BCBEdit._WRAPMODES := Map(
-     *          "none",  SC_WRAP_NONE       := 0,
-     *          "word",  SC_WRAP_WORD       := 1,
-     *          "char",  SC_WRAP_CHAR       := 2,
-     *          "white", SC_WRAP_WHITESPACE := 3
-     *      )
-     */
-    WrapMode {
-        Get {
-            _wrap := this.Send(SCI_GETWRAPMODE)
-            for wpname, wpval in this._WRAPMODES
-                if (_wrap = wpval)
-                    Return wpname
-        }
-        Set {
-            for wpname, wpval in this._WRAPMODES
-                if (wpname = Value)
-                    this.Send(SCI_SETWRAPMODE, wpval)
         }
     }
 
@@ -443,8 +401,8 @@ Class BCBEdit {
     /**
      * @prop {Hex Color} Background
      *
-     * A 6-8 digit (A)RGB hex color as a string or integer defining the color of the
-     * control's background
+     * A **6-8** digit **(A)RGB** hex color as a string or integer defining the color of
+     * the control's background
      */
     Background {
         Get => this.Send(SCI_STYLEGETBACK, STYLE_DEFAULT)
@@ -458,8 +416,8 @@ Class BCBEdit {
     /**
      * @prop {Hex Color} Foreground
      *
-     * A 6-8 digit (A)RGB hex color as a string or integer defining the color of the
-     * control's foreground text
+     * A **6-8** digit **(A)RGB** hex color as a string or integer defining the color of
+     * the control's foreground text
      */
     Foreground {
         Get => this.Send(SCI_STYLEGETFORE, STYLE_DEFAULT)
@@ -470,40 +428,346 @@ Class BCBEdit {
         }
     }
 
+    ; </> /**
+    ; </>  * @prop {Hex Color} Caret
+    ; </>  *
+    ; </>  * A **6-8** digit **(A)RGB** hex color as a string or integer defining the color of
+    ; </>  * the control's caret
+    ; </>  */
+    ; </> Caret {
+    ; </>     Get => this.Send(SCI_GETCARETFORE)
+    ; </>     Set {
+    ; </>         _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
+    ; </>         this.Send(SCI_SETCARETFORE, _col)
+    ; </>         this.Send(SCI_STYLECLEARALL)
+    ; </>     }
+    ; </> }
+
     /**
-     * @prop {Hex Color} Caret
+     * @prop {String} Technology
      *
-     * A 6-8 digit (A)RGB hex color as a string or integer defining the color of the
-     * control's caret
+     * This value can be any key in `BCBEdit()._TECHMODES`
+     *
+     *      BCBEdit()._TECHMODES := Map(
+     *           "default"  , SC_TECHNOLOGY_DEFAULT           := 0,
+     *           "dw"       , SC_TECHNOLOGY_DIRECTWRITE       := 1,
+     *           "dw_retain", SC_TECHNOLOGY_DIRECTWRITERETAIN := 2,
+     *           "dw_dc"    , SC_TECHNOLOGY_DIRECTWRITEDC     := 3
+     *      )
      */
-    Caret {
-        Get => this.Send(SCI_GETCARETFORE)
+    Technology {
+        Get {
+            _tech := this.Send(SCI_GETTECHNOLOGY)
+            for techname, techval in this._TECHMODES
+                if (_tech = techval)
+                    Return techname
+        }
         Set {
-            _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
-            this.Send(SCI_SETCARETFORE, _col)
-            this.Send(SCI_STYLECLEARALL)
+            for techname, techval in this._TECHMODES
+                if (techname = StrLower(Value))
+                    this.Send(SCI_SETTECHNOLOGY, techval)
         }
     }
 
     /**
-     * @param {Object} colors
+     * @prop {String} WrapMode
      *
-     * Function takes an object with one or more of the following properties which
-     *  should equate to 6 or 8 digit (A)RGB hex digits as a string.
+     * This value can be any key in `BCBEdit()._WRAPMODES`
      *
-     *      colors.fg = "80FF0000"  ; Red at 50% Alpha
-     *      colors.bg = "0000FF"    ; Blue at 100% Alpha
-     *      colors.caret = "DDFFEE" ; Pale green at 100% Alpha
+     *      BCBEdit()._WRAPMODES := Map(
+     *          "none",  SC_WRAP_NONE       := 0,
+     *          "word",  SC_WRAP_WORD       := 1,
+     *          "char",  SC_WRAP_CHAR       := 2,
+     *          "white", SC_WRAP_WHITESPACE := 3
+     *      )
      */
-    SetColors(colors) {
-        if IsObject(colors) {
-            if colors.HasProp("bg")
-                this.Background := colors.bg
-            if colors.HasProp("fg")
-                this.Foreground := colors.fg
-            if colors.HasProp("caret")
-                this.Caret := colors.caret
+    WrapMode {
+        Get {
+            _wrap := this.Send(SCI_GETWRAPMODE)
+            for wpname, wpval in this._WRAPMODES
+                if (_wrap = wpval)
+                    Return wpname
         }
+        Set {
+            for wpname, wpval in this._WRAPMODES
+                if (wpname = Value)
+                    this.Send(SCI_SETWRAPMODE, wpval)
+        }
+    }
+
+    ;<`>    Class WhiteSpace {
+    ;<`>        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+    ;<`>        p := {}
+    ;<`>
+    ;<`>        /**
+    ;<`>          * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+    ;<`>          */
+    ;<`>        __New(_BCBEdit) {
+    ;<`>            this.p := _BCBEdit
+    ;<`>        }
+    ;<`>    }
+
+    Class Caret {
+        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        p := {}
+
+        /** @prop {Map} _STICKYMODES */
+        _STICKYMODES := Map( "off"       , SC_CARETSTICKY_OFF           ; 0
+                           , "on"        , SC_CARETSTICKY_ON            ; 1
+                           , "whitespace", SC_CARETSTICKY_WHITESPACE  ) ; 2
+    
+        /**
+          * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+          */
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
+        }
+
+        /**
+         * @prop {Hex Color} Foreground
+         *
+         * An **8** digit **ARGB** hex color as a string or integer defining the color of
+         * the caret foreground
+         */
+        Foreground {
+            Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_CARET)
+            Set {
+                _col := (Type(Value)="String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_CARET, _col)
+            }
+        }
+
+        /**
+         * @prop {Hex Color} LineBackground
+         * 
+         * An **8** digit **ARGB** hex color as a string or integer defining the color of
+         * the background of the line the caret is on
+         */
+        LineBackground {
+            Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_CARET_LINE_BACK)
+            Set {
+                _col := (Type(Value)="String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_CARET_LINE_BACK, _col)
+            }
+        }
+
+        /**
+         * @prop {String} Sticky
+         * 
+         * This value can be any of the keys in `BCBEdit.Caret()._STICKYMODES`
+         * 
+         *      BCBEdit.Caret()._STICKYMODES := Map(
+         *          "off"       , SC_CARETSTICKY_OFF        := 0,
+         *          "on"        , SC_CARETSTICKY_ON         := 1,
+         *          "whitespace", SC_CARETSTICKY_WHITESPACE := 2
+         *      )
+         */
+        Sticky {
+            Get {
+                _stickymode := this.p.Send(SCI_GETCARETSTICKY)
+                for mdName, mdVal in this._STICKYMODES
+                    if (mdVal=_stickymode)
+                        Return mdName
+            }
+            Set {
+                for mdName, mdVal in this._STICKYMODES
+                    if (mdName=Value)
+                        this.p.Send(SCI_SETCARETSTICKY, mdVal)
+            }
+        }
+
+        /** @prop {Integer} Width 
+         * 
+         * Get and set the width in pixels of the caret
+         */
+        Width {
+            Get => this.p.Send(SCI_GETCARETWIDTH)
+            Set => this.p.Send(SCI_SETCARETWIDTH, Value)
+        }
+
+        /** @prop {Boolean} FrameDraw
+         * 
+         * Toggle the appearance of a frame around the caret line (not filling it in)
+         */
+        FrameDraw {
+            Get => this.p.Send(SCI_GETCARETLINEFRAME)
+            Set => this.p.Send(SCI_SETCARETLINEFRAME, !!(Value))
+        }
+    }
+
+    Class WhiteSpace {
+        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        p := {}
+
+        /** @prop {Boolean} _UseIndents */
+        _UseIndents := False
+
+        /** @prop {Map} _VISMODES */
+        _VISMODES := Map( "always_off"  , SCWS_INVISIBLE             ; 0
+                        , "always_on"   , SCWS_VISIBLEALWAYS         ; 1
+                        , "after_indent", SCWS_VISIBLEAFTERINDENT    ; 2
+                        , "only_indent" , SCWS_VISIBLEONLYININDENT ) ; 3
+        /** @prop {Map} _TABMODES */
+        _TABMODES := Map( "arrow" , SCTD_LONGARROW   ; 0
+                        , "strike", SCTD_STRIKEOUT ) ; 1
+
+        /**
+         * @param {BCBEdit} _BCBEdit 
+         * 
+         * The instance of `BCBEdit` to interact with
+         */
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
+        }
+
+        /**
+         * @prop {Hex Color} Foreground
+         *
+         * An **8** digit **ARGB** hex color as a string or integer defining the color of
+         * the control's whitespace foreground
+         */
+        Foreground {
+            Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_WHITE_SPACE)
+            Set {
+                _col := (Type(Value)="String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_WHITE_SPACE, _col)
+            }
+        }
+
+        /**
+         * @prop {String} Visibility
+         * 
+         * This value can be any key in `BCBEdit.WhiteSpace()._VISMODES`
+         * 
+         *      BCBEdit.WhiteSpace()._VISMODES := Map(
+         *          "always_off"  , SCWS_INVISIBLE           := 0,
+         *          "always_on"   , SCWS_VISIBLEALWAYS       := 1,
+         *          "after_indent", SCWS_VISIBLEAFTERINDENT  := 2,
+         *          "only_indent" , SCWS_VISIBLEONLYININDENT := 3
+         *      )
+         */
+        Visibility {
+            Get {
+                _vis := this.p.Send(SCI_GETVIEWWS)
+                for visName, visVal in this._VISMODES
+                    if (_vis=visVal)
+                        Return visName
+            }
+            Set {
+                for visName, visVal in this._VISMODES
+                    if (visName=Value)
+                        this.p.Send(SCI_SETVIEWWS, visVal)
+            }
+        }
+
+        /**
+         * @prop {String} TabStyle
+         * 
+         * This value can be either of the keys in `BCBEdit.WhiteSpace()._TABMODES`
+         * 
+         *      BCBEdit.WhiteSpace()._TABMODES := Map(
+         *          "arrow" , SCTD_LONGARROW := 0,  ; Default
+         *          "strike", SCTD_STRIKEOUT := 1
+         *      )
+         */
+        TabStyle{
+            Get {
+                _tabmode := this.p.Send(SCI_GETTABDRAWMODE)
+                for mdName, mdVal in this._TABMODES
+                    if (mdVal=_tabmode)
+                        Return mdName
+            }
+            Set {
+                for mdName, mdVal in this._TABMODES
+                    if (mdName=Value)
+                        this.p.Send(SCI_SETTABDRAWMODE, mdVal)
+            }
+        }
+
+        /**
+         * @prop {Integer} TabWidth
+         * 
+         * Get and set the size of the tabs used in the control
+         */
+        TabWidth {
+            Get => this.p.Send(SCI_GETTABWIDTH)
+            Set => this.p.Send(SCI_SETTABWIDTH, Value)
+        }
+
+        /**
+         * @prop {Boolean} UseTabs
+         * 
+         * Toggle whether the control uses tabs or spaces
+         */
+        UseTabs {
+            Get => this.p.Send(SCI_GETUSETABS)
+            Set => this.p.Send(SCI_SETUSETABS, !!(Value))
+        }
+
+        /** @prop {Boolean} UseIndents
+         * 
+         * Toggle whether the tab and backspace keys insert/delete characters or
+         * indent/unindent the current line
+         */
+        UseIndents {
+            Get => this._UseIndents
+            Set {
+                this._UseIndents := !!(Value)
+                this.p.Send(SCI_SETTABINDENTS, this._UseIndents)
+                this.p.Send(SCI_SETBACKSPACEUNINDENTS, this._UseIndents)
+            }
+        }
+
+        /**
+         * @prop {Integer} Size
+         * 
+         * Get and set the size of the whitespace markers in the control
+         */
+        Size {
+            Get => this.p.Send(SCI_GETWHITESPACESIZE)
+            Set => this.p.Send(SCI_SETWHITESPACESIZE, Value)
+        }
+    }
+
+    Class Selection {
+        /** @prop {BCBEdit} p The parent `BCBEdit` instance to interact with */
+        p := {}
+
+        /**
+         * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+         */
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
+        }
+
+        /**
+         * @prop {Hex Color} Background
+         *
+         * An **6-8** digit **(A)RGB** hex color as a string or integer defining the color
+         * of the selection background
+         */
+        Background {
+            Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_SELECTION_BACK)
+            Set {
+                _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_BACK, _col)
+            }
+        }
+
+        /**
+         * @prop {Hex Color} Foreground
+         *
+         * An **6-8** digit **(A)RGB** hex color as a string or integer defining the color
+         * of the selection foreground
+         */
+        Foreground {
+            Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_SELECTION_TEXT)
+            Set {
+                _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_TEXT, _col)
+            }
+        }
+
     }
 }
 
@@ -524,12 +788,16 @@ Class BCBApp {
 
     /** @prop {Object} colors */
     colors := {
-        bg: "080e09",
-        fg: "b6ffb1",
-        caret: "b6ffb1",
-        border : "53864f",
-        indexbg: "2a392b",
-        indexfg: "5a8b5e"
+        bg:        "080e09",    ;  RGB
+        fg:        "b6ffb1",    ;  RGB
+        border:    "53864f",    ;  RGB
+        indexbg:   "2a392b",    ;  RGB
+        indexfg:   "5a8b5e",    ;  RGB
+        caret:   "c0fafffa",    ; ARGB
+        caretln: "101a3020",    ; ARGB
+        selbg:   "aa579261",    ; ARGB
+        selfg:   "ff001000",    ; ARGB
+        whitefg: "5595d58a"     ; ARGB
     }
     /** @prop {String} fontName */
     fontName := "Fira Code"
@@ -563,18 +831,31 @@ Class BCBApp {
         this.gui.BackColor := this.colors.border
 
         this.edit := BCBEdit(this.gui, "w700 h400")
-        this.edit.Background := this.colors.bg
-        this.edit.Foreground := this.colors.fg
-        this.edit.Caret := this.colors.caret
+        this.edit.Font := this.fontName
         this.edit.WrapMode := "word"
         this.edit.Technology := "dw"
-        this.edit.Font := this.fontName
         this.edit.MarginWidth := 0
-        this.edit.ScrollBar := False
         this.edit.MultipleSelection := True
         this.edit.AdditionalSelectionTyping := True
         this.edit.MultiPaste := True
+        this.edit.ScrollBar := False
         this.edit.ScrollPastEnd := False
+        this.edit.Background := this.colors.bg
+        this.edit.Foreground := this.colors.fg
+        this.edit.Selection.Background := this.colors.selbg
+        this.edit.Selection.Foreground := this.colors.selfg
+        this.edit.WhiteSpace.Visibility := "always_on"
+        this.edit.WhiteSpace.Foreground := this.colors.whitefg
+        this.edit.WhiteSpace.TabWidth := 4
+        this.edit.WhiteSpace.UseTabs := False
+        this.edit.WhiteSpace.UseIndents := True
+        this.edit.WhiteSpace.Size := 2
+        ; this.edit.WhiteSpace.TabStyle := "strike"
+        this.edit.Caret.Foreground := this.colors.caret
+        this.edit.Caret.LineBackground := this.colors.caretln
+        this.edit.Caret.Sticky := "on"
+        this.edit.Caret.Width := 2
+        ; this.edit.Caret.FrameDraw := True
 
         this.gui.Show("NA x" A_ScreenWidth)
         WinSetTransparent(0, this.gui)

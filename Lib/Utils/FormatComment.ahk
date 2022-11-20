@@ -14,7 +14,7 @@ FormatSingleLineComment(sep:=":", commChar:=";", padWidth:=1) {
     clip := StrReplace(clip, "`t", "`s`s`s`s")
     trimClip := LTrim(clip)
     leading := StrReplace(clip, trimClip, "")
-    fillSpace := 80-StrLen(clip)
+    fillSpace := 90-StrLen(clip)
     lFill := (fillSpace-Mod(fillSpace,2)) / 2
     rFill := lFill+Mod(fillSpace,2)
     padWidth := StrLen(trimClip) ? padWidth : 0
