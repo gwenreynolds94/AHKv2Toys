@@ -18,7 +18,8 @@ SciLoad(_dll_path:="") {
                            , "Str", !!_dll_path ? _dll_path : "Scintilla.dll" ;
                            , "Ptr"                                            )
 
-    /** Function to be attached to *`Gui.Prototype`*, allowing for a custom
+    /**
+     * Function to be attached to *`Gui.Prototype`*, allowing for a custom
      *      Scintilla control to be added with a **`Send`** method for sending
      *      messages to the control directly with DLL calls
      */
@@ -43,10 +44,12 @@ SciLoad(_dll_path:="") {
 SciFree(_sci_pointer) {
     Try
         FileAppend("Freeing the Scintilla.dll Library...`n", "*")
+
     DllCall("FreeLibrary", "Ptr", _sci_pointer)
 }
 
-/** Retrieve direct references to a Scintilla function and pointer and store
+/**
+ * Retrieve direct references to a Scintilla function and pointer and store
  *      them in static variables so as to avoid the overhead associated with
  *      using SendMessage. The hwnd is stored in a static variable after first
  *      usage (and subsequents).
@@ -75,7 +78,8 @@ SciSend(_msg, _wparam:=0, _lparam:=0, _hwnd:="") {
                  , "UInt", _lparam)
 }
 
-/** If **_hwnd** is present and the *`_DirectFunction`* or *`_DirectPointer`*
+/**
+ * If **_hwnd** is present and the *`_DirectFunction`* or *`_DirectPointer`*
  *      property is not already set for **_ctrl**, a direct reference to a
  *      Scintilla function and pointer are retrieved and stored as said
  *      properties of **_ctrl**. Subsequent calls use the function and pointer
@@ -83,7 +87,7 @@ SciSend(_msg, _wparam:=0, _lparam:=0, _hwnd:="") {
  *      overhead associated with SendMessage.
  *
  *
- *  This function is meant to be bound to a *`Gui.Custom`* Scintilla control,
+ * This function is meant to be bound to a *`Gui.Custom`* Scintilla control,
  *      and as such would pass a hidden **this** variable
  *      into the first parameter (**_ctrl**), leaving only the remaining
  *      parameters to be passed when calling.

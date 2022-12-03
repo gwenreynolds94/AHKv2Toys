@@ -1,9 +1,19 @@
+
+;@Ahk2Exe-Base %A_ProgramFiles%\AutoHotkey\v2.0-beta.10\AutoHotkey64.exe
+;@Ahk2Exe-SetMainIcon %A_ScriptDir%\BCB.ico
+;@Ahk2Exe-AddResource %A_ScriptDir%\BCB.ico, _BCBICO
 #Requires AutoHotkey v2.0-beta
 #Warn All, StdOut
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
 TraySetIcon("BCB.ico")
 
+/**
+ * Immediately exit script if run with the command argument **DoExit**; in combination with
+ * **`#SingleInstance Force`**, this allows for safely exiting the compiled script -- still
+ * catching `OnExit` registered functions -- by just running ".\BCV2.exe DoExit"
+ */
+__1 := (A_Args.Length) ? A_Args[1] : ""
 if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
     ExitApp
 
@@ -35,9 +45,13 @@ OnExit (*) => SciFree(SciPtr)
 /**
  * @var {BCBApp} App
  *
- * Initializi
+ * Initialize BetterClipboard application
  */
 App := BCBApp()
+
+;@Ahk2Exe-IgnoreBegin
+
+;@Ahk2Exe-IgnoreEnd
 
 /**
  * Helper class for setting/getting keys in configuration file as defined by
@@ -950,9 +964,9 @@ Class BCBApp {
         newIndex := this.curIndex + 1
         if (newIndex > this.maxIndex)
             newIndex := 1
-        if (FileExist(BCB_CLIPS_DIR "\" newIndex ".clip") ~= "A|N")
-            FileDelete(BCB_CLIPS_DIR "\" newIndex ".clip")
-        FileAppend(A_Clipboard, BCB_CLIPS_DIR "\" newIndex ".clip")
+        if (FileExist(clipPath:=(BCB_CLIPS_DIR "\" newIndex ".clip")) ~= "A|N")
+            FileDelete(clipPath)
+        FileAppend(A_Clipboard, clipPath)
         BCBConf.Index["Current"] := this.curIndex := newIndex
     }
 
@@ -970,12 +984,46 @@ Class BCBApp {
         A_Clipboard := this.edit.Text
     }
 
+    SaveShownClip(*) {
+        if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
+            FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
+    }
+
+    DeleteShownClip(*) {
+        if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
+            fileList := []
+            Loop Files, BCB_CLIPS_DIR "\*.clip" {
+                filePrefix := StrReplace(A_LoopFileName, ".clip")
+                if ( (filePrefix ~= "^\d+$") and (filePrefix) ) {
+
+                    fileList[filePrefix] := { old: A_LoopFileName, new: filePrefix-1 ".clip"}
+                }
+            }
+            FileDelete(shownClip)
+        }
+    }
+
+    NewLineAbove(*) {
+        this.edit.Send(SCI_HOME)
+        this.edit.Send(SCI_NEWLINE)
+        this.edit.Send(SCI_LINEUP)
+    }
+
+    NewLineBelow(*) {
+        this.edit.Send(SCI_LINEEND)
+        this.edit.Send(SCI_NEWLINE)
+    }
+
     InitHotkeys() {
         HotIf (*) => this.active
         Hotkey("<#c", ObjBindMethod(this, "HideGui"))
         Hotkey("PgDn", ObjBindMethod(this, "PrevClip"))
         Hotkey("PgUp", ObjBindMethod(this, "NextClip"))
-        Hotkey("<^Enter", ObjBindMethod(this, "UpdateClipboardFromEdit"))
+        Hotkey("!Enter", ObjBindMethod(this, "UpdateClipboardFromEdit"))
+        Hotkey("!+Enter", ObjBindMethod(this, "SaveShownClip"))
+        Hotkey("^Enter", ObjBindMethod(this, "NewLineBelow"))
+        Hotkey("^+Enter", ObjBindMethod(this, "NewLineAbove"))
+        Hotkey("!+Delete", ObjBindMethod(this))
         Hotkey("^+z", ObjBindMethod(this.edit, "Redo"))
         Hotkey("^+d", ObjBindMethod(this.edit, "Duplicate"))
         HotIf (*) => !(this.active)
@@ -1001,12 +1049,12 @@ Class BCBApp {
             FileAppend(A_Clipboard, BCB_CLIPS_DIR "\1.clip")
             BCBConf.Index["Current"] := this.curIndex := 1
         } else if ((this.curIndex <= 0) or (this.curIndex > this.maxIndex)) {
-            if (FileExist(BCB_CLIPS_DIR "\1.clip"))
-                FileDelete(BCB_CLIPS_DIR "\1.clip")
-            FileAppend(A_Clipboard, BCB_CLIPS_DIR "\1.clip")
+            if (FileExist(clip1:=(BCB_CLIPS_DIR "\1.clip")))
+                FileDelete(clip1)
+            FileAppend(A_Clipboard, clip1)
             BCBConf.Index["Current"] := this.curIndex := 1
-        } else if !(FileExist(BCB_CLIPS_DIR "\" this.curIndex ".clip") ~= "A|N") {
-            FileAppend(A_Clipboard, BCB_CLIPS_DIR "\" this.curIndex ".clip")
+        } else if !(FileExist(clipC:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
+            FileAppend(A_Clipboard, clipC)
         }
     }
 
@@ -1026,6 +1074,8 @@ Class BCBApp {
                     this.currentOp := this.opacity
                     this.idxGui.ShowGui()
                     this.idxGui.StartTimeout()
+                    if !WinActive(this.gui)
+                        WinActivate(this.gui)
                 } else {
                     WinSetTransparent(newTrans, this.gui)
                     this.currentOp := newTrans

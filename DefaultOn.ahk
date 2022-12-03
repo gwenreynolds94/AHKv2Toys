@@ -98,6 +98,8 @@ HotIf
 $XButton1::
 {
     ; Two XButton1 Up or Downs in 300 ms Sends <Copy>, cancels sending XButton1
+    ToolTip A_PriorHotkey
+    SetTimer (*)=> ToolTip(), -1000
     if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 450)
         Return Send("{LCtrl Down}c{LCtrl Up}") SetTimer(SendXButton1, 0)
     ; XButton2->XButton1 Searches AutohHotkey V2 Docs
@@ -106,8 +108,6 @@ $XButton1::
     ; Otherwise set timer to send XButton1 for 450 ms
     SetTimer SendXButton1, -450
 }
-/** @type {Int} */
-something:=40
 ; Easier to activate when hand can move around mouse
 $XButton1 Up:: Return
 ; Send XButton1
@@ -137,13 +137,18 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;  XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+XButton2Down := False
 $XButton2::
 {
+    global XButton2Down := True
     if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 300)
         Return SearchFirefoxFromClipboard() . SetTimer(SendXButton2, 0)
     SetTimer(SendXButton2, -300)
 }
-$XButton2 Up:: Return
+$XButton2 Up::
+{
+    global XButton2Down := False
+}
 SendXButton2(*) {
     SetTimer(,0)
     Return Send("{XButton2}")
@@ -162,7 +167,7 @@ SearchFirefoxFromClipboard(*) {
     WinActivate wIDstr
     WinWait wIDstr
     SetKeyDelay 25, 5
-    SendEvent "{LCtrl Down}tkv{LCtrl Up}{Enter}"
+    SendEvent "{LCtrl Down}tlv{LCtrl Up}{Enter}"
 }
 ; Activate window below current in the z-order
 ActivateZIndex3(*) {
@@ -186,6 +191,16 @@ HotIf
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <XButton2Down> variable) ; ; ; ; ; ; ; ; 
+;
+#HotIf !!XButton2Down
+WheelUp::WheelRight
+WheelDown::WheelLeft
+#HotIf
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -211,11 +226,16 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-LWin & WheelUp::AlterSound__ShowInfo("+2")
-LWin & WheelDown::AlterSound__ShowInfo("-2")
-<#MButton::SoundSetMute("+1")
+; LWin & WheelUp::AlterSound__ShowInfo("+2")
+; LWin & WheelDown::AlterSound__ShowInfo("-2")
+; <#MButton::SoundSetMute("+1")
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+
+
+ShowSetVolume() {
+    
+}
 
 
 /** ### AlterSound__ShowInfo()
@@ -305,6 +325,27 @@ AlterSound__ShowInfo(_volume:="", _guiWidth:=35, _guiHeight:=100
     }
 }
 ; Hotkey "F8", (*) => AlterSound__ShowInfo()
+
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;
+;
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Shift+Delete Sans Cutting ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+;
+$+Delete::
+{
+    B_Clipboard := A_Clipboard
+    SendEvent "{LShift Down}{Delete}{LShift Up}"
+    A_Clipboard := B_Clipboard
+}
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
 Hotkey "#F7", (*) => ExitApp()    ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
