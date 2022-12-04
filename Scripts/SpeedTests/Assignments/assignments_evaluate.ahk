@@ -83,7 +83,7 @@ PrintStats() {
 }
 
 
-#Include ..\..\Lib\DBT.ahk
+#Include ..\..\..\Lib\DEBUG\DBT.ahk
 #Include .\assignments_separate.ahk
 #Include .\assignments_same.ahk
 #Include .\assignments_continuation.ahk

@@ -2,7 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\Lib\DBT.ahk
+#Include ..\Lib\DEBUG\DBT.ahk
 
 WatchObjectDestroy(force_unhook:=False) {
     static winhook := 0

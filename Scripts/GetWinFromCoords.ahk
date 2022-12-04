@@ -48,4 +48,4 @@ if (A_ScriptName="_scratch.ahk") {
     HotIf
 }
 
-#Include <DBT>
+#Include ..\Lib\DEBUG\DBT.ahk

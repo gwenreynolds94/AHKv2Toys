@@ -98,8 +98,6 @@ HotIf
 $XButton1::
 {
     ; Two XButton1 Up or Downs in 300 ms Sends <Copy>, cancels sending XButton1
-    ToolTip A_PriorHotkey
-    SetTimer (*)=> ToolTip(), -1000
     if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 450)
         Return Send("{LCtrl Down}c{LCtrl Up}") SetTimer(SendXButton1, 0)
     ; XButton2->XButton1 Searches AutohHotkey V2 Docs
@@ -195,8 +193,8 @@ HotIf
 ; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <XButton2Down> variable) ; ; ; ; ; ; ; ; 
 ;
 #HotIf !!XButton2Down
-WheelUp::WheelRight
-WheelDown::WheelLeft
+WheelUp::WheelLeft
+WheelDown::WheelRight
 #HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;

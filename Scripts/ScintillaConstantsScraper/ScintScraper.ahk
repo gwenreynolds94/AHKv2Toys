@@ -2,8 +2,8 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\Lib
-#Include DBT.ahk
+#Include ..\..\Lib\
+#Include DEBUG\DBT.ahk
 
 indexHTML := "https://docs.rs/scintilla-sys/4.0.3/scintilla_sys/index.html"
 

@@ -2,9 +2,9 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include SciConstants.ahk
-#Include ..\Lib
-#Include DBT.ahk
+#Include ..\..\Lib\
+#Include SciLib\SciConstants.ahk
+#Include DEBUG\DBT.ahk
 
 
 scint := DllCall("LoadLibrary", "Str", "Scintilla.dll", "Ptr")
@@ -71,9 +71,10 @@ Class ScEdit {
                           , "char", SC_WRAP_CHAR
                           , "whitespace", SC_WRAP_WHITESPACE
                           , "word", SC_WRAP_WORD)
+         , ctrl := {}
     __New(guiParent, options:="") {
-        this.ctrl := guiParent.Add("Custom", "ClassScintilla " options)
-        Scendilla 0, 0, 0, this.ctrl.Hwnd
+        ScEdit.ctrl := guiParent.Add("Custom", "ClassScintilla " options)
+        Scendilla 0, 0, 0, ScEdit.ctrl.Hwnd
         this.Style := ScEdit.Style()
     }
 

@@ -150,4 +150,4 @@ NewTestsProgressBar( pbWidth:=200, pbHeight:=25
 }
 
 #Include .\assignments_evaluate.ahk
-#Include ..\..\GdipTest\Gdip_Custom.ahk
+#Include ..\..\..\Lib\GdipLib\Gdip_Custom.ahk

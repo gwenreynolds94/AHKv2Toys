@@ -338,4 +338,4 @@ Class ITI_Gui {
 }
 
 
-#Include ..\GdipTest\Gdip_Custom.ahk
+#Include ..\..\Lib\GdipLib\Gdip_Custom.ahk

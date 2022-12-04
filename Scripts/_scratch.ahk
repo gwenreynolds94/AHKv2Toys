@@ -2,7 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <DBT>
+#Include ..\Lib\DEBUG\DBT.ahk
 
 InstallKeybdHook
 

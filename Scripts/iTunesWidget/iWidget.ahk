@@ -2,8 +2,9 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\GdipTest\Gdip_Custom.ahk
-#Include ..\Lib\DBT.ahk
+#Include ..\..\Lib\
+#Include GdipLib\Gdip_Custom.ahk
+#Include DEBUG\DBT.ahk
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;: END Directives ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 

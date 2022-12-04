@@ -1,12 +1,24 @@
 
-;@Ahk2Exe-Base %A_ProgramFiles%\AutoHotkey\v2.0-beta.10\AutoHotkey64.exe
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2.0-beta.10\AutoHotkey64.exe
 ;@Ahk2Exe-SetMainIcon %A_ScriptDir%\BCB.ico
-;@Ahk2Exe-AddResource %A_ScriptDir%\BCB.ico, _BCBICO
+;@Ahk2Exe-AddResource *14 %A_ScriptDir%\BCB.ico, BCBICON
 #Requires AutoHotkey v2.0-beta
 #Warn All, StdOut
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
-TraySetIcon("BCB.ico")
+
+;@Ahk2Exe-IgnoreBegin
+/* Path to `BCB.ico` icon */
+BCBIcon := "BCB.ico"
+;@Ahk2Exe-IgnoreEnd
+
+/*@Ahk2Exe-Keep
+; Handle to `BCB.ico` icon
+BCBIcon := "HICON:" LoadPicture(A_ScriptDir "\BCV2.exe", "Icon6", &isIcon:=1)
+*/
+
+A_IconTip := "BetterClipboardV2"
+TraySetIcon(BCBIcon)
 
 /**
  * Immediately exit script if run with the command argument **DoExit**; in combination with
@@ -267,6 +279,15 @@ Class BCBEdit {
     Redo := {}
     ; @prop {Method} Duplicate Sends a SCI_SELECTIONDUPLICATE command to the control
     Duplicate := {}
+    ; @prop {Method} SelectNext Adds the next occurence to the main selection
+    SelectNext := {}
+    ; @prop {Method} SelectEach Adds each occurence to the main selection
+    SelectEach := {}
+    ; @prop {Method} CopyAllowLine Copies selection or current line
+    CopyAllowLine := {}
+    MoveLineUp := {}
+    MoveLineDown := {}
+    ; RotateSelection := {}
 
     ; @prop {BCBEdit.Wrap} Wrap
     Wrap := {}
@@ -276,6 +297,11 @@ Class BCBEdit {
     WhiteSpace := {}
     ; @prop {BCBEdit.Caret} Caret
     Caret := {}
+    ; @prop {BCBEdit.Chars} Chars
+    Chars := {}
+
+    ; @prop {Integer} multiSelectColumn 
+    multiSelectColumn := -1
 
     /**
      * @param {Gui} _gui A reference to the parent Gui object
@@ -286,13 +312,21 @@ Class BCBEdit {
         this.gui := _gui
         this.Send := (_this, _msg, _wp:=0, _lp:=0) =>
                                             this.ctrl.Send(_msg, _wp, _lp)
-        this.Redo := (*)=> this.Send(SCI_REDO)
+        this.Redo := (*)=> (this.Send(SCI_REDO), this.Send(SCI_SCROLLCARET))
         this.Duplicate := (*)=> this.Send(SCI_SELECTIONDUPLICATE)
+        this.SelectNext := (*)=> (this.Send(SCI_TARGETWHOLEDOCUMENT), this.Send(SCI_MULTIPLESELECTADDNEXT))
+        this.SelectEach := (*)=> (this.Send(SCI_TARGETWHOLEDOCUMENT), this.Send(SCI_MULTIPLESELECTADDEACH))
+        this.CopyAllowLine := (*)=> this.Send(SCI_COPYALLOWLINE)
+        this.MoveLineDown := (*)=> this.Send(SCI_MOVESELECTEDLINESDOWN)
+        this.MoveLineUp := (*)=> this.Send(SCI_MOVESELECTEDLINESUP)
+        ; this.RotateSelection := (*)=> (this.Send(SCI_ROTATESELECTION), this.Send(SCI_SCROLLCARET))
         this.Wrap := BCBEdit.Wrap(this)
         this.Selection := BCBEdit.Selection(this)
         this.WhiteSpace := BCBEdit.WhiteSpace(this)
         this.Caret := BCBEdit.Caret(this)
+        this.Chars := BCBEdit.Chars(this)
         this.SetShortcuts()
+        this.Send(SCI_TARGETWHOLEDOCUMENT)
     }
 
     ; Enable keyboard shortcuts for the Scintilla control, handled by Scintilla
@@ -302,18 +336,88 @@ Class BCBEdit {
         ctrlPgUp := SCK_PRIOR + (SCMOD_CTRL << 16)
         altDn := SCK_DOWN + (SCMOD_ALT << 16)
         altUp := SCK_UP + (SCMOD_ALT << 16)
+        altRight := SCK_RIGHT + (SCMOD_ALT << 16)
         altHome := SCK_HOME + (SCMOD_ALT << 16)
         altEnd := SCK_END + (SCMOD_ALT << 16)
         this.Send(SCI_ASSIGNCMDKEY, ctrlPgDn, SCI_PAGEDOWN) ; Ctrl+PgDn => PageDown
         this.Send(SCI_ASSIGNCMDKEY, ctrlPgUp, SCI_PAGEUP)   ; Ctrl+PgUp => PageUp
-        ; Alt+Down => Move selected lines down
-        this.Send(SCI_ASSIGNCMDKEY, altDn, SCI_MOVESELECTEDLINESDOWN)
-        ; Alt+Up => Move selected lines up
-        this.Send(SCI_ASSIGNCMDKEY, altUp, SCI_MOVESELECTEDLINESUP)
+        ; ;
+        ; ; Alt+Down => Move selected lines down
+        ; ; this.Send(SCI_ASSIGNCMDKEY, altDn, SCI_MOVESELECTEDLINESDOWN)
+        ; ; Alt+Up => Move selected lines up
+        ; ; this.Send(SCI_ASSIGNCMDKEY, altUp, SCI_MOVESELECTEDLINESUP)
+        ; ;
+        ; ; Alt+Right => Rotate main selection in multiple selection
+        ; this.Send(SCI_ASSIGNCMDKEY, altRight, SCI_ROTATESELECTION)
+        ; ;
         ; Alt+Home => Uppercase
         this.Send(SCI_ASSIGNCMDKEY, altHome, SCI_UPPERCASE)
         ; Alt+End => Lowercase
         this.Send(SCI_ASSIGNCMDKEY, altEnd, SCI_LOWERCASE)
+    }
+
+    RotateSelection(*) {
+        selectionCount := this.Send(SCI_GETSELECTIONS)
+        mainSelection := this.Send(SCI_GETMAINSELECTION)
+        if ((mainSelection+1) < selectionCount) {
+            this.Send(SCI_SETMAINSELECTION, mainSelection+1)
+        } else {
+            this.Send(SCI_SETMAINSELECTION, 0)
+        }
+        this.Send(SCI_SCROLLCARET)
+    }
+
+    RotateSelectionReverse(*) {
+        selectionCount := this.Send(SCI_GETSELECTIONS)
+        mainSelection := this.Send(SCI_GETMAINSELECTION)
+        if ((mainSelection-1) >= 0) {
+            this.Send(SCI_SETMAINSELECTION, mainSelection-1)
+        } else {
+            this.Send(SCI_SETMAINSELECTION, selectionCount-1)
+        }
+        this.Send(SCI_SCROLLCARET)
+    }
+
+    AddCaretAbove(*) {
+        selectionCount := this.Send(SCI_GETSELECTIONS)
+        anchorPos := this.Send(SCI_GETANCHOR)
+        lineNumber := this.Send(SCI_LINEFROMPOSITION, anchorPos)
+        lineBeginPos := this.Send(SCI_POSITIONFROMLINE, lineNumber)
+        if (selectionCount=1) {
+            anchorColumn := anchorPos - lineBeginPos
+            this.multiSelectColumn := anchorColumn
+        } else anchorColumn := this.multiSelectColumn
+        newLineBeginPos := this.Send(SCI_POSITIONFROMLINE, lineNumber-1)
+        newLineEndPos := this.Send(SCI_GETLINEENDPOSITION, lineNumber-1)
+        newLineLength := newLineEndPos - newLineBeginPos
+        if (newLineLength >= anchorColumn) {
+            newAnchorPos := newLineBeginPos + anchorColumn
+        } else {
+            newAnchorPos := newLineEndPos
+        }
+        this.Send(SCI_ADDSELECTION, newAnchorPos, newAnchorPos)
+        this.Send(SCI_SCROLLCARET)
+    }
+
+    AddCaretBelow(*) {
+        selectionCount := this.Send(SCI_GETSELECTIONS)
+        anchorPos := this.Send(SCI_GETANCHOR)
+        lineNumber := this.Send(SCI_LINEFROMPOSITION, anchorPos)
+        lineBeginPos := this.Send(SCI_POSITIONFROMLINE, lineNumber)
+        if (selectionCount=1) {
+            anchorColumn := anchorPos - lineBeginPos
+            this.multiSelectColumn := anchorColumn
+        } else anchorColumn := this.multiSelectColumn
+        newLineBeginPos := this.Send(SCI_POSITIONFROMLINE, lineNumber+1)
+        newLineEndPos := this.Send(SCI_GETLINEENDPOSITION, lineNumber+1)
+        newLineLength := newLineEndPos - newLineBeginPos
+        if (newLineLength >= anchorColumn) {
+            newAnchorPos := newLineBeginPos + anchorColumn
+        } else {
+            newAnchorPos := newLineEndPos
+        }
+        this.Send(SCI_ADDSELECTION, newAnchorPos, newAnchorPos)
+        this.Send(SCI_SCROLLCARET)
     }
 
     /**
@@ -460,6 +564,30 @@ Class BCBEdit {
         }
     }
 
+    Class Chars {
+        /* @prop {BCBEdit} p */
+        p := {}
+
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
+        }
+
+        Punctuation {
+            Get {
+                nLen := this.p.Send(SCI_GETPUNCTUATIONCHARS)
+                buf := Buffer(nLen+1, 0)
+                this.p.Send(SCI_GETPUNCTUATIONCHARS, 0, buf.Ptr)
+                Return StrGet(buf,,"UTF-8")
+            }
+            Set {
+                strSize := StrPut(Value, "UTF-8")
+                buf := Buffer(strSize, 0)
+                StrPut(Value, buf, "UTF-8")
+                this.p.Send(SCI_SETPUNCTUATIONCHARS, 0, buf.Ptr)
+            }
+        }
+    }
+
     Class Wrap {
         ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
@@ -545,7 +673,7 @@ Class BCBEdit {
                 Return _flags
             }
             Set {
-                _bitflag := 0x00
+                _bitflag := 0x0000
                 for flagName in Value
                     for flagNameRef, flagBitRef in this._VISUALFLAGSFLAGS
                         if (flagName=flagNameRef)
@@ -672,6 +800,11 @@ Class BCBEdit {
         ; @prop {Map} _TABMODES
         _TABMODES := Map( "arrow" , SCTD_LONGARROW   ; 0
                         , "strike", SCTD_STRIKEOUT ) ; 1
+        ; @prop {Map} _INDENTGUIDES
+        _INDENTGUIDES := Map( "none"       , SC_IV_NONE          ; 0
+                            , "real"       , SC_IV_REAL          ; 1
+                            , "lookforward", SC_IV_LOOKFORWARD   ; 2
+                            , "lookboth"   , SC_IV_LOOKBOTH    ) ; 3
 
         /**
          * @param {BCBEdit} _BCBEdit
@@ -782,6 +915,41 @@ Class BCBEdit {
         }
 
         /**
+         * @prop {String} IndentGuides
+         * 
+         * Get/Set the indentation guide mode. This value can be any of the keys in
+         *      `BCBEdit.WhiteSpace()._INDENTGUIDES`
+         * 
+         *      BCBEdit.WhiteSpace()._INDENTGUIDES := Map(
+         *            "none"       , SC_IV_NONE        := 0 ; Default
+         *          , "real"       , SC_IV_REAL        := 1
+         *          , "lookforward", SC_IV_LOOKFORWARD := 2
+         *          , "lookboth"   , SC_IV_LOOKBOTH    := 3
+         *      )
+         */
+        IndentGuides {
+            Get {
+                _igIDCurrent := this.p.Send(SCI_GETINDENTATIONGUIDES)
+                for igName, igID in this._INDENTGUIDES
+                    if (_igIDCurrent=igID)
+                        Return igName
+            }
+            Set {
+                for igName, igID in this._INDENTGUIDES
+                    if (Value=igName)
+                        this.p.Send(SCI_SETINDENTATIONGUIDES, igID)
+            }
+        }
+
+        IndentGuideColor {
+            Get => this.p.Send(SCI_STYLEGETFORE, STYLE_INDENTGUIDE)
+            Set {
+                _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
+                this.p.Send(SCI_STYLESETFORE, STYLE_INDENTGUIDE, _col)
+            }
+        }
+
+        /**
          * @prop {Integer} Size
          *
          * Get and set the size of the whitespace markers in the control
@@ -801,6 +969,7 @@ Class BCBEdit {
          */
         __New(_BCBEdit) {
             this.p := _BCBEdit
+            this.Additional := BCBEdit.Selection.Additional(_BCBEdit)
         }
 
         /**
@@ -828,6 +997,32 @@ Class BCBEdit {
             Set {
                 _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
                 this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_TEXT, _col)
+            }
+        }
+
+        Class Additional {
+            ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
+            p := {}
+
+            /**
+             * @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+             */
+            __New(_BCBEdit) {
+                this.p := _BCBEdit
+            }
+
+            /**
+             * @prop {Hex Color} Foreground
+             *
+             * An **6-8** digit **(A)RGB** hex color as a string or integer defining the color
+             * of the additional selection foreground
+             */
+            Foreground {
+                Get => this.p.Send(SCI_GETELEMENTCOLOUR, SC_ELEMENT_SELECTION_ADDITIONAL_TEXT)
+                Set {
+                    _col := (Type(Value) = "String") ? Integer("0x" Value) : Value
+                    this.p.Send(SCI_SETELEMENTCOLOUR, SC_ELEMENT_SELECTION_ADDITIONAL_TEXT, _col)
+                }
             }
         }
 
@@ -860,7 +1055,9 @@ Class BCBApp {
         caretln: "0a1a2a1a",    ; ARGB
         selbg:   "aa579261",    ; ARGB
         selfg:   "ff001000",    ; ARGB
-        whitefg: "5595d58a"     ; ARGB
+        adselfg: "ff080e09",    ; ABGR
+        whitefg: "5595d58a",    ; ARGB
+        guidefg: "ff3c4e22"
     }
     ; @prop {String} fontName
     fontName := "Fira Code"
@@ -896,7 +1093,7 @@ Class BCBApp {
         this.edit := BCBEdit(this.gui, "w700 h400")
         this.edit.Font := this.fontName
         this.edit.Wrap.Mode := "word"
-        this.edit.Wrap.VisualFlags := ["start"]
+        this.edit.Wrap.VisualFlags := ["start", "end"]
         this.edit.Wrap.Indent := 2
         this.edit.Technology := "dw"
         this.edit.MarginWidth := 0
@@ -909,12 +1106,15 @@ Class BCBApp {
         this.edit.Foreground := this.colors.fg
         this.edit.Selection.Background := this.colors.selbg
         this.edit.Selection.Foreground := this.colors.selfg
+        this.edit.Selection.Additional.Foreground := this.colors.adselfg
         this.edit.WhiteSpace.Visibility := "always_on"
         this.edit.WhiteSpace.Foreground := this.colors.whitefg
         this.edit.WhiteSpace.TabWidth := 4
         this.edit.WhiteSpace.UseTabs := False
         this.edit.WhiteSpace.UseIndents := True
         this.edit.WhiteSpace.Size := 2
+        this.edit.WhiteSpace.IndentGuides := "lookboth"
+        this.edit.WhiteSpace.IndentGuideColor := this.colors.guidefg
         ; this.edit.WhiteSpace.TabStyle := "strike"
         this.edit.Caret.Foreground := this.colors.caret
         this.edit.Caret.LineBackground := this.colors.caretln
@@ -982,25 +1182,26 @@ Class BCBApp {
     UpdateClipboardFromEdit(*) {
         this.updatingClip := True
         A_Clipboard := this.edit.Text
+        this.HideGui()
     }
 
     SaveShownClip(*) {
-        if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
-            FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
+        ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
+        ;     FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
     }
 
     DeleteShownClip(*) {
-        if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
-            fileList := []
-            Loop Files, BCB_CLIPS_DIR "\*.clip" {
-                filePrefix := StrReplace(A_LoopFileName, ".clip")
-                if ( (filePrefix ~= "^\d+$") and (filePrefix) ) {
-
-                    fileList[filePrefix] := { old: A_LoopFileName, new: filePrefix-1 ".clip"}
-                }
-            }
-            FileDelete(shownClip)
-        }
+        ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
+        ;     fileList := []
+        ;     Loop Files, BCB_CLIPS_DIR "\*.clip" {
+        ;         filePrefix := StrReplace(A_LoopFileName, ".clip")
+        ;         if ( (filePrefix ~= "^\d+$") and (filePrefix) ) {
+        ;
+        ;             fileList[filePrefix] := { old: A_LoopFileName, new: filePrefix-1 ".clip"}
+        ;         }
+        ;     }
+        ;     FileDelete(shownClip)
+        ; }
     }
 
     NewLineAbove(*) {
@@ -1023,9 +1224,19 @@ Class BCBApp {
         Hotkey("!+Enter", ObjBindMethod(this, "SaveShownClip"))
         Hotkey("^Enter", ObjBindMethod(this, "NewLineBelow"))
         Hotkey("^+Enter", ObjBindMethod(this, "NewLineAbove"))
-        Hotkey("!+Delete", ObjBindMethod(this))
+        Hotkey("!+Delete", ObjBindMethod(this, "DeleteShownClip"))
         Hotkey("^+z", ObjBindMethod(this.edit, "Redo"))
         Hotkey("^+d", ObjBindMethod(this.edit, "Duplicate"))
+        Hotkey("^d", ObjBindMethod(this.edit, "SelectNext"))
+        Hotkey("^+a", ObjBindMethod(this.edit, "SelectEach"))
+        Hotkey("^c", ObjBindMethod(this.edit, "CopyAllowLine"))
+        Hotkey("^+Up", ObjBindMethod(this.edit, "MoveLineUp"))
+        Hotkey("^+Down", ObjBindMethod(this.edit, "MoveLineDown"))
+        Hotkey("!Up", ObjBindMethod(this.edit, "AddCaretAbove"))
+        Hotkey("!Down", ObjBindMethod(this.edit, "AddCaretBelow"))
+        Hotkey("!Right", ObjBindMethod(this.edit, "RotateSelection"))
+        Hotkey("!Left", ObjBindMethod(this.edit, "RotateSelectionReverse"))
+        Hotkey("!+p", (*)=>(A_Clipboard:=this.edit.Chars.Punctuation))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))
         HotIf()

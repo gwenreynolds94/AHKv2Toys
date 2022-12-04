@@ -2,9 +2,9 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include SciConstants.ahk
-#Include ..\Lib
-#Include DBT.ahk
+#Include ..\..\Lib\
+#Include SciLib\SciConstants.ahk
+#Include DEBUG\DBT.ahk
 
 
 scint := DllCall("LoadLibrary", "Str", "Scintilla.dll", "Ptr")

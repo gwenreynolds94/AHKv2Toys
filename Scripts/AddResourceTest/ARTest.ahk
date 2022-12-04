@@ -20,11 +20,11 @@ TraySetIcon "BCB.ico"
 ; hIcon := DllCall("LoadImage", "Ptr", hMod, "Str", "BCB.ico", "UInt", 1, "Int", 0, "Int", 0, "UInt", 0, "Ptr")
 ; MsgBox hIcon
 
-hIcon := LoadPicture("C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Scripts\AddResourceTest\ARTest.exe", "Icon6", &asd:=1)
+hIcon := "HICON:" LoadPicture(A_ScriptDir "\ARTest.exe", "Icon6", &asd:=1)
 
 msgbox hicon
 Try {
-    TraySetIcon "HICON:" hIcon
+    TraySetIcon hIcon
     MsgBox "Success"
 } Catch Error as err {
     MsgBox "Failed: " err.Message

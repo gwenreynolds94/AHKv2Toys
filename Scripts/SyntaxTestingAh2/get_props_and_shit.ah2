@@ -2,7 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <DBT>
+#Include ..\Lib\DEBUG\DBT.ahk
 
 aOb := "Any|Array|BoundFunc|Buffer|Class|ClipboardAll|Closure|ComObjArray" "|"
        . "ComObject|ComValueRef|ComValue|Enumerator|Error|File|Float|Func" "|"

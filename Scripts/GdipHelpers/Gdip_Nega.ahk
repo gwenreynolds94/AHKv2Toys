@@ -34,5 +34,6 @@ Class GdipSolidBrushPalette {
 }
 
 
-#Include <DBT>
-#Include <Gdip_v2Ex>
+#Include ..\..\Lib\
+#Include DEBUG\DBT.ahk
+#Include GdipLib\Gdip_v2Ex.ahk
