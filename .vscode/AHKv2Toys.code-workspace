@@ -45,7 +45,7 @@
             ]
         },
         "scm.inputFontSize": 12,
-        "debug.console.fontSize": 10,
+        "debug.console.fontSize": 12,
         "markdown.preview.fontSize": 10,
         "terminal.integrated.fontSize": 10,
         "notebook.outputFontSize": 10,
@@ -297,6 +297,37 @@
                 "bold": false,
                 "italic": false
             },
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "AutoHotkey 2 Debug XXX",
+                "type": "autohotkey",
+                "request": "launch",
+                "program": "${file}",
+                "args": [],
+                "port": "9002-9010",
+                "variableCategories": "recommend",
+                "useDebugDirective": true,
+                "useAutoJumpToError": true,
+                "runtime_v2": "v2/AutoHotkey.exe",
+                "useOutputDebug": true,
+                "internalConsoleOptions": "openOnFirstSessionStart"
+            },
+            {
+                "name": "AutoHotkey 2 Debug <Attach> XXX",
+                "type": "autohotkey",
+                "request": "attach",
+                "port": "9002-9010",
+                "program": "${file}",
+                "variableCategories": "recommend",
+                "useDebugDirective": true,
+                "useAutoJumpToError": true,
+                "useOutputDebug": true,
+                "internalConsoleOptions": "openOnFirstSessionStart"
+            }
         ]
     }
 }
