@@ -297,7 +297,8 @@
                 "bold": false,
                 "italic": false
             },
-        ]
+        ],
+        "editor.fontFamily": "Fira Code, 'Courier New', monospace"
     },
     "launch": {
         "version": "0.2.0",

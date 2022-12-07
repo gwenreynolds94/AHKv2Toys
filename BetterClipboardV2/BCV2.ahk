@@ -171,6 +171,7 @@ Class BCBIndexGui {
         static fadeAmt := this.opacity / this.fadeSteps
         this.active := True
         this.gui.Show("NA")
+        this.MatchParentGuiPos()
         ; Fade in the index gui
         FadeIn(*) {
             if !(this.active) {
@@ -285,9 +286,10 @@ Class BCBEdit {
     SelectEach := {}
     ; @prop {Method} CopyAllowLine Copies selection or current line
     CopyAllowLine := {}
+    ; @prop {Method} MoveLineUp Move selected lines up
     MoveLineUp := {}
+    ; @prop {Method} MoveLineDown Move selected lines down
     MoveLineDown := {}
-    ; RotateSelection := {}
 
     ; @prop {BCBEdit.Wrap} Wrap
     Wrap := {}
@@ -1130,7 +1132,26 @@ Class BCBApp {
 
         this.SetClip(this.shownIndex)
         this.InitHotkeys()
+        OnMessage(0x1666, ObjBindMethod(this, "OnSizingStartEnd"))
         OnClipboardChange(ObjBindMethod(this, "ClipChange"))
+    }
+
+    OnSizingStartEnd(wparam, lparam, msg, hwnd) {
+        if (!!wparam) {     ; on sizing start
+            SetTimer SizingLoop, 15
+            this.gui.BackColor := this.colors.bg
+            this.edit.ctrl.Opt("-Redraw")
+        } else {    ; on sizing end
+            SetTimer SizingLoop, 0
+            this.gui.BackColor := this.colors.border
+            this.edit.ctrl.Opt("+Redraw")
+        }
+        SizingLoop(*) {
+            this.gui.GetPos(,,&_w, &_h)
+            _newW := _w-(this.gui.MarginX*2)
+            _newH := _h-(this.gui.MarginY*2)
+            this.edit.ctrl.Move(,,_newW, _newH)
+        }
     }
 
     ; @param {Integer} _index
@@ -1217,26 +1238,26 @@ Class BCBApp {
 
     InitHotkeys() {
         HotIf (*) => this.active
-        Hotkey("<#c", ObjBindMethod(this, "HideGui"))
-        Hotkey("PgDn", ObjBindMethod(this, "PrevClip"))
-        Hotkey("PgUp", ObjBindMethod(this, "NextClip"))
-        Hotkey("!Enter", ObjBindMethod(this, "UpdateClipboardFromEdit"))
-        Hotkey("!+Enter", ObjBindMethod(this, "SaveShownClip"))
-        Hotkey("^Enter", ObjBindMethod(this, "NewLineBelow"))
-        Hotkey("^+Enter", ObjBindMethod(this, "NewLineAbove"))
-        Hotkey("!+Delete", ObjBindMethod(this, "DeleteShownClip"))
-        Hotkey("^+z", ObjBindMethod(this.edit, "Redo"))
-        Hotkey("^+d", ObjBindMethod(this.edit, "Duplicate"))
-        Hotkey("^d", ObjBindMethod(this.edit, "SelectNext"))
-        Hotkey("^+a", ObjBindMethod(this.edit, "SelectEach"))
-        Hotkey("^c", ObjBindMethod(this.edit, "CopyAllowLine"))
-        Hotkey("^+Up", ObjBindMethod(this.edit, "MoveLineUp"))
-        Hotkey("^+Down", ObjBindMethod(this.edit, "MoveLineDown"))
-        Hotkey("!Up", ObjBindMethod(this.edit, "AddCaretAbove"))
-        Hotkey("!Down", ObjBindMethod(this.edit, "AddCaretBelow"))
-        Hotkey("!Right", ObjBindMethod(this.edit, "RotateSelection"))
-        Hotkey("!Left", ObjBindMethod(this.edit, "RotateSelectionReverse"))
-        Hotkey("!+p", (*)=>(A_Clipboard:=this.edit.Chars.Punctuation))
+        Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"))
+        Hotkey("PgDn"    , ObjBindMethod(this     , "PrevClip"))
+        Hotkey("PgUp"    , ObjBindMethod(this     , "NextClip"))
+        Hotkey("!Enter"  , ObjBindMethod(this     , "UpdateClipboardFromEdit"))
+        Hotkey("!+Enter" , ObjBindMethod(this     , "SaveShownClip"))
+        Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"))
+        Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"))
+        Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"))
+        Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"))
+        Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"))
+        Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"))
+        Hotkey("^+a"     , ObjBindMethod(this.edit, "SelectEach"))
+        Hotkey("^c"      , ObjBindMethod(this.edit, "CopyAllowLine"))
+        Hotkey("^+Up"    , ObjBindMethod(this.edit, "MoveLineUp"))
+        Hotkey("^+Down"  , ObjBindMethod(this.edit, "MoveLineDown"))
+        Hotkey("!Up"     , ObjBindMethod(this.edit, "AddCaretAbove"))
+        Hotkey("!Down"   , ObjBindMethod(this.edit, "AddCaretBelow"))
+        Hotkey("!Right"  , ObjBindMethod(this.edit, "RotateSelection"))
+        Hotkey("!Left"   , ObjBindMethod(this.edit, "RotateSelectionReverse"))
+        ; Hotkey("!+p"     , (*)=>(A_Clipboard:=this.edit.Chars.Punctuation))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))
         HotIf()

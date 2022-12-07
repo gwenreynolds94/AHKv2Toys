@@ -220,108 +220,126 @@ WheelDown::WheelRight
 ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
-
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-; LWin & WheelUp::AlterSound__ShowInfo("+2")
-; LWin & WheelDown::AlterSound__ShowInfo("-2")
-; <#MButton::SoundSetMute("+1")
+#Include <Utils\VolumeChangeGUI>
+(VolChangeGui)
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-
-ShowSetVolume() {
-    
+#HotIf !!((MouseGetPos(,, &_targetWin), WinGetClass("ahk_id " _targetWin))="Shell_TrayWnd")
+#MaxThreadsBuffer True
+$WheelUp:: 
+$WheelDown::
+{
+    _volMag := !!(SubStr(ThisHotkey, 7)="Up") ? 1 : -1
+    _volNew := Round(SoundGetVolume())+(2*_volMag)
+    SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
+    VolChangeGui.Show()
 }
+$!WheelUp:: 
+$!WheelDown::
+{
+    _volMag := !!(SubStr(ThisHotkey, 8)="Up") ? 1 : -1
+    _volNew := Round(SoundGetVolume())+(10*_volMag)
+    SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
+    VolChangeGui.Show()
+}
+MButton::
+{
+    SetTimer(ToggleMuteOnMButtonHold, -500)
+}
+MButton Up::
+{
+    SetTimer(ToggleMuteOnMButtonHold, 0)
+}
+ToggleMuteOnMButtonHold(*) {
+    SoundSetMute(!SoundGetMute())
+    VolChangeGui.UpdateMuteStatus()
+    Tooltip (SoundGetMute())?("Muted"):("Unmuted")
+    SetTimer (*)=>Tooltip(), -1000
+}
+#MaxThreadsBuffer False
+#HotIf
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
-
-/** ### AlterSound__ShowInfo()
- * @param {Integer | String} _volume
- *
- * `0-100` Set volume level
- *
- * `+n` Increment volume level
- *
- * `-n` Decremement volume level
- *
- * `toggle` Toggle mute/unmute
- *
- * `mute` Mute if not muted
- *
- * `unmute` Unmute if not unmuted
- *
- * @param {Integer} _guiWidth
- * @param {Integer} _guiHeight
- * @param {Integer} _guiDuration
- * @param {Integer} _guiFadeDuration
- */
-AlterSound__ShowInfo(_volume:="", _guiWidth:=35, _guiHeight:=100
-                                , _guiDuration:=2000, _guiFadeDuration:=300) {
-         /**
-          * @type {Gui} #
-          * Gui object containing volume/mute status */
-    static sound_gui := {}
-         /**
-          * @type {GuiControl} #
-          * Progress gui control representing volume */
-         , sound_prog := {}
-         /**
-          * @type {dwFlag} #
-          * DWORD hide window flag for `AnimateWindow` */
-         , AW_HIDE := 0x00010000
-         /**
-          * @type {dwFlag} #
-          * DWORD show window flag for `AnimateWindow` */
-         , AW_ACTIVATE := 0x00020000
-         /**
-          * @type {dwFlag} #
-          * DWORD fading animation flag for `AnimateWindow`*/
-         , AW_BLEND := 0x00080000
-         /**
-          * @type {String} #
-          * ExStyle, prevents window getting focus */
-         , WS_EX_NOACTIVATE := "E0x08000000"
-
-    if !(sound_gui is Gui)
-        _Initialize_Sound_Gui()
-
-    if (_volume ~= "^[\+\-](0|1)?[0-9][0-9]?$") {
-        SoundSetVolume(_volume)
-        _currentVolume := Round(SoundGetVolume())
-        _currentMute := SoundGetMute()
-        sound_prog.Value := _currentVolume
-        ToolTip(_currentVolume ", " (_currentMute ? "On" : "Off"))
-        SetTimer((*)=>Tooltip(), -1000)
-    } else if (_volume ~= "^(1[0-9]{2}|[1-9][0-9]|[0-9])$") {
-
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;
+#Include <Utils\DllCoords>
+(AltShiftDragWindowRect)
+Class AltShiftDragWindowRect {
+    Static isMoving := False
+         , isSizing := False
+         , home := { hwnd: -0x000001,
+                     mouse: { x: -1, y: -1 },
+                     win:   { x: -1, y: -1, w: -1, h: -1 } }
+         , sizeMin := { w: 100, h: 100 }
+    Static __New() {
+        HotIf (*)=> (!(this.isMoving) and !((A_PriorHotkey="!+LButton") and (A_TimeSincePriorHotkey < 300)))
+        Hotkey "!+LButton", ObjBindMethod(this, "StartMoving")
+        HotIf (*)=> (!(this.isMoving) and !!((A_PriorHotkey="!+LButton") and (A_TimeSincePriorHotkey < 300)))
+        Hotkey "!+LButton", ObjBindMethod(this, "CenterWindow")
+        HotIf (*)=> !(this.isSizing)
+        Hotkey "!+RButton", ObjBindMethod(this, "StartSizing")
+        HotIf
     }
-
-    if ControlGetVisible(sound_prog) {
-        SetTimer _Hide_Sound_Gui, -2000
-    } else {
-        _Show_Sound_Gui()
-        SetTimer _Hide_Sound_Gui, -2000
+    Static StartMoving(*) {
+        this.isMoving := True
+        MouseGetPos(,,&_aHwnd)
+        this.home.hwnd := _aHwnd
+        this.home.mouse := DllMouseGetPos()
+        this.home.win := DllWinGetRect(this.home.hwnd)
+        SetTimer MovingLoop, 1
+        MovingLoop() {
+            if !(GetKeyState("LButton", "P"))
+                SetTimer(,0), this.isMoving := False
+            else {
+                mouseNow := DllMouseGetPos()
+                mouseDelta := { x: mouseNow.x - this.home.mouse.x,
+                                y: mouseNow.y - this.home.mouse.y }
+                winPosNew := { x: this.home.win.x + mouseDelta.x,
+                               y: this.home.win.y + mouseDelta.y }
+                DllWinSetRect(this.home.hwnd, winPosNew)
+            }
+        }
     }
-
-    _Show_Sound_Gui(*) {
-        DllCall( "AnimateWindow", "Ptr", sound_gui.Hwnd
-                                , "Int", _guiFadeDuration
-                                , "UInt", AW_ACTIVATE|AW_BLEND )
+    Static StartSizing(*) {
+        this.isSizing := True
+        MouseGetPos(,,&_aHwnd)
+        this.home.hwnd := _aHwnd
+        this.home.mouse := DllMouseGetPos()
+        this.home.win := DllWinGetRect(this.home.hwnd)
+        SetTimer SizingLoop, 1
+        PostMessage(0x1666,1,,, "ahk_id " this.home.hwnd)
+        SizingLoop() {
+            if !(GetKeyState("RButton", "P"))
+                SetTimer(,0), this.isSizing := False, PostMessage(0x1666,0,,, "ahk_id " this.home.hwnd)
+            else {
+                mouseNow := DllMouseGetPos()
+                mouseDelta := { x: mouseNow.x - this.home.mouse.x,
+                                y: mouseNow.y - this.home.mouse.y }
+                winSizeNew := {
+                    w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ? _w : this.sizeMin.w,
+                    h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ? _h : this.sizeMin.h
+                }
+                DllWinSetRect(this.home.hwnd, winSizeNew)
+            }
+        }
     }
-    _Hide_Sound_Gui(*) {
-        DllCall( "AnimateWindow", "Ptr", sound_gui.Hwnd
-                                , "Int", _guiFadeDuration
-                                , "UInt", AW_HIDE|AW_BLEND )
-    }
-    _Initialize_Sound_Gui(*) {
-        sound_gui := Gui("+AlwaysOnTop -Caption +" WS_EX_NOACTIVATE)
-        sound_gui.MarginX := sound_gui.MarginY := 0
-        sound_gui.SetFont("s14 cc35166", "Cousine")
-        sound_prog := sound_gui.Add("Progress", "x0 y0 w35 h100 Vertical Smooth", SoundGetVolume())
-        sound_gui.Show("x" 10 " y" (A_ScreenHeight-10-_guiHeight) " w" _guiWidth " h" _guiHeight " Hide NA")
+    Static CenterWindow(*) {
+        MouseGetPos(,,&_aHwnd)
+        this.home.hwnd := _aHwnd
+        this.home.win := DllWinGetRect(this.home.hwnd)
+        winPosNew := { x: (A_ScreenWidth - this.home.win.w)/2,
+                       y: (A_ScreenHeight - this.home.win.h)/2 }
+        DllWinSetRect(this.home.hwnd, winPosNew)
     }
 }
-; Hotkey "F8", (*) => AlterSound__ShowInfo()
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
