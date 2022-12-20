@@ -4,7 +4,8 @@ SizeWindow(wHwnd:=0, wScrGap:=8, *) {
     wTitle  := "ahk_id " wHwnd
     wWidth  := A_ScreenWidth - wScrGap*2
     wHeight := A_ScreenHeight - wScrGap*2
-    ConvertTrueWinCoords(&wRect:=0, wHwnd, wScrGap, wScrGap, wWidth, wHeight)
+    ; ConvertTrueWinCoords(&wRect:=0, wHwnd, wScrGap, wScrGap, wWidth, wHeight)
+    RealCoordsFromSuperficial(&wRect:=0, wHwnd, wScrGap, wScrGap, wWidth, wHeight)
     WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
 }
 
@@ -20,7 +21,8 @@ SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
     else if (side=2) or (side="right")
         wX := wRX
     else {
-        ConvertTrueWinCoords(&visRect:=0, wHwnd)
+        ; ConvertTrueWinCoords(&visRect:=0, wHwnd)
+        SuperficialCoordsFromReal(&visRect:=0, wHwnd)
         if (visRect.x=wLX) and (visRect.w=wWidth)
             wX := wRX
         else if (visRect.x=wRX) and (visRect.w=wWidth)
@@ -36,59 +38,87 @@ SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
         }
     }
     wY := wScrGap
-    ConvertTrueWinCoords(&wRect:=0, wHwnd, wX, wY, wWidth, wHeight)
+    ; ConvertTrueWinCoords(&wRect:=0, wHwnd, wX, wY, wWidth, wHeight)
+    RealCoordsFromSuperficial(&wRect:=0, wHwnd, wX, wY, wWidth, wHeight)
     WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
 }
 
 GetWindowMarginsRect(&win, wHwnd) {
-	win := {}
+    win := {}
     newWinRect := Buffer(16)
-	DllCall("GetWindowRect", "Ptr", wHwnd, "Ptr", newWinRect.Ptr)
-	win.x := NumGet(newWinRect, 0, "Int")
-	win.y := NumGet(newWinRect, 4, "Int")
-	win.w := NumGet(newWinRect, 8, "Int")
-	win.h := NumGet(newWinRect, 12, "Int")
+    DllCall("GetWindowRect", "Ptr", wHwnd, "Ptr", newWinRect.Ptr)
+    win.x := NumGet(newWinRect, 0, "Int")
+    win.y := NumGet(newWinRect, 4, "Int")
+    win.w := NumGet(newWinRect, 8, "Int")
+    win.h := NumGet(newWinRect, 12, "Int")
 }
 
 GetWindowVisibleRect(&frame, wHwnd) {
-	frame := {}
-	DWMWA_EXTENDED_FRAME_BOUNDS := 9
-	rectSize := 16
-	newFrameRect := Buffer(16)
-	DllCall("Dwmapi.dll\DwmGetWindowAttribute"
-			, "Ptr", wHwnd
-			, "Uint", DWMWA_EXTENDED_FRAME_BOUNDS
-			, "Ptr", newFrameRect.Ptr
-			, "Uint", rectSize)
-	frame.x := NumGet(newFrameRect, 0, "Int")
-	frame.y := NumGet(newFrameRect, 4, "Int")
-	frame.w := NumGet(newFrameRect, 8, "Int")
-	frame.h := NumGet(newFrameRect, 12, "Int")
+    frame := {}
+    DWMWA_EXTENDED_FRAME_BOUNDS := 9
+    rectSize := 16
+    newFrameRect := Buffer(16)
+    DllCall("Dwmapi.dll\DwmGetWindowAttribute"
+            , "Ptr", wHwnd
+            , "Uint", DWMWA_EXTENDED_FRAME_BOUNDS
+            , "Ptr", newFrameRect.Ptr
+            , "Uint", rectSize)
+    frame.x := NumGet(newFrameRect, 0, "Int")
+    frame.y := NumGet(newFrameRect, 4, "Int")
+    frame.w := NumGet(newFrameRect, 8, "Int")
+    frame.h := NumGet(newFrameRect, 12, "Int")
 }
 
 ConvertTrueWinCoords(&inOutCoords, wHwnd, mx := 0, my := 0, mw := 0, mh := 0) {
-	inOutCoords := {}
-	GetWindowMarginsRect(&win, wHwnd)
-	GetWindowVisibleRect(&frame, wHwnd)
-	offSetLeft := frame.x - win.x
-	offSetRight := win.w - frame.w
-	offSetBottom := win.h - frame.h
-	;; if coords are empty...
-	if !(mx && my && mw && mh) {
-		;; ...get visible inner rect coords from
-		;; ...window's invisble margin rect coords
-		WinGetPos &mx, &my, &mw, &mh, "ahk_id " wHwnd
-		inOutCoords.x := mx + offSetLeft
-		inOutCoords.y := my
-		inOutCoords.w := mw  - (offSetRight * 2)
-		inOutCoords.h := mh - offSetBottom
-	} else {
-		;; ...convert desired visible window rect coords
-		;; ...to account for the invisible margin rect
-		inOutCoords.x := mx - offSetLeft
-		inOutCoords.y := my
-		inOutCoords.w := mw  + (offSetRight * 2)
-		inOutCoords.h := mh + offSetBottom
-	}
+    inOutCoords := {}
+    GetWindowMarginsRect(&win, wHwnd)
+    GetWindowVisibleRect(&frame, wHwnd)
+    offSetLeft := frame.x - win.x
+    offSetRight := win.w - frame.w
+    offSetBottom := win.h - frame.h
+    ;; Retrieve visible rect coords if coords are empty...
+    if !(mx && my && mw && mh) {
+        ;; ...get visible inner rect coords from
+        ;; ...window's invisble margin rect coords
+        WinGetPos &mx, &my, &mw, &mh, "ahk_id " wHwnd
+        inOutCoords.x := mx + offSetLeft
+        inOutCoords.y := my
+        inOutCoords.w := mw - (offSetRight * 2)
+        inOutCoords.h := mh - offSetBottom
+    } else {
+        ;; Retrieve true coordinates to match the visible rect with given coords
+        ;; ...convert desired visible window rect coords
+        ;; ...to account for the invisible margin rect
+        inOutCoords.x := mx - offSetLeft
+        inOutCoords.y := my
+        inOutCoords.w := mw + (offSetRight * 2)
+        inOutCoords.h := mh + offSetBottom
+    }
 }
 
+SuperficialCoordsFromReal(&outCoords, wHwnd) {
+    outCoords := {}
+    GetWindowMarginsRect(&win, wHwnd)
+    GetWindowVisibleRect(&frame, wHwnd)
+    offSetLeft := frame.x - win.x
+    offSetRight := win.w - frame.w
+    offSetBottom := win.h - frame.h
+    WinGetPos &wX, &wY, &wW, &wH, "ahk_id " wHwnd
+    outCoords.x := wX + offSetLeft
+    outCoords.y := wY
+    outCoords.w := wW - (offSetRight * 2)
+    outCoords.h := wH - offSetBottom
+}
+
+RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH) {
+    outCoords := {}
+    GetWindowMarginsRect(&win, wHwnd)
+    GetWindowVisibleRect(&frame, wHwnd)
+    offSetLeft := frame.x - win.x
+    offSetRight := win.w - frame.w
+    offSetBottom := win.h - frame.h
+    outCoords.x := wX - offSetLeft
+    outCoords.y := wY
+    outCoords.w := wW + (offSetRight * 2)
+    outCoords.h := wH + offSetBottom
+}

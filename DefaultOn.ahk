@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0-beta
+#Requires AutoHotkey v2.0-rc
 #Warn All, StdOut
 #SingleInstance Force
 
@@ -6,28 +6,9 @@
 
 ; #Include <GdipLib\Gdip_Custom>
 
-/**
- *<]*>  Hotkey Overview
- * <.> ... {XButton1}, {XButton1 Up}  ==>  ClickToCopy
- *<`\> ... ... XButton1->LButton2  =>  Ctrl+v
- *<`\> ... ... XButton1->RButton2  =>  Ctrl+x
- *<`\> ... ... XButton1->XButton1  =>  Ctrl+c
- *
- * <.> ... {XButton2}, {XButton2 Up}  ==>  AltTabEsque
- *<`\> ... ... XButton2->LButton2  =>  Activate Previous Active Window
- *<`\> ... ... XButton2->XButton2  =>  SearchFirefoxFromClipboard (or Waterfox)
- *<`\> ... ... XButton2->RButton2  =>  Activate Previously Previous Active Window
- *
- *<`\> ... "<^+p"  ==>  Single Line Comment Formatting  [Hard]
- *<`\> ... "<^+o"  ==>  Single Line Comment Formatting  [Soft]
- *<`\> ... "<^+i"  ==>  Single Line Comment Formatting  [Medium]
- *
- *<`\> ... "<#v"   ==>  Scritch Notes Application
- */
 
-
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; FUCK CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  FUCK CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ;
 FuckCortana(*) {
     if ProcessExist("Cortana.exe")
@@ -35,11 +16,12 @@ FuckCortana(*) {
 }
 SetTimer FuckCortana, (1000 * 5)
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ;
 if !ProcessExist("BCV2.exe") {
     Run(A_ScriptDir "\BetterClipboardV2\BCV2.exe")
@@ -50,11 +32,12 @@ ExitBCB(ExitReason, ExitCode) {
 }
 OnExit ExitBCB
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ;
 #Include %A_ScriptDir%\ScinSkratch\Scritch.ahk
 ;
@@ -62,18 +45,20 @@ ScritchResourcePath := A_ScriptDir "\ScinSkratch"
 NotesApp := ScritchGui(ScritchResourcePath, startHidden := True)
 Hotkey "<#v", (*) => NotesApp.ToggleGui()
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\FormatComment>
 ;
 _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
+_vsc_text_main_rgx := ".*Visual\sStudio\sCode"
 SetTitleMatchMode "Regex"
 SetTitleMatchMode "Slow"
-HotIf (*) => (WinActive("ahk_exe Code.exe")
+HotIf (*) => (WinActive("i)\.ahk" _vsc_text_main_rgx)
     or WinActive("ahk_exe VSCodium.exe"))
 Hotkey "<^+p", (*) => FormatSingleLineComment()
 Hotkey "<^+o", (*) => FormatSingleLineComment(" ")
@@ -88,23 +73,33 @@ Hotkey "<^+o", (*) => FormatSingleLineComment("=", "`;", 0)
 Hotkey "<^+i", (*) => FormatSingleLineComment("|", "`;", 1)
 HotIf
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+Global X1NoCopy := False
+     , X1ListenDur := 375
 ; Kick it all off
 $XButton1::
 {
-    ; Two XButton1 Up or Downs in 300 ms Sends <Copy>, cancels sending XButton1
-    if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 450)
-        Return Send("{LCtrl Down}c{LCtrl Up}") SetTimer(SendXButton1, 0)
+    Global X1ListenDur, X1NoCopy
+    ; Two XButton1 Up or Downs in <X1ListenDur> ms Sends <LCtrl+C>, cancels sending XButton1
+    if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < X1ListenDur) and !X1NoCopy {
+        X1NoCopy := True
+        Send("{LCtrl Down}c{LCtrl Up}")
+        SetTimer(SendXButton1, 0)
+        Return
+    }
     ; XButton2->XButton1 Searches AutohHotkey V2 Docs
-    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 450)
+    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < X1ListenDur)
         Return SearchV2DocsFromClipboard() SetTimer(SendXButton1, 0)
-    ; Otherwise set timer to send XButton1 for 450 ms
-    SetTimer SendXButton1, -450
+
+    ; Otherwise set timer to send XButton1 after <X1ListenDur> ms
+    SetTimer SendXButton1, -X1ListenDur
+    X1NoCopy := False
 }
 ; Easier to activate when hand can move around mouse
 $XButton1 Up:: Return
@@ -124,24 +119,26 @@ SendPaste(*) {
     Send("{LCtrl Down}v{LCtrl Up}")
 }
 ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-HotIf (*) => InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < 450)
+HotIf (*) => InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < X1ListenDur) and !X1NoCopy
 Hotkey("LButton", SendPaste)
 Hotkey("RButton", SendCut)
 HotIf
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ;  XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-XButton2Down := False
+Global XButton2Down := False
+     , X2ListenDur := 300
 $XButton2::
 {
-    global XButton2Down := True
-    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 300)
+    global XButton2Down := True, X2ListenDur
+    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < X2ListenDur)
         Return SearchFirefoxFromClipboard() . SetTimer(SendXButton2, 0)
-    SetTimer(SendXButton2, -300)
+    SetTimer(SendXButton2, -X2ListenDur)
 }
 $XButton2 Up::
 {
@@ -182,12 +179,14 @@ ActivateZIndex4(*) {
     DetectHiddenWindows True
 }
 ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-HotIf (*) => InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < 300)
+HotIf (*) => InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < X2ListenDur)
 Hotkey("LButton", ActivateZIndex3)
 Hotkey("RButton", ActivateZIndex4)
 HotIf
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <XButton2Down> variable) ; ; ; ; ; ; ; ; 
@@ -200,25 +199,29 @@ WheelDown::WheelRight
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\WinSizePos>
 ;
 #b:: SizeWindow()
 #s:: SizeWindowHalf()
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
 ;
 #Include <Utils\SearchV2Docs>
 ;
 #z:: SearchV2DocsFromClipboard()
 ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -232,9 +235,9 @@ $WheelUp::
 $WheelDown::
 {
     _volMag := !!(SubStr(ThisHotkey, 7)="Up") ? 1 : -1
-    _volNew := Round(SoundGetVolume())+(2*_volMag)
+    _volNew := Round(SoundGetVolume())+(4*_volMag)
     SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
-    VolChangeGui.Show()
+    VolChangeGui.AnimateShow()
 }
 $!WheelUp:: 
 $!WheelDown::
@@ -242,7 +245,7 @@ $!WheelDown::
     _volMag := !!(SubStr(ThisHotkey, 8)="Up") ? 1 : -1
     _volNew := Round(SoundGetVolume())+(10*_volMag)
     SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
-    VolChangeGui.Show()
+    VolChangeGui.AnimateShow()
 }
 MButton::
 {
@@ -263,6 +266,7 @@ ToggleMuteOnMButtonHold(*) {
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -341,6 +345,7 @@ Class AltShiftDragWindowRect {
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
+
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
@@ -348,6 +353,7 @@ Class AltShiftDragWindowRect {
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Shift+Delete Sans Cutting ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
@@ -363,4 +369,17 @@ $+Delete::
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-Hotkey "#F7", (*) => ExitApp()    ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+#Left::
+{
+    Send "{LAlt Down}{RAlt}{Tab}{LAlt Up}"
+}
+#Right::
+{
+    Send "{LAlt Down}{Tab}{LAlt Up}"
+}
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+
+
+Hotkey "#F7", (*) => ExitApp() ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;

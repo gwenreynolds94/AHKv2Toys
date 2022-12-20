@@ -6,6 +6,10 @@
     ],
     "settings": {
         "workbench.tree.indent": 12,
+        "editor.suggestSelection": "recentlyUsedByPrefix",
+        "editor.stickyTabStops": false,
+        "editor.suggest.shareSuggestSelections": true,
+        "editor.autoSurround": "languageDefined",
         "explorer.sortOrder": "foldersNestsFiles",
         "files.autoSave": "afterDelay",
         "peacock.color": "#393838",
@@ -49,7 +53,6 @@
         "markdown.preview.fontSize": 10,
         "terminal.integrated.fontSize": 10,
         "notebook.outputFontSize": 10,
-        "editor.fontSize": 10,
         "editor.rulers": [
             89, 90
         ],
@@ -298,7 +301,10 @@
                 "italic": false
             },
         ],
-        "editor.fontFamily": "Fira Code, 'Courier New', monospace"
+        "editor.fontFamily": "Fira Code, 'Courier New', monospace",
+        "AutoHotkey2.InterpreterPath": "C:\\Program Files\\AutoHotkey\\v2.0-rc.2\\AutoHotkey.exe",
+        "editor.semanticHighlighting.enabled": true,
+        "workbench.settings.useSplitJSON": true
     },
     "launch": {
         "version": "0.2.0",

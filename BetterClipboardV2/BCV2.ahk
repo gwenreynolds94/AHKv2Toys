@@ -1,8 +1,8 @@
 
-;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2.0-beta.10\AutoHotkey64.exe
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2.0-rc.2\AutoHotkey64.exe
 ;@Ahk2Exe-SetMainIcon %A_ScriptDir%\BCB.ico
 ;@Ahk2Exe-AddResource *14 %A_ScriptDir%\BCB.ico, BCBICON
-#Requires AutoHotkey v2.0-beta
+#Requires Autohotkey v2.0-rc.2
 #Warn All, StdOut
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
@@ -34,7 +34,9 @@ if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
 #Include SciLib\SciLoad.ahk
 
 ; @prop {String} Path to Scintilla.dll
-SCI_DLL_PATH := "..\Lib\SciLib\Scintilla.dll"
+SCI_DLL_PATH := "Scintilla.dll"
+if !(FileExist(SCI_DLL_PATH) ~= "A|N")
+    FileInstall "..\Lib\SciLib\Scintilla.dll", ".\Scintilla.dll"
 
 ; @prop {String} Path to BetterClipboard configuration file
 BCB_CONF_PATH := A_AppData "\BetterClipboard\BCB.ini"
@@ -75,16 +77,23 @@ App := BCBApp()
 Class BCBConf {
     static __New() {
         ; Create configuration file as per BCB_CONF_PATH if the file does not exist and
-        ; the file's directory does exist. If neither exist, exit the application
+        ; the file's directory does exist. If neither exist, exit the application        
         if !(FileExist(BCB_CONF_PATH) ~= "A|N") {
             SplitPath BCB_CONF_PATH,, &conf_dir
             if DirExist(conf_dir) {
                 IniWrite 1   , BCB_CONF_PATH, "Index", "Current"
                 IniWrite 9999, BCB_CONF_PATH, "Index", "Max"
             } else {
-                MsgBox( "Neither file or directory of given path to "
-                      . "configuration file could be found."          )
-                ExitApp
+                SplitPath conf_dir,, &conf_dir_parent
+                if DirExist(conf_dir_parent) {
+                    DirCreate conf_dir
+                    IniWrite 1   , BCB_CONF_PATH, "Index", "Current"
+                    IniWrite 9999, BCB_CONF_PATH, "Index", "Max"
+                } else {
+                    MsgBox( "Neither file or directory of given path to "
+                          . "configuration file could be found."          )
+                    ExitApp
+                }
             }
         }
     }
@@ -291,7 +300,7 @@ Class BCBEdit {
     ; @prop {Method} MoveLineDown Move selected lines down
     MoveLineDown := {}
 
-    ; @prop {BCBEdit.Wrap} Wrap
+    ; @prop {BCBEdit.Wrap()} Wrap
     Wrap := {}
     ; @prop {BCBEdit.Selection} Selection
     Selection := {}
@@ -328,7 +337,7 @@ Class BCBEdit {
         this.Caret := BCBEdit.Caret(this)
         this.Chars := BCBEdit.Chars(this)
         this.SetShortcuts()
-        this.Send(SCI_TARGETWHOLEDOCUMENT)
+        ; this.Send(SCI_TARGETWHOLEDOCUMENT)
     }
 
     ; Enable keyboard shortcuts for the Scintilla control, handled by Scintilla
@@ -350,7 +359,7 @@ Class BCBEdit {
         ; ; this.Send(SCI_ASSIGNCMDKEY, altUp, SCI_MOVESELECTEDLINESUP)
         ; ;
         ; ; Alt+Right => Rotate main selection in multiple selection
-        ; this.Send(SCI_ASSIGNCMDKEY, altRight, SCI_ROTATESELECTION)
+        ; ; this.Send(SCI_ASSIGNCMDKEY, altRight, SCI_ROTATESELECTION)
         ; ;
         ; Alt+Home => Uppercase
         this.Send(SCI_ASSIGNCMDKEY, altHome, SCI_UPPERCASE)
@@ -567,9 +576,10 @@ Class BCBEdit {
     }
 
     Class Chars {
-        /* @prop {BCBEdit} p */
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
         p := {}
 
+        ; @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
         __New(_BCBEdit) {
             this.p := _BCBEdit
         }
@@ -599,20 +609,13 @@ Class BCBEdit {
                          , "word"  , SC_WRAP_WORD         ; 1
                          , "char"  , SC_WRAP_CHAR         ; 2
                          , "white" , SC_WRAP_WHITESPACE ) ; 3
-        /**
-         *  @prop {Map} _VISUALFLAGSFLAGS
-         *      Dictionary of Scintilla flags for wrap visual flags
-         */
+        ; @prop {Map} _VISUALFLAGSFLAGS Dictionary of Scintilla flags for wrap visual flags
         _VISUALFLAGSFLAGS := Map( "none",   SC_WRAPVISUALFLAG_NONE     ; 0
                                 , "end",    SC_WRAPVISUALFLAG_END      ; 1
                                 , "start",  SC_WRAPVISUALFLAG_START    ; 2
                                 , "margin", SC_WRAPVISUALFLAG_MARGIN ) ; 4
 
-        /**
-          * @param {BCBEdit} _BCBEdit
-          *
-          * The instance of `BCBEdit` to interact with
-          */
+        ; @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
         __New(_BCBEdit) {
             this.p := _BCBEdit
         }
@@ -1041,31 +1044,31 @@ Class BCBApp {
 
     ; @prop {Gui} gui
     gui := {}
-    ; @prop {BCBEdit} edit
+    ; @prop {BCBEdit()} edit
     edit := {}
     ; @prop {BCBIndexGui} idxGui
     idxGui := {}
 
     ; @prop {Object} colors
     colors := {
-        bg:        "080e09",    ;  RGB
-        fg:        "b6ffb1",    ;  RGB
-        border:    "53864f",    ;  RGB
-        indexbg:   "2a392b",    ;  RGB
-        indexfg:   "5a8b5e",    ;  RGB
-        caret:   "c0fafffa",    ; ARGB
-        caretln: "0a1a2a1a",    ; ARGB
-        selbg:   "aa579261",    ; ARGB
-        selfg:   "ff001000",    ; ARGB
+             bg:   "080e09",    ;  BGR
+             fg:   "b6ffb1",    ;  BGR
+         border:   "53864f",    ;  BGR
+        indexbg:   "2a392b",    ;  BGR
+        indexfg:   "5a8b5e",    ;  BGR
+          caret: "c0fafffa",    ; ABGR
+        caretln: "0a1a2a1a",    ; ABGR
+          selbg: "aa579261",    ; ABGR
+          selfg: "ff001000",    ; ABGR
         adselfg: "ff080e09",    ; ABGR
-        whitefg: "5595d58a",    ; ARGB
-        guidefg: "ff3c4e22"
+        whitefg: "5595d58a",    ; ABGR
+        guidefg: "ff3c4e22"     ; ABGR
     }
     ; @prop {String} fontName
     fontName := "Fira Code"
 
     ; @prop {Integer} fadeSteps Number of transparency steps in fade animation
-    fadeSteps := 5
+    fadeSteps := 6
     ; @prop {Integer} fadeRest Ticks between transparency steps in fade animation
     fadeRest := 1
     ; @prop {Integer} opacity 0-255
@@ -1075,11 +1078,11 @@ Class BCBApp {
 
     ; @prop {Integer} indexDuration
     indexDuration := 500
-    ; @prop {Integer} shownIndex
+    ; @prop {Integer} shownIndex Index of currently shown clip
     shownIndex := 0
     ; @prop {Integer} maxIndex
     maxIndex := 0
-    ; @prop {Integer} curIndex
+    ; @prop {Integer} curIndex Index of most recently created clip
     curIndex := 0
 
     __New() {
@@ -1138,7 +1141,7 @@ Class BCBApp {
 
     OnSizingStartEnd(wparam, lparam, msg, hwnd) {
         if (!!wparam) {     ; on sizing start
-            SetTimer SizingLoop, 15
+            SetTimer SizingLoop, 25
             this.gui.BackColor := this.colors.bg
             this.edit.ctrl.Opt("-Redraw")
         } else {    ; on sizing end
@@ -1209,17 +1212,28 @@ Class BCBApp {
     SaveShownClip(*) {
         ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
         ;     FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
+        
+        currentText := this.edit.Text
+        shownClip:=(BCB_CLIPS_DIR "\" this.shownIndex ".clip")
+        if (FileExist(shownClip) ~= "A|N") {
+            FileDelete(shownClip)
+            FileAppend(currentText, shownClip)
+            this.idxGui.ShowGui()
+            this.idxGui.StartTimeout()
+        }
     }
 
     DeleteShownClip(*) {
-        ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
-        ;     fileList := []
+        ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.shownIndex ".clip")) ~= "A|N") {
+        ;     fileList := Map()
         ;     Loop Files, BCB_CLIPS_DIR "\*.clip" {
         ;         filePrefix := StrReplace(A_LoopFileName, ".clip")
-        ;         if ( (filePrefix ~= "^\d+$") and (filePrefix) ) {
-        ;
+        ;         if ( (filePrefix ~= "^\d+$") and (Integer(filePrefix) > this.shownIndex) ) {
         ;             fileList[filePrefix] := { old: A_LoopFileName, new: filePrefix-1 ".clip"}
         ;         }
+        ;     }
+        ;     for filePF, fileInfo in fileList {
+        ;         FileMove BCB_CLIPS_DIR "\"
         ;     }
         ;     FileDelete(shownClip)
         ; }
@@ -1238,25 +1252,25 @@ Class BCBApp {
 
     InitHotkeys() {
         HotIf (*) => this.active
-        Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"))
-        Hotkey("PgDn"    , ObjBindMethod(this     , "PrevClip"))
-        Hotkey("PgUp"    , ObjBindMethod(this     , "NextClip"))
+        Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"                ))
+        Hotkey("PgDn"    , ObjBindMethod(this     , "PrevClip"               ))
+        Hotkey("PgUp"    , ObjBindMethod(this     , "NextClip"               ))
         Hotkey("!Enter"  , ObjBindMethod(this     , "UpdateClipboardFromEdit"))
-        Hotkey("!+Enter" , ObjBindMethod(this     , "SaveShownClip"))
-        Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"))
-        Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"))
-        Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"))
-        Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"))
-        Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"))
-        Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"))
-        Hotkey("^+a"     , ObjBindMethod(this.edit, "SelectEach"))
-        Hotkey("^c"      , ObjBindMethod(this.edit, "CopyAllowLine"))
-        Hotkey("^+Up"    , ObjBindMethod(this.edit, "MoveLineUp"))
-        Hotkey("^+Down"  , ObjBindMethod(this.edit, "MoveLineDown"))
-        Hotkey("!Up"     , ObjBindMethod(this.edit, "AddCaretAbove"))
-        Hotkey("!Down"   , ObjBindMethod(this.edit, "AddCaretBelow"))
-        Hotkey("!Right"  , ObjBindMethod(this.edit, "RotateSelection"))
-        Hotkey("!Left"   , ObjBindMethod(this.edit, "RotateSelectionReverse"))
+        Hotkey("!+Enter" , ObjBindMethod(this     , "SaveShownClip"          ))
+        Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"           ))
+        Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"           ))
+        Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"        ))
+        Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"                   ))
+        Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"              ))
+        Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"             ))
+        Hotkey("^+a"     , ObjBindMethod(this.edit, "SelectEach"             ))
+        Hotkey("^c"      , ObjBindMethod(this.edit, "CopyAllowLine"          ))
+        Hotkey("^+Up"    , ObjBindMethod(this.edit, "MoveLineUp"             ))
+        Hotkey("^+Down"  , ObjBindMethod(this.edit, "MoveLineDown"           ))
+        Hotkey("!Up"     , ObjBindMethod(this.edit, "AddCaretAbove"          ))
+        Hotkey("!Down"   , ObjBindMethod(this.edit, "AddCaretBelow"          ))
+        Hotkey("!Right"  , ObjBindMethod(this.edit, "RotateSelection"        ))
+        Hotkey("!Left"   , ObjBindMethod(this.edit, "RotateSelectionReverse" ))
         ; Hotkey("!+p"     , (*)=>(A_Clipboard:=this.edit.Chars.Punctuation))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))

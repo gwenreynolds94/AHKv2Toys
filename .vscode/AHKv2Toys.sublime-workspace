@@ -1,0 +1,998 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"fiu",
+				"function-block"
+			],
+			[
+				"func",
+				"function-block"
+			],
+			[
+				"por",
+				"property-block"
+			],
+			[
+				"kn",
+				"known_variables"
+			],
+			[
+				"prop",
+				"property-block"
+			],
+			[
+				"tray",
+				"stray-brace"
+			],
+			[
+				"br",
+				"braces"
+			],
+			[
+				"stray",
+				"stray-brace"
+			],
+			[
+				"hot",
+				"hotkey_identifier"
+			],
+			[
+				"met",
+				"comment"
+			],
+			[
+				"c",
+				"class"
+			],
+			[
+				"ho",
+				"hotkey_identifier"
+			],
+			[
+				"hotkey",
+				"hotkey_identifier"
+			],
+			[
+				"hotk",
+				"hotkey_modifier"
+			],
+			[
+				"hotkey_",
+				"hotkey_modifier"
+			],
+			[
+				"hotke",
+				"hotkey_identifier"
+			],
+			[
+				"co",
+				"control"
+			],
+			[
+				"s",
+				"storage"
+			],
+			[
+				"str",
+				"stray-bracket"
+			],
+			[
+				"va",
+				"variables"
+			],
+			[
+				"a",
+				"ahk2"
+			],
+			[
+				"kno",
+				"known_functions"
+			],
+			[
+				"expre",
+				"expression"
+			],
+			[
+				"expression-",
+				"expression-group"
+			],
+			[
+				"known",
+				"known_functions"
+			],
+			[
+				"comment",
+				"comment-line-body"
+			],
+			[
+				"comme",
+				"comment-block-body"
+			],
+			[
+				"lit",
+				"literals"
+			],
+			[
+				"clas",
+				"class-declaration"
+			],
+			[
+				"stra",
+				"stray-bracket"
+			],
+			[
+				"st",
+				"stray-brace"
+			],
+			[
+				"meta",
+				"meta_scope"
+			],
+			[
+				"se",
+				"section"
+			],
+			[
+				"sc",
+				"script"
+			],
+			[
+				"b",
+				"block"
+			],
+			[
+				"pro",
+				"meta_include_prototype"
+			],
+			[
+				"com",
+				"comments_in"
+			],
+			[
+				"d",
+				"Documents"
+			],
+			[
+				"con",
+				"context"
+			],
+			[
+				"else-",
+				"else-pop"
+			],
+			[
+				"quali",
+				"qualified-object-type"
+			],
+			[
+				"fat-arr",
+				"fat-arrow-meta"
+			],
+			[
+				"declar",
+				"declarations"
+			],
+			[
+				"varaible-",
+				"variable-declaration-type"
+			],
+			[
+				"qui",
+				"qualified-object-type-class"
+			],
+			[
+				"bran",
+				"branch_point"
+			],
+			[
+				"qualf",
+				"qualified-object-type"
+			],
+			[
+				"else-pop",
+				"else-pop3"
+			],
+			[
+				"branch",
+				"branch_point"
+			],
+			[
+				"dir",
+				"directives"
+			],
+			[
+				"class",
+				"class-declare"
+			],
+			[
+				"res",
+				"reserved_words"
+			],
+			[
+				"bra",
+				"braces"
+			],
+			[
+				"iden",
+				"identifier"
+			],
+			[
+				"idi",
+				"identifier"
+			],
+			[
+				"identifier_",
+				"identifier_continue"
+			],
+			[
+				"identifi",
+				"identifier_start"
+			],
+			[
+				"id",
+				"id_first_char"
+			],
+			[
+				"A_",
+				"A_AppDataCommon"
+			],
+			[
+				"A_Scr",
+				"A_ScriptDir"
+			],
+			[
+				"In",
+				"#Hotstring"
+			],
+			[
+				"ahk",
+				"AddHotkey"
+			],
+			[
+				"Incl",
+				"Include"
+			],
+			[
+				"XButto",
+				"XButton2"
+			],
+			[
+				"WinaCt",
+				"WinActivate"
+			],
+			[
+				"Detect",
+				"DetectHiddenWindows"
+			],
+			[
+				"GetKeyS",
+				"GetKeyState"
+			],
+			[
+				"WinActiv",
+				"WinActivate"
+			],
+			[
+				"WinWait",
+				"WinWaitActive"
+			],
+			[
+				"WinWaitActiv",
+				"WinWaitActive"
+			],
+			[
+				"WinG",
+				"WinGetPos"
+			],
+			[
+				"MouseGetP",
+				"MouseGetPos"
+			],
+			[
+				"Clic",
+				"MouseClick"
+			],
+			[
+				"Click",
+				"Click}"
+			],
+			[
+				"WinAC",
+				"WinActivate"
+			],
+			[
+				"WinActi",
+				"WinActive()"
+			],
+			[
+				"Detec",
+				"DetectHiddenText"
+			],
+			[
+				"WinWaitA",
+				"WinWaitActive"
+			],
+			[
+				"Control",
+				"ControlPanelNav"
+			],
+			[
+				"searchBar",
+				"searchBarVisible"
+			],
+			[
+				"searchB",
+				"searchBarVisible"
+			],
+			[
+				"BUG",
+				"BUG_LOAD"
+			],
+			[
+				"JW",
+				"JWIN_POS"
+			],
+			[
+				"slide",
+				"slideDistanceY"
+			],
+			[
+				"sli",
+				"slideDistanceY"
+			],
+			[
+				"j",
+				"jaywhen"
+			],
+			[
+				"bfS",
+				"bfShowMain"
+			],
+			[
+				"WinGet",
+				"WinGetClass"
+			],
+			[
+				"Splash",
+				"SplashTextOff"
+			],
+			[
+				"SplashTex",
+				"SplashTextOn"
+			],
+			[
+				"A_Sc",
+				"A_ScreenWidth"
+			],
+			[
+				"JWI",
+				"JWIN_MARGIN"
+			],
+			[
+				"JWIN",
+				"JWIN_SIZE"
+			],
+			[
+				"JWn",
+				"JWIN_POS"
+			],
+			[
+				"JWN",
+				"JWIN_SIZE"
+			],
+			[
+				"fu",
+				"funcs"
+			],
+			[
+				"_ch",
+				"_child_name"
+			],
+			[
+				"_chi",
+				"_children"
+			],
+			[
+				"HW",
+				"HWND_TEXT"
+			],
+			[
+				"HWND_",
+				"HWND_EDIT"
+			],
+			[
+				"List",
+				"ListVars"
+			],
+			[
+				"IsB",
+				"IsBuiltIn"
+			],
+			[
+				"LIST",
+				"ListVars"
+			],
+			[
+				"hid",
+				"HideIndex"
+			],
+			[
+				"Wines",
+				"WinExist()"
+			],
+			[
+				"Get",
+				"GetKeyVK()"
+			],
+			[
+				"GetK",
+				"GetKeyVK()"
+			],
+			[
+				"A_ip",
+				"A_IPAddress4"
+			],
+			[
+				"iSt",
+				"iSmoothness"
+			],
+			[
+				"bfInd",
+				"bfIndexFadeOut"
+			],
+			[
+				"index",
+				"IndexFadeOut"
+			],
+			[
+				"inde",
+				"IndexFadeIn"
+			],
+			[
+				"Indx",
+				"IndexGui"
+			],
+			[
+				"iMa",
+				"iMaxOpacity"
+			],
+			[
+				"Step",
+				"iStepCount"
+			],
+			[
+				"sG",
+				"sGui"
+			],
+			[
+				"Ind",
+				"IndexGui"
+			],
+			[
+				"Cl",
+				"Clipboard"
+			],
+			[
+				"Clip",
+				"Clipboard"
+			],
+			[
+				"curr",
+				"iCurrentIndex"
+			],
+			[
+				"sCli",
+				"sClipText"
+			],
+			[
+				"bfi",
+				"bFirstPass"
+			],
+			[
+				"iCur",
+				"iCurrentLocalIndex"
+			],
+			[
+				"firs",
+				"bFirstPass"
+			],
+			[
+				"cur",
+				"iCurrentLocalIndex"
+			],
+			[
+				"bfs",
+				"bfShowIndex"
+			],
+			[
+				"Sho",
+				"ShowIndex"
+			],
+			[
+				"of",
+				"oFont"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"lsp",
+				"LSP: Enable Language Server in Project"
+			],
+			[
+				"col",
+				"UI: Select Color Scheme"
+			],
+			[
+				"cust",
+				"UI: Customize Color Scheme"
+			],
+			[
+				"cusotm",
+				"UI: Customize Color Scheme"
+			],
+			[
+				"theme",
+				"UI: Customize Theme"
+			],
+			[
+				"custom",
+				"UI: Customize Theme"
+			],
+			[
+				"cus",
+				"UI: Customize Color Scheme"
+			],
+			[
+				"ccus",
+				"UI: Customize Color Scheme"
+			],
+			[
+				"LSP",
+				"Preferences: LSP Key Bindings"
+			],
+			[
+				"prefere",
+				"Preferences: Settings"
+			],
+			[
+				"pre",
+				"Preferences: Settings"
+			],
+			[
+				"prefer",
+				"Preferences: Settings – Distraction Free"
+			],
+			[
+				"extr",
+				"Extract Sublime Package: Extract open Package File"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"disalb",
+				"LSP: Disable Language Server in Project"
+			],
+			[
+				"color",
+				"UI: Select Color Scheme"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"setting",
+				"Preferences: Settings"
+			],
+			[
+				"mater",
+				"Material Theme: Configuration"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"colo",
+				"UI: Select Color Scheme"
+			],
+			[
+				"key",
+				"Preferences: Key Bindings"
+			],
+			[
+				"keyb",
+				"Preferences: Key Bindings"
+			],
+			[
+				"ena",
+				"LSP: Enable Language Server Globally"
+			],
+			[
+				"prefe",
+				"Preferences: LSP Settings"
+			],
+			[
+				"pref",
+				"Preferences: LSP Settings"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"pip",
+				"AutoHotkey - Run As Piped Buffer"
+			],
+			[
+				"ahk",
+				"AutoHotkey - Run"
+			],
+			[
+				"rename",
+				"Rename File"
+			],
+			[
+				"keybi",
+				"Preferences: Key Bindings"
+			],
+			[
+				"sche",
+				"UI: Select Color Scheme"
+			],
+			[
+				"them",
+				"UI: Select Theme"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"sett",
+				"Preferences: Settings – Distraction Free"
+			],
+			[
+				"preferen",
+				"Preferences: Settings"
+			],
+			[
+				"custo",
+				"UI: Customize Color Scheme"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				"settin",
+				"Preferences: Settings – Distraction Free"
+			],
+			[
+				"exr",
+				"Extract Sublime Package: Extract open Package File"
+			],
+			[
+				"autohot",
+				"AutoHotkey - Run"
+			],
+			[
+				"test",
+				"TestPluginAA: Test Command AA"
+			],
+			[
+				"new",
+				"PackageDev: New Commands File"
+			],
+			[
+				"extract",
+				"Extract Sublime Package: Extract open Package File"
+			],
+			[
+				"gruvbox",
+				"gruvbox: Readme"
+			],
+			[
+				"scheme",
+				"UI: Select Color Scheme"
+			]
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 249.0,
+		"history":
+		[
+			"sublime.log_commands(False)",
+			"sublime.log_commands(True)",
+			"sublime.log_commands(False)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": false,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/C#/C#.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Python/Python.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Java/Java.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/AutoHotkey/AutoHotkey.tmLanguage",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Installed Packages/AutoHotkey.sublime-package",
+		"/C/Users/jonat/Desktop/ahksyntax/PreviewScripts/BetterClipboard.ahk",
+		"/C/Users/jonat/Desktop/ahksyntax/PreviewScripts/searchdocs.ahk",
+		"/C/Users/jonat/Desktop/ahksyntax/PreviewScripts/Scritch.ahk",
+		"/C/Users/jonat/Desktop/ahksyntax/PreviewScripts/Gdip_Custom.ahk",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/Syntaxes/AutoHotkey2TEST.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/Syntaxes/AHKV2-004.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/Syntaxes/AHKV2TEST001.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/Syntaxes/AHKV2-005.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/Syntaxes/AutoHotkey2.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/LSP-ahk2/AutoHotkey2.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/LSP-ahk2/AHKV2-004.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Packages/JavaScript.sublime-package",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/syntax/AHKV2-005.sublime-syntax",
+		"/C/Users/jonat/Portables/sublime_text_4_template/Data/Packages/User/syntax/AHKV2-05.sublime-syntax",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/Scritch/Scritch.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/BetterClipboard/BetterClipboard.ahk",
+		"/C/Users/jonat/Portables/sublime_text_4/Packages/Java.sublime-package",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/ImgToIco/Gdip_SaveHICONToFile.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/BetterClipboard/Lib/Gdip_v2Ex.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/BetterClipboard/Lib/BC_Install.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/BetterClipboard/Lib/BCUNINSTALL.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/Lib/DBT.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Lib/SciConstants.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/SearchV2Docs/searchdocs.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/WinSize&PosUtils.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/AutoFormatComments/FormatSingleLineComment.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/ScEditTesting.ahk",
+		"/C/Users/jonat/Documents/gitrepos/AHKv2Toys/Scripts/_scratch.ahk",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/AutoHotkey2.sublime-settings",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/LSP/LSP.sublime-settings",
+		"/C/Users/jonat/Documents/AHK Scripts/OnByDefault/OnByDefault.ahk",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/scripts/Face.py",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/ScintillaMessages.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/Scintilla.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/ScintillaWidget.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/Sci_Position.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/ScintillaTypes.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/include/ScintillaStructures.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/scripts/ScintillaAPIFacer.py",
+		"/C/Users/jonat/Documents/AHK Scripts/Scritches/Scratchpad[2].ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV4/BetterClipboardV4.ahk",
+		"/C/Users/jonat/Documents/AutoHotkey/Lib/Acc.ahk",
+		"/C/Users/jonat/Documents/AutoHotkey/Lib/JEEa.ahk",
+		"/C/Users/jonat/Documents/AutoHotkey/Lib/Anchor.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV4/Lib/BUG.ahk",
+		"/C/Users/jonat/'chm_config.js'",
+		"/C/Users/jonat/Downloads/Scintilla-Example/lib/scilexer.h.ahk",
+		"/C/Users/jonat/AppData/Roaming/Waterfox/Profiles/za2snpld.default-default/chrome/alertMe.uc.js",
+		"/C/Users/jonat/Downloads/Scintilla-Example/lib/scintilla-wrapper/SCI.ahk",
+		"/C/Users/jonat/Downloads/Scintilla-Example/ScintillaExample.ahk",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/test/MessageNumbers.py",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/win32/WinTypes.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/win32/ScintillaWin.h",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/test/ScintillaCallable.py",
+		"/C/Users/jonat/Downloads/scintilla530/scintilla/test/win32Tests.py",
+		"/C/Users/jonat/Documents/AHK Scripts/TestingEnvGen/WebScraping/WebScrapeA.ahk",
+		"/C/Users/jonat/Downloads/jfkz43.ahk",
+		"/C/Users/jonat/Downloads/ahkdll-v1-release-master/README.md",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV4/scritcha.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboard4/SCRATCH.ahk",
+		"/C/Users/jonat/Portables/AHK-Studio-master/lib/Languages/ahk.xml",
+		"/C/Users/jonat/Portables/AHK-Studio-master/AHK-Studio.text",
+		"/C/Users/jonat/Portables/AHK-Studio-master/Readme.md",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV4/dbAHK.py",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV4/Beep.ahk",
+		"/C/Users/jonat/Portables/ahkexec.py",
+		"/C/Users/jonat/PyProjects/scritches/scartch.ahk",
+		"/C/Users/jonat/Portables/frequAhk/Insert AHK Parameters.ini",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV2/BetterClipboardV2.ahk",
+		"/C/Users/jonat/Documents/AutoHotkey/Lib/JLK.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboard/BetterClipboard.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/JLK/scratch0.ahk",
+		"/C/Users/jonat/Portables/sublime_text_4/Lib/python38/sublime.py",
+		"/C/Users/jonat/Portables/sublime_text_4/Lib/python38/sublime_plugin.py",
+		"/C/Users/jonat/PyProjects/stubs/sublime/out/sublime_plugin.pyi",
+		"/C/Users/jonat/PyProjects/stubs/sublime/out/sublime.pyi",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Anaconda/Anaconda.sublime-settings",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/229.clip",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/88.clip",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/74.clip",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/14.clip.txt",
+		"/C/Users/jonat/Documents/AutoHotkey/SciTE/Extensions/ass.butt/butt.ahk",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/63.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/15.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/11.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/BetterClipboard.config.ini",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/10.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/7.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/5.clip.txt",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboardV2/Config.ini",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/1.clip.txt",
+		"/C/Users/jonat/AppData/Roaming/AHKUser/Clipboards/3.clip.txt",
+		"/C/Users/jonat/Documents/AHK Scripts/Tidbits/RoundCorners.ahk",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/Completions/JLK_Splish_SetFadeSettings.sublime-snippet",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/Completions/JLK_Splish_Instance_Definition.sublime-snippet",
+		"/C/Users/jonat/Documents/AHK Scripts/JLK/Lib/JLK.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/CreateNewAHKScript/Resources/Templates/StandardNew.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/CreateNewAHKScript/Resources/Templates/StandardNewFormatted.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboard/BetterClipboardIncludeRuntime.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/BetterClipboard/BetterClipboardIncludeInit.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/JLK/JLK.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/TestJLK.ahk",
+		"/C/Program Files/AutoHotkey/Lib/Acc.ahk",
+		"/C/Program Files/AutoHotkey/Libs/JLK.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/JLK/scratch.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/OnByDefault/AutoSettings.txt",
+		"/C/Windows/System32/drivers/etc/hosts",
+		"/C/Users/jonat/Documents/AHK Scripts/CreateNewAHKScript/CreateNewAHKScriptIncludeRuntime.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/CreateNewAHKScript/CreateNewAHKScriptIncludeInit.ahk",
+		"/C/Users/jonat/Documents/AHK Scripts/testingXXX/testingXXX.ahk",
+		"/C/Users/jonat/Documents/AHKScripts/Testing/Taco/TestingZXYW.ahk",
+		"/C/Users/jonat/Userware/PyCharm Community Edition 2022.2.1/bin/idea.properties",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/gruvbox/messages/install.txt",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/gruvbox/README.md",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Installed Packages/gruvbox.sublime-package",
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Default/Preferences.sublime-settings"
+	],
+	"find":
+	{
+		"height": 22.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"scrollbar_highlights": true,
+		"show_context": true,
+		"use_buffer2": true,
+		"use_gitignore": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 46.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.LSP Log Panel":
+	{
+		"height": 0.0
+	},
+	"output.diagnostics":
+	{
+		"height": 120.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/User/BuildSystems/AHKv2.sublime-build",
+	"project": "AHKv2Toys.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 185.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
