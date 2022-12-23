@@ -1,5 +1,5 @@
 
-;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2.0-rc.2\AutoHotkey64.exe
+;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey.exe
 ;@Ahk2Exe-SetMainIcon %A_ScriptDir%\BCB.ico
 ;@Ahk2Exe-AddResource *14 %A_ScriptDir%\BCB.ico, BCBICON
 #Requires Autohotkey v2.0-rc.2
@@ -310,6 +310,8 @@ Class BCBEdit {
     Caret := {}
     ; @prop {BCBEdit.Chars} Chars
     Chars := {}
+    ; @prop {BCBEdit.Font} Font
+    Font := {}
 
     ; @prop {Integer} multiSelectColumn 
     multiSelectColumn := -1
@@ -330,12 +332,15 @@ Class BCBEdit {
         this.CopyAllowLine := (*)=> this.Send(SCI_COPYALLOWLINE)
         this.MoveLineDown := (*)=> this.Send(SCI_MOVESELECTEDLINESDOWN)
         this.MoveLineUp := (*)=> this.Send(SCI_MOVESELECTEDLINESUP)
+        this.ZoomIn := (*)=> this.Send(SCI_ZOOMIN)
+        this.ZoomOut := (*)=> this.Send(SCI_ZOOMOUT)
         ; this.RotateSelection := (*)=> (this.Send(SCI_ROTATESELECTION), this.Send(SCI_SCROLLCARET))
         this.Wrap := BCBEdit.Wrap(this)
         this.Selection := BCBEdit.Selection(this)
         this.WhiteSpace := BCBEdit.WhiteSpace(this)
         this.Caret := BCBEdit.Caret(this)
         this.Chars := BCBEdit.Chars(this)
+        this.Font := BCBEdit.Font(this)
         this.SetShortcuts()
         ; this.Send(SCI_TARGETWHOLEDOCUMENT)
     }
@@ -452,27 +457,6 @@ Class BCBEdit {
     }
 
     /**
-     * @prop {String} Font
-     *
-     * Get and set the name of the font to be displayed
-     */
-    Font {
-        Get {
-            nLen := this.Send(SCI_STYLEGETFONT, STYLE_DEFAULT)
-            buf := Buffer(nLen+1, 0)
-            this.Send(SCI_STYLEGETFONT, STYLE_DEFAULT, buf.Ptr)
-            Return StrGet(buf,,"UTF-8")
-        }
-        Set {
-            strSize := StrPut(Value, "UTF-8")
-            buf := Buffer(strSize, 0)
-            StrPut(Value, buf, "UTF-8")
-            this.Send(SCI_STYLESETFONT, STYLE_DEFAULT, buf.Ptr)
-            this.Send(SCI_STYLECLEARALL)
-        }
-    }
-
-    /**
      * @prop {Integer} MarginWidth
      *
      * Get and set width in pixels of margin 1
@@ -572,6 +556,47 @@ Class BCBEdit {
             for techname, techval in this._TECHMODES
                 if (techname = StrLower(Value))
                     this.Send(SCI_SETTECHNOLOGY, techval)
+        }
+    }
+    
+    Class Font {
+        ; @prop {BCBEdit} p The parent `BCBEdit` instance to interact with
+        p := {}
+
+        ; @param {BCBEdit} _BCBEdit The instance of `BCBEdit` to interact with
+        __New(_BCBEdit) {
+            this.p := _BCBEdit
+        }
+
+        /**
+         * @prop {String} Font
+         *
+         * Get and set the name of the font to be displayed
+         */
+        Name {
+            Get {
+                nLen := this.p.Send(SCI_STYLEGETFONT, STYLE_DEFAULT)
+                buf := Buffer(nLen+1, 0)
+                this.p.Send(SCI_STYLEGETFONT, STYLE_DEFAULT, buf.Ptr)
+                Return StrGet(buf,,"UTF-8")
+            }
+            Set {
+                strSize := StrPut(Value, "UTF-8")
+                buf := Buffer(strSize, 0)
+                StrPut(Value, buf, "UTF-8")
+                this.p.Send(SCI_STYLESETFONT, STYLE_DEFAULT, buf.Ptr)
+                this.p.Send(SCI_STYLECLEARALL)
+            }
+        }
+
+        /**
+         * @prop {Number} Font
+         *
+         * Get and set the size of the font to be displayed
+         */
+        Size {
+            Get => this.p.Send(SCI_STYLEGETSIZEFRACTIONAL, STYLE_DEFAULT)/100
+            Set => (IsNumber(Value)) ? this.p.Send(SCI_STYLESETSIZEFRACTIONAL, STYLE_DEFAULT, Integer(Value*100)) : False
         }
     }
 
@@ -1067,6 +1092,11 @@ Class BCBApp {
     ; @prop {String} fontName
     fontName := "Fira Code"
 
+    ; @prop {Number} fontSizeMin
+    fontSizeMin := 3
+    ; @prop {Number} fontSizeMax
+    fontSizeMax := 50
+
     ; @prop {Integer} fadeSteps Number of transparency steps in fade animation
     fadeSteps := 6
     ; @prop {Integer} fadeRest Ticks between transparency steps in fade animation
@@ -1096,7 +1126,7 @@ Class BCBApp {
         this.gui.BackColor := this.colors.border
 
         this.edit := BCBEdit(this.gui, "w700 h400")
-        this.edit.Font := this.fontName
+        this.edit.Font.Name := this.fontName
         this.edit.Wrap.Mode := "word"
         this.edit.Wrap.VisualFlags := ["start", "end"]
         this.edit.Wrap.Indent := 2
@@ -1260,6 +1290,8 @@ Class BCBApp {
         Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"           ))
         Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"           ))
         Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"        ))
+        Hotkey("^-"      , ObjBindMethod(this.edit, "ZoomOut"                ))
+        Hotkey("^="      , ObjBindMethod(this.edit, "ZoomIn"                 ))
         Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"                   ))
         Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"              ))
         Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"             ))

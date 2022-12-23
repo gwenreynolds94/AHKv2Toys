@@ -1,14 +1,18 @@
-;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey.exe
-#Requires AutoHotkey v2.0-rc
+#Requires AutoHotkey v2.0
 #Warn All, StdOut
 #SingleInstance Force
 
 #Include Lib\
 #Include DEBUG\DBT.ahk
-#Include Utils\DllCoords.ahk
 
+Tooltip.On := {
+    Call: (_this, _daddy, _msg := "", _dur := False) => (
+        Tooltip(_msg),
+        (!!_dur and IsInteger(_dur)) ? (SetTimer((*) => Tooltip(), _dur), True) : False
+            )
+}
+Tooltip.Off := {
+    Call: (_this, _daddy, _delay := 1000) => (SetTimer((*) => Tooltip(), _delay))
+}
 
-FileInstall("C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\SciLib\Scintilla.dll", ".\Scintilla.dll")
-
-
-F8::ExitApp
+F8:: ExitApp

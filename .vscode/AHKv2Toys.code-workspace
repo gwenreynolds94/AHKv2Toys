@@ -49,12 +49,12 @@
             ]
         },
         "scm.inputFontSize": 12,
-        "debug.console.fontSize": 12,
+        "debug.console.fontSize": 11,
         "markdown.preview.fontSize": 10,
         "terminal.integrated.fontSize": 10,
         "notebook.outputFontSize": 10,
         "editor.rulers": [
-            89, 90
+            99, 100
         ],
         "better-comments.tags": [
             {
@@ -283,7 +283,7 @@
                 "italic": false
             },
             {
-                "tag": "**",
+                "tag": "<**>",
                 "color": "#AAB079",
                 "strikethrough": false,
                 "underline": false,
@@ -302,9 +302,11 @@
             },
         ],
         "editor.fontFamily": "Fira Code, 'Courier New', monospace",
-        "AutoHotkey2.InterpreterPath": "C:\\Program Files\\AutoHotkey\\v2.0-rc.2\\AutoHotkey.exe",
+        "AutoHotkey2.InterpreterPath": "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey.exe",
         "editor.semanticHighlighting.enabled": true,
-        "workbench.settings.useSplitJSON": true
+        "workbench.settings.useSplitJSON": true,
+        "debug.console.fontFamily": "Fira Code",
+        "workbench.sash.size": 25,
     },
     "launch": {
         "version": "0.2.0",
@@ -335,6 +337,11 @@
                 "useOutputDebug": true,
                 "internalConsoleOptions": "openOnFirstSessionStart"
             }
+        ]
+    },
+    "extensions": {
+        "recommendations": [
+            "golang.go-nightly"
         ]
     }
 }

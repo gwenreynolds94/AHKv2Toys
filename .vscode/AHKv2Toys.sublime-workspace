@@ -743,6 +743,7 @@
 	},
 	"file_history":
 	[
+		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/User/Projects/AHKv2Toys.sublime-workspace",
 		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/C#/C#.sublime-syntax",
 		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Python/Python.sublime-syntax",
 		"/C/Users/jonat/Portables/sublime_text_4/Data/Packages/Java/Java.sublime-syntax",
@@ -966,12 +967,16 @@
 	},
 	"select_project":
 	{
-		"height": 0.0,
+		"height": 500.0,
 		"last_filter": "",
 		"selected_items":
 		[
+			[
+				"",
+				"C:\\Users\\jonat\\Documents\\gitrepos\\AHKv2Toys\\.vscode\\AHKv2Toys.sublime-workspace"
+			]
 		],
-		"width": 0.0
+		"width": 380.0
 	},
 	"select_symbol":
 	{

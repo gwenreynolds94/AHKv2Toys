@@ -1,0 +1,17 @@
+Keywords
+
+The following list shows the reserved words in Go. These reserved words may not be used as constant or variable or any other identifier names.
+
+
+
+*------------*-----------------*----------*-------------*----------*
+|   break    |     default     |   func   |  interface  |  select  |
+|------------*-----------------*----------*-------------*----------|
+|   case     |      defer      |    Go    |     map     |  Struct  |
+|------------*-----------------*----------*-------------*----------|
+|   chan     |      else       |   Goto   |   package   |  Switch  |
+|------------*-----------------*----------*-------------*----------|
+|   const    |   fallthrough   |    if    |    range    |   Type   |
+|------------*-----------------*----------*-------------*----------|
+|  continue  |       for       |  import  |    return   |   Var    |
+*------------*-----------------*----------*-------------*----------*
