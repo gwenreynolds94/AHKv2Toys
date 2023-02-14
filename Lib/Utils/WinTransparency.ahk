@@ -117,9 +117,8 @@ Class WinTransparency {
             1, 100, 
             2, 170, 
             3, 210, 
-            4, 230, 
-            5, 245, 
-            6, 255
+            4, 245, 
+            5, 255
         )
         hwnd := 0x00000
         winTitle := ""
@@ -127,12 +126,11 @@ Class WinTransparency {
         title := ""
         /* @prop {Map} transparencyValues */
         transparencyValues := Map(
-             1, 100, 
-             2, 170, 
-             3, 210, 
-             4, 230, 
-             5, 245, 
-             6, 255
+            1, 100, 
+            2, 170, 
+            3, 210, 
+            4, 245, 
+            5, 255
         )
         _CurrentStep := this.transparencyValues.Count
         cycleSteps := True

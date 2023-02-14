@@ -19,7 +19,7 @@ Tooltip.Off := {
 
 
 ; if FileExist(A_Temp "\wlan.tmp")
-    ; FileDelete(A_Temp "\wlan.tmp")
+; FileDelete(A_Temp "\wlan.tmp")
 ; RunWait A_ComSpec " /c netsh wlan show interfaces >> " A_Temp "\wlan.tmp",, "Hide"
 ; i_wlan := FileRead(A_Temp "\wlan.tmp")
 ; /* @type {RegExMatchInfo} */
@@ -33,7 +33,9 @@ Tooltip.Off := {
 
 
 someFunc := (*)=>("")
-dbgo someFunc()
+dbgo someFunc
+stdo someFunc
+
 ; dbgo Map
 ; dbgo RegExReplace(mapres, "m)(^(.\|(.{3})))")
 

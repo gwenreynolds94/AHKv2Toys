@@ -1,3 +1,5 @@
+
+
 chunk(param_array,param_size:=1) {
 	if (!isObject(param_array)) {
 		this._internal_ThrowException()

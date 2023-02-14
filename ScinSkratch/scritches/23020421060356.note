@@ -1,0 +1,15 @@
+Name	PID	Status	User name	CPU	Memory (active private working set)	Base priority	Command line	Operating system context	Elevated	UAC virtualization
+
+lua-language-server.exe	15380	Running	jonat	00 	23,824 K	Normal	
+
+>--- Executable ---<
+C:\Users\jonat\AppData\Local\coc\extensions\coc-sumneko-lua-data\sumneko-lua-ls\extension\server\bin\lua-language-server.exe 
+
+>---- Arguments ----<
+-E 
+C:\Users\jonat\AppData\Local\coc\extensions\coc-sumneko-lua-data\sumneko-lua-ls\extension\server\bin\main.lua 
+--locale=en-us	
+
+Windows Vista	No	
+
+Disabled

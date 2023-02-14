@@ -116,7 +116,7 @@ dbgo(msg*) {
         Try {
             Return ((indent) ? indent " ": "") String(out_item) "`n"
         } Catch MethodError {
-            Return TryObjectOut(out_item)
+            Return TryArrayOut(out_item)
         }
     }
     TryArrayOut(out_item) {
@@ -305,9 +305,23 @@ stdoplain(_msg*) {
         FileAppend _m, "*"
 }
 
+/**
+ * Upon initialization of a new instance, the tick frequency is fetched and stored -- so that the
+ *      tick count can be divided by it upon retrieval and multiplied by 1000, resulting in 
+ *      a return value calculated in milliseconds.
+ * 
+ * The counter will not start until *`this.Start()`* is called and will not stop until 
+ *      *`this.Stop()`* is called, which will return the tick count in ms.
+ * 
+ * Calling *`this.Lap()`* will push the current tick count to *`this._laps[]`*.
+ * 
+ * Lastly, the current tick count can be retrieved at any time using *`this.GetCurrentCounter()`*.
+ *      By default, this value is passed through *`this.ToMilliseconds(&ms)`* before being returned,
+ *      but you can set *`this.ms`* to ***False*** to change this behaviour.
+ */
 Class PerfCounter {
     start := 0
-    laps := []
+    _laps := []
     __New() {
         DllCall "QueryPerformanceFrequency", "Int*", &freq := 0
         this.frequency := freq

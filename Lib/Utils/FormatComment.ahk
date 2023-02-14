@@ -1,3 +1,6 @@
+#Include ..\DEBUG\DBT.ahk
+
+perf := PerfCounter()
 
 FormatSingleLineComment(sep:=":", commChar:=";", padWidth:=1) {
     SetKeyDelay 25, 10

@@ -32,7 +32,7 @@ ImageToIcon_Convert(sourceImg, targetIco:="") {
     }
     _hBitmap := Gdip_CreateBitmapFromFile(sourceImg)
     _hIcon := Gdip_CreateHICONFromBitmap(_hBitmap)
-    _result := Gdip_SaveHIconToFile( _hIcon
+    _result := Gdip_SaveHICONToFile( _hIcon
                                    , _fileOutDirectory "\" _fileOutName ".ico" )
     DestroyIcon(_hIcon)
     Gdip_DisposeImage(_hBitmap)

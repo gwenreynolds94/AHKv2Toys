@@ -8,7 +8,7 @@ SearchV2DocsFromClipboard(*)
         startWinsStr .= startingHelpWins[A_Index] "|"
     }
     Run "C:\Windows\hh.exe "
-      . "`"C:\Program Files\AutoHotkey\v2.0-rc.2\AutoHotkey.chm`""
+      . "`"C:\Program Files\AutoHotkey\v2\AutoHotkey.chm`""
     SetTimer(WatchForWindow, 250)
     ; WATCH FOR NEW WINDOW
     WatchForWindow(*) {
