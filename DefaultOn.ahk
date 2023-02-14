@@ -7,7 +7,7 @@
 ; #Include <GdipLib\Gdip_Custom>
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Configuration ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Configuration ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 
 Class DefaultOnConfiguration {
     Static     config := {}
@@ -255,7 +255,7 @@ Class DefaultOnConfiguration {
 
         ; @prop {Boolean} CONF_INI_EXISTS
         Static CONF_INI_EXISTS => !!(FileExist(this.CONF_INI_FP)~="A|N")
-        
+
         ; @prop {Boolean} CONF_DIR_EXISTS
         Static CONF_DIR_EXISTS => !!(DirExist(this.CONF_DIR))
 
@@ -263,26 +263,26 @@ Class DefaultOnConfiguration {
             IniValidate() {
                 _iniSections := Map( "General" , Map("existing", Map(), "new", Map())
                                    , "Paths"   , Map("existing", Map(), "new", Map())
-                                   , "Enabled" , Map("existing", Map(), "new", Map()) 
+                                   , "Enabled" , Map("existing", Map(), "new", Map())
                                    , "Installs", Map("existing", Map(), "new", Map()) )
                 for _k, _v in this.CONF_GENERAL.OwnProps() {
                     _ini_v := this.IniGeneral.%(_k)%
                     if !!(_ini_v="null")
-                        this.IniGeneral.%(_k)% := 
+                        this.IniGeneral.%(_k)% :=
                             _iniSections["General"]["new"][_k] := _v
                     else _iniSections["General"]["existing"][_k] := _ini_v
                 }
                 for _k, _v in this.CONF_PATHS.OwnProps() {
                     _ini_v := this.IniPaths.%(_k)%
                     if !!(_ini_v="null")
-                        this.IniPaths.%(_k)% := 
+                        this.IniPaths.%(_k)% :=
                             _iniSections["Paths"]["new"][_k] := _v
                     else _iniSections["Paths"]["existing"][_k] := _ini_v
                 }
                 for _k, _v in this.CONF_ENABLED.OwnProps() {
                     _ini_v := this.IniEnabled.%(_k)%
                     if !!(_ini_v="null")
-                        this.IniEnabled.%(_k)% := 
+                        this.IniEnabled.%(_k)% :=
                             _iniSections["Enabled"]["new"][_k] := _v
                     else _iniSections["Enabled"]["existing"][_k] := _ini_v
                 }
@@ -294,9 +294,9 @@ Class DefaultOnConfiguration {
                             if (_ini_src="null" or _ini_dst="null")
                                 this.IniInstalls.%(_id)% :=
                                     _iniSections["Installs"]["new"][_id] := _paths
-                            else 
-                                _iniSections["Installs"]["existing"][_id] := 
-                                    Map("Source", _ini_src, "Dest" , _ini_dst)             
+                            else
+                                _iniSections["Installs"]["existing"][_id] :=
+                                    Map("Source", _ini_src, "Dest" , _ini_dst)
                         }
                     }
                 }
@@ -329,8 +329,8 @@ Class DefaultOnConfiguration {
             retVal := { dir: DirValidate(this.CONF_INI_FP, this.CONF_DIR)
                       , file: FPValidate(this.CONF_INI_FP, this.CONF_DIR)
                       , init: Map("unset", True) }
-            retval.init := (!!IsObject(retVal.file) && !!ObjHasOwnProp(retVal.file, "init")) ? 
-                            retVal.file.init : (_ini) ? IniValidate() 
+            retval.init := (!!IsObject(retVal.file) && !!ObjHasOwnProp(retVal.file, "init")) ?
+                            retVal.file.init : (_ini) ? IniValidate()
                                 : Map("unset", True)
             Return retVal
         }
@@ -391,7 +391,7 @@ CONF:=(DefaultOnConfiguration)
 CONF.Validate(True)
 
 /**
- * @var {DefaultOnConfiguration.Defaults.CONF_GENERAL} iGENERAL 
+ * @var {DefaultOnConfiguration.Defaults.CONF_GENERAL} iGENERAL
  */
 iGENERAL := DefaultOnConfiguration.Conf.LiteralIniGeneral()
 
@@ -409,7 +409,7 @@ iENABLED := DefaultOnConfiguration.Conf.LiteralIniEnabled()
  * @var {DefaultOnConfiguration.Defaults.CONF_INSTALLS} iINSTALLS
  */
 iINSTALLS := DefaultOnConfiguration.Conf.LiteralIniInstalls()
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 JKQuickTip(_msg, _timeout_ms) {
@@ -432,7 +432,7 @@ JKQuickToast(_msg, _title, _timeout_ms) {
         if SubStr(A_OSVersion, 1, 3) = "10." {
             A_IconHidden := True
             SetTimer(
-                        (*) => (A_IconHidden := False), 
+                        (*) => (A_IconHidden := False),
                         -200
                     )
         }
@@ -447,27 +447,27 @@ JKQuickToast(_msg, _title, _timeout_ms) {
     }
     if _types_are_valid {
         TrayTip(
-                    _msg_str, 
+                    _msg_str,
                     _title_str
                )
         SetTimer(
-                    (*)=>HideTrayTip(), 
+                    (*)=>HideTrayTip(),
                     _timeout_ms_int
                 )
     } else {
-        TrayTip( 
+        TrayTip(
                     "The passed parameters did not have the correct types",
                     "Could not display specified toast message"
                )
         SetTimer(
-                    (*)=>HideTrayTip(), 
+                    (*)=>HideTrayTip(),
                     -1000
                 )
     }
 }
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  FUCK CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  FUCK CORTANA ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 FuckCortana(*) {
     if ProcessExist("Cortana.exe")
@@ -476,12 +476,12 @@ FuckCortana(*) {
 if !!(iENABLED.CloseCortana)
     SetTimer FuckCortana, iGENERAL.CloseCortanaInterval
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 if !ProcessExist("BCV2.exe") and !!iENABLED.BCV2 {
     Run(iPATHS.BCV2Exe)
@@ -493,12 +493,12 @@ ExitBCB(ExitReason, ExitCode) {
 if !!iENABLED.BCV2
     OnExit ExitBCB
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 ;
@@ -508,12 +508,12 @@ if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) 
     Hotkey "<#v", (*) => NotesApp.ToggleGui()
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\FormatComment>
 ;
@@ -538,12 +538,12 @@ if !!iENABLED.FormatComment {
     HotIf
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 iGENERAL.X1NoCopy := False
 ; Kick it all off
@@ -586,20 +586,20 @@ if !!iENABLED.MouseHotkeys {
     Hotkey "$XButton1", (*)=>OnX1Down()
     Hotkey "$XButton1 Up", (*)=>""
     ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-    HotIf (*) => ( InStr(A_PriorHotkey, "XButton1") 
-                        and (A_TimeSincePriorHotkey < iGENERAL.X1Delay) 
+    HotIf (*) => ( InStr(A_PriorHotkey, "XButton1")
+                        and (A_TimeSincePriorHotkey < iGENERAL.X1Delay)
                         and !iGENERAL.X1NoCopy )
     Hotkey("LButton", SendPaste)
     Hotkey("RButton", SendCut)
     HotIf
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 iGENERAL.X2IsDown := False
 ; $XButton2::
@@ -660,25 +660,25 @@ if !!iENABLED.MouseHotkeys {
     HotIf
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <iGENERAL.X2IsDown> variable) ; ; ; ; 
+; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <iGENERAL.X2IsDown> variable) ; ; ; ;
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BROKEN ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BROKEN ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; #HotIf !!iGENERAL.X2IsDown
 ; WheelUp::WheelLeft
 ; WheelDown::WheelRight
 ; #HotIf
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\WinSizePos>
 ;
@@ -687,24 +687,24 @@ if !!iENABLED.WinSizePos {
     Hotkey "#s", (*)=> SizeWindowHalf()
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\SearchV2Docs>
 ;
 if !!iENABLED.SearchV2
     Hotkey "#z", (*)=> SearchV2DocsFromClipboard()
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\VolumeChangeGUI>
 (VolChangeGui)
@@ -742,12 +742,12 @@ if !!iENABLED.VolumeChange {
 }
 #MaxThreadsBuffer False
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\DllCoords>
 if !!iENABLED.AltShiftWinDrag
@@ -835,12 +835,12 @@ Class AltShiftDragWindowRect {
     }
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 #Include <Utils\WinTransparency>
 ;
@@ -854,12 +854,12 @@ if !!iENABLED.Transparency {
     Hotkey "!#r", (*)=>WinTransparency.ResetActive()
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Shift+Delete Sans Cutting ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Shift+Delete Sans Cutting ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 if !!iENABLED.ShiftDelete
     Hotkey "$+Delete", (*)=> OnShiftDelete()
@@ -870,12 +870,12 @@ OnShiftDelete(*)
     A_Clipboard := B_Clipboard
 }
 ;
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Tab Switching ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Tab Switching ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 OnWinLeft(*)
 {
     Send "{LAlt Down}{RAlt}{Tab}{LAlt Up}"
@@ -888,7 +888,7 @@ if !!iENABLED.TabSwitcher {
     Hotkey "#Left", (*)=>OnWinLeft()
     Hotkey "#Right", (*)=>OnWinRight()
 }
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; 
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
 ; Windows applications *really* don't like it when their caption is removed,
@@ -952,7 +952,7 @@ OpenEnvironmentVars(){
 *CapsLock::
 {
     if GetKeyState("Shift", "P")
-        SetStoreCapsLockMode(False) , 
+        SetStoreCapsLockMode(False) ,
             SendEvent("{CapsLock}") ,
          SetStoreCapsLockMode(True)
     else SendEvent( "{LCtrl Down}"  .
@@ -967,16 +967,16 @@ OpenEnvironmentVars(){
 #HotIf
 
 Class LeaderKeys {
-    
+
     leader := ""
     , keys := Map()
     , timeout   := 2000
     /**
-     * 
+     *
      */
     , boundmeth := {}
-    /** 
-     * @type { LeaderKeys.Actions } 
+    /**
+     * @type { LeaderKeys.Actions }
      */
     , actions  := {}
     , _enabled := False
@@ -1023,7 +1023,7 @@ Class LeaderKeys {
     BindKey(_key, _action) {
         this.keys[_key] := _action
     }
-    
+
     Class Actions {
         __New()
         {
