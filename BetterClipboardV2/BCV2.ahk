@@ -77,7 +77,8 @@ App := BCBApp()
 Class BCBConf {
     static __New() {
         ; Create configuration file as per BCB_CONF_PATH if the file does not exist and
-        ; the file's directory does exist. If neither exist, exit the application        
+        ; the file's directory or the file's directory's parent does exist. 
+        ; If neither exist, exit the application        
         if !(FileExist(BCB_CONF_PATH) ~= "A|N") {
             SplitPath BCB_CONF_PATH,, &conf_dir
             if DirExist(conf_dir) {
@@ -596,7 +597,11 @@ Class BCBEdit {
          */
         Size {
             Get => this.p.Send(SCI_STYLEGETSIZEFRACTIONAL, STYLE_DEFAULT)/100
-            Set => (IsNumber(Value)) ? this.p.Send(SCI_STYLESETSIZEFRACTIONAL, STYLE_DEFAULT, Integer(Value*100)) : False
+            Set => (
+                (IsNumber(Value)) ? 
+                this.p.Send(SCI_STYLESETSIZEFRACTIONAL, STYLE_DEFAULT, Integer(Value*100)) : 
+                False
+            )
         }
     }
 
@@ -971,6 +976,13 @@ Class BCBEdit {
             }
         }
 
+        /**
+         * @prop {String|Integer} IndentGuideColor
+         * 
+         * Get/Set the indent guide color. This value can be a string of alphanumeric 
+         *      characters describing the hex color code (omitting `#`) or alternatively
+         *      can be the integer value of the hex color code.
+         */
         IndentGuideColor {
             Get => this.p.Send(SCI_STYLEGETFORE, STYLE_INDENTGUIDE)
             Set {
@@ -1169,12 +1181,25 @@ Class BCBApp {
         OnClipboardChange(ObjBindMethod(this, "ClipChange"))
     }
 
+    /**
+     * Upon receiving a message from my default-running script that is sent
+     * when using Alt+Shift+RButton to resize the window, stop redrawing the
+     * window and make the window black -- and change it back to the default
+     * upon receiving the message sent when Alt+Shift+RButton is released. 
+     * This prevents some pretty intense flickering.
+     * @param {Integer} wparam **Zero** or **Non-zero**
+     * @param {Integer} lparam *unused*
+     * @param {Integer} msg The code for the received message
+     * @param {Integer} hwnd The handle of the receiving window
+     */
     OnSizingStartEnd(wparam, lparam, msg, hwnd) {
-        if (!!wparam) {     ; on sizing start
+        ; on sizing start -->
+        if (!!wparam) {
             SetTimer SizingLoop, 25
             this.gui.BackColor := this.colors.bg
             this.edit.ctrl.Opt("-Redraw")
-        } else {    ; on sizing end
+        ; on sizing end ---->
+        } else {
             SetTimer SizingLoop, 0
             this.gui.BackColor := this.colors.border
             this.edit.ctrl.Opt("+Redraw")
@@ -1187,13 +1212,27 @@ Class BCBApp {
         }
     }
 
-    ; @param {Integer} _index
+    /**
+     * Use the specified clipboard entry to set the currently shown text 
+     *       of the Scintilla control and update the index indicator respectively
+     *
+     * @param {Integer} _index
+     */
     SetClip(_index) {
         this.edit.Text := FileRead(BCB_CLIPS_DIR "\" _index ".clip")
         this.idxGui.text.Value := _index
         this.shownIndex := _index
     }
 
+    /**
+     * Update the currently shown clip with the previous; Upon hitting the
+     *      very first clip and executing this function, the current clip will
+     *      be updated to be the last clip that was captured.
+     *
+     * ***May change this functionality***
+     * ***to roll over to the clip with***
+     * ***the highest index that exists***
+     */
     PrevClip(*) {
         newIndex := this.shownIndex - 1
         if (newIndex <= 0)
@@ -1204,6 +1243,10 @@ Class BCBApp {
         this.idxGui.StartTimeout()
     }
 
+    /**
+     * Update the currently shown clip with the next; Rolls over to index 1 after
+     *      hitting the clip with the highest index. (Not the current clip)
+     */
     NextClip(*) {
         newIndex := this.shownIndex + 1
         if (FileExist(BCB_CLIPS_DIR "\" newIndex ".clip") ~= "A|N")
@@ -1214,6 +1257,9 @@ Class BCBApp {
         this.idxGui.StartTimeout()
     }
 
+    /**
+     * Create new clip using the current clipboard contents
+     */
     NewClip() {
         newIndex := this.curIndex + 1
         if (newIndex > this.maxIndex)
@@ -1224,6 +1270,10 @@ Class BCBApp {
         BCBConf.Index["Current"] := this.curIndex := newIndex
     }
 
+    /**
+     * Function called on `OnClipboardChange`
+     * @param {0|1|2} type The type of the clipboard contents
+     */
     ClipChange(type) {
         static CB_EMPTY := 0, CB_TEXT := 1, CB_NON_TEXT := 2
         if (type=CB_TEXT) {
@@ -1233,12 +1283,18 @@ Class BCBApp {
         }
     }
 
+    /**
+     * Update the clipboard contents with the currently shown text in the control
+     */
     UpdateClipboardFromEdit(*) {
         this.updatingClip := True
         A_Clipboard := this.edit.Text
         this.HideGui()
     }
 
+    /**
+     * Update the current clip's file with the currently shown text
+     */
     SaveShownClip(*) {
         ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
         ;     FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
@@ -1253,6 +1309,10 @@ Class BCBApp {
         }
     }
 
+    /**
+     * Broken method to delete the currently shown clip.
+     * ***FIX LATER***
+     */
     DeleteShownClip(*) {
         ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.shownIndex ".clip")) ~= "A|N") {
         ;     fileList := Map()
@@ -1269,17 +1329,26 @@ Class BCBApp {
         ; }
     }
 
+    /**
+     * Insert new blank line above the current and jump to it (doesn't split line)
+     */
     NewLineAbove(*) {
         this.edit.Send(SCI_HOME)
         this.edit.Send(SCI_NEWLINE)
         this.edit.Send(SCI_LINEUP)
     }
 
+    /**
+     * Insert new blank line below the current and jump to it (doesn't split line)
+     */
     NewLineBelow(*) {
         this.edit.Send(SCI_LINEEND)
         this.edit.Send(SCI_NEWLINE)
     }
 
+    /**
+     * Setup hotkeys for the control
+     */
     InitHotkeys() {
         HotIf (*) => this.active
         Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"                ))
@@ -1309,6 +1378,17 @@ Class BCBApp {
         HotIf()
     }
 
+    /**
+     * Validate the extistence of the directory to store clips (creating it if necessary).
+     *      Will fail and exit the app if parent dir does not exist.
+     * 
+     * If no clips exist in the directory, create one with the current clipboard contents.
+     *
+     * Fixes an out of bounds value in the .ini for the current index by
+     *      forcing the current index to *1*, (over)writing `1.clip` with the 
+     *      current clipboard. A value can be out of bounds if it's less than 1,
+     *      greater than the maxindex, or if the corresponding clip file doesn't exist.
+     */
     InitClipsDir() {
         if !(DirExist(BCB_CLIPS_DIR)) {
             SplitPath(BCB_CLIPS_DIR,, &parentDir)
@@ -1336,6 +1416,9 @@ Class BCBApp {
         }
     }
 
+    /**
+     * Fade in the gui and set the current clip
+     */
     ShowGui(*) {
         static fadeAmt := this.opacity / this.fadeSteps
         this.active := True
@@ -1363,6 +1446,9 @@ Class BCBApp {
         SetTimer(FadeIn, this.fadeRest)
     }
 
+    /**
+     * Fade out the gui
+     */
     HideGui(*) {
         static fadeAmt := this.opacity / this.fadeSteps
         this.active := False
