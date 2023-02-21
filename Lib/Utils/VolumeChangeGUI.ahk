@@ -25,12 +25,20 @@ Class VolChangeGui {
                             , POSITIVE: 0x00000001 } }
         ; @prop {Integer} AnimMS
         , AnimMS := 150
+        , active_color := "C862d2d"
+        , inactive_color := "C602d2d"
     Static __New() {
         this.gui := Gui("-Caption +Owner +AlwaysOnTop",
                         "AHKVolumeChangeGui")
         this.gui.MarginX := this.gui.MarginY := 0
-        this.prog := this.gui.Add("Progress", "Smooth Vertical Range0-100 C0C2B27 BackgroundAAAAAA " .
-                                            "w" this.size.w " h" this.size.h)
+        ; this.prog := this.gui.Add("Progress", "Smooth Vertical Range0-100 C0C2B27 BackgroundAAAAAA " .
+        this.prog := this.gui.Add("Progress", "Smooth"           . " " .
+                                              "Vertical"         . " " .
+                                              "Range0-100"       . " " .
+                                              "w" this.size.w    . " " .
+                                              "h" this.size.h    . " " .
+                                              "BackgroundAAAAAA" . " " .
+                                              this.active_color)
         this.BFHide := ObjBindMethod(this, "Hide")
         this.BFAnimHide := ObjBindMethod(this, "AnimateHide")
     }
@@ -53,8 +61,8 @@ Class VolChangeGui {
     }
     Static UpdateMuteStatus(*) {
         if !!SoundGetMute()
-            this.prog.Opt("C2C3B37")
-        else this.prog.Opt("C0C2B27")
+            this.prog.Opt(this.inactive_color)
+        else this.prog.Opt(this.active_color)
     }
     Static AnimateShow(*) {
         this.prog.Value := Round(SoundGetVolume())

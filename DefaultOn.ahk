@@ -966,7 +966,7 @@ OpenEnvironmentVars(){
 *CapsLock Up::Return
 #HotIf
 
-Class LeaderKeys {
+Class LeaderKey {
 
     leader := ""
     , keys := Map()
@@ -985,7 +985,7 @@ Class LeaderKeys {
     __New(_leader:="#a", _timeout:=2000) {
         this.leader  := _leader
         this.timeout := Abs(_timeout)
-        this.actions := LeaderKeys.Actions()
+        this.actions := LeaderKey.Actions()
         this.boundmeth.newkey     := ObjBindMethod(this, "BindKey")
         this.boundmeth.activate   := ObjBindMethod(this, "Activate")
         this.boundmeth.deactivate := ObjBindMethod(this, "Deactivate")
@@ -1004,20 +1004,20 @@ Class LeaderKeys {
         }
     }
 
-    Activate() {
+    Activate(*) {
         SetTimer this.boundmeth.deactivate, ((-1)*this.timeout)
         for k, a in this.keys
             HotKey k, a, "On"
     }
 
-    Deactivate() {
+    Deactivate(*) {
         for k, a in this.keys
             Hotkey k, a, "Off"
     }
 
     /**
      * @param {String} _key
-     * @param {String} _action
+     * @param {String|Func} _action
      * @param {Func} _cond
      */
     BindKey(_key, _action) {
@@ -1040,14 +1040,25 @@ Class LeaderKeys {
     }
 }
 
-#1::
+KillHelpWindows()
 {
     help_windows := WinGetList("ahk_exe hh.exe")
     for hhwin in help_windows
-    {
-        WinClose hhwin
-    }
+        if WinExist("ahk_id " hhwin)
+            WinClose hhwin
 }
+
+alt_comma_leader := LeaderKey("^,")
+alt_comma_leader.BindKey(
+    "m", (*)=>( MsgBox("message...") )
+)
+alt_comma_leader.BindKey(
+    "b", (*)=>( SearchBrowserFromClipboard() )
+)
+alt_comma_leader.BindKey(
+    "h", (*)=>( KillHelpWindows() )
+)
+alt_comma_leader.Enabled := True
 
 
 TriggerReload(*)

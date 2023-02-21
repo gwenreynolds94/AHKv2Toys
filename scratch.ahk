@@ -151,58 +151,62 @@ Class Main {
     ; PostMessage 0x5555,,,, "ahk_id " hGui
 ; }
 
-Class LeaderKey {
-    leader := ""
-    , keys := Map()
-    , enabled := False
-    , bmeth := {}
-    , timeout := 2000
+; Class LeaderKey {
+    ; leader := ""
+    ; , keys := Map()
+    ; , enabled := False
+    ; , bmeth := {}
+    ; , timeout := 2000
+; 
+    ; /**
+     ; * @param {String} _leader
+     ; */
+    ; __New(_leader:="#a") {
+        ; this.leader := _leader
+        ; this.bmeth.activate := ObjBindMethod(this, "ActivateLeader")
+        ; this.bmeth.deactivate := ObjBindMethod(this, "DeactivateLeader")
+        ; Hotkey this.leader, this.bmeth.activate
+    ; }
+; 
+    ; ActivateLeader(*) {
+        ; SetTimer this.bmeth.deactivate, (this.timeout*(-1))
+        ; for k, a in this.keys {
+            ; Hotkey k, a, "On"
+        ; }
+    ; }
+; 
+    ; DeactivateLeader(*) {
+        ; for k, a in this.keys {
+            ; Hotkey k, a, "Off"
+        ; }
+    ; }
+; 
+    ; BindKey(_key, _act) {
+        ; this.keys[_key] := _act
+    ; }
+; }
 
-    /**
-     * @param {String} _leader
-     */
-    __New(_leader:="#a") {
-        this.leader := _leader
-        this.bmeth.activate := ObjBindMethod(this, "ActivateLeader")
-        this.bmeth.deactivate := ObjBindMethod(this, "DeactivateLeader")
-        Hotkey this.leader, this.bmeth.activate
-    }
+; main_leader := LeaderKey()
+; 
+; IterLK(*) {
+    ; stdo main_leader
+; }
+; 
+; main_leader.BindKey(
+    ; "h",
+    ; IterLK
+; )
+ ; stdo "", "", main_leader
+; 
+; 
 
-    ActivateLeader(*) {
-        SetTimer this.bmeth.deactivate, (this.timeout*(-1))
-        for k, a in this.keys {
-            Hotkey k, a, "On"
-        }
-    }
-
-    DeactivateLeader(*) {
-        for k, a in this.keys {
-            Hotkey k, a, "Off"
-        }
-    }
-
-    BindKey(_key, _act) {
-        this.keys[_key] := _act
-    }
-}
-
-main_leader := LeaderKey()
-
-IterLK(*) {
-    stdo main_leader
-}
-
-main_leader.BindKey(
-    "h",
-    IterLK
-)
- stdo "", "", main_leader
+dbgo Gui()
 
 
 F8:: ExitApp
-
-
-F10::
-{
-    
-}
+; 
+; 
+; F10::
+; {
+    ; 
+; }

@@ -1090,7 +1090,7 @@ Class BCBApp {
         guidefg: "ff3c4e22"     ; ABGR
     }
     ; @prop {String} fontName
-    fontName := "Fira Code"
+    fontName := "CaskaydiaCove NF"
 
     ; @prop {Number} fontSizeMin
     fontSizeMin := 3

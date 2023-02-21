@@ -532,12 +532,12 @@
 		"selected_items":
 		[
 			[
-				"lsp",
-				"LSP: Enable Language Server in Project"
-			],
-			[
 				"col",
 				"UI: Select Color Scheme"
+			],
+			[
+				"lsp",
+				"LSP: Enable Language Server in Project"
 			],
 			[
 				"cust",
@@ -949,6 +949,10 @@
 	{
 		"height": 0.0
 	},
+	"output.mdpopups":
+	{
+		"height": 0.0
+	},
 	"pinned_build_system": "Packages/User/BuildSystems/AHKv2.sublime-build",
 	"project": "AHKv2Toys.sublime-project",
 	"replace":
@@ -973,7 +977,7 @@
 		[
 			[
 				"",
-				"C:\\Users\\jonat\\Documents\\gitrepos\\AHKv2Toys\\.vscode\\AHKv2Toys.sublime-workspace"
+				"C:\\Users\\jonat\\Portables\\sublime_text_4\\Data\\Packages\\User\\Projects\\AHKv2Toys.sublime-project"
 			]
 		],
 		"width": 380.0
@@ -994,7 +998,7 @@
 	"show_minimap": false,
 	"show_open_files": true,
 	"show_tabs": true,
-	"side_bar_visible": true,
+	"side_bar_visible": false,
 	"side_bar_width": 185.0,
 	"status_bar_visible": true,
 	"template_settings":
