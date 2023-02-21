@@ -1268,7 +1268,7 @@ Class BCBApp {
             newIndex := 1
         if (FileExist(clipPath:=(BCB_CLIPS_DIR "\" newIndex ".clip")) ~= "A|N")
             FileDelete(clipPath)
-        FileAppend(A_Clipboard, clipPath)
+        FileAppend(A_Clipboard, clipPath, "UTF-8")
         BCBConf.Index["Current"] := this.curIndex := newIndex
     }
 
@@ -1302,10 +1302,11 @@ Class BCBApp {
         ;     FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
         
         currentText := this.edit.Text
+        MsgBox currentText
         shownClip:=(BCB_CLIPS_DIR "\" this.shownIndex ".clip")
         if (FileExist(shownClip) ~= "A|N") {
             FileDelete(shownClip)
-            FileAppend(currentText, shownClip)
+            FileAppend(currentText, shownClip, "UTF-8")
             this.idxGui.ShowGui()
             this.idxGui.StartTimeout()
         }
@@ -1406,15 +1407,15 @@ Class BCBApp {
         Loop Files, BCB_CLIPS_DIR "\*.clip"
             fileCount++
         if !(fileCount) {
-            FileAppend(A_Clipboard, BCB_CLIPS_DIR "\1.clip")
+            FileAppend(A_Clipboard, BCB_CLIPS_DIR "\1.clip", "UTF-8")
             BCBConf.Index["Current"] := this.curIndex := 1
         } else if ((this.curIndex <= 0) or (this.curIndex > this.maxIndex)) {
             if (FileExist(clip1:=(BCB_CLIPS_DIR "\1.clip")))
                 FileDelete(clip1)
-            FileAppend(A_Clipboard, clip1)
+            FileAppend(A_Clipboard, clip1, "UTF-8")
             BCBConf.Index["Current"] := this.curIndex := 1
         } else if !(FileExist(clipC:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N") {
-            FileAppend(A_Clipboard, clipC)
+            FileAppend(A_Clipboard, clipC, "UTF-8")
         }
     }
 
