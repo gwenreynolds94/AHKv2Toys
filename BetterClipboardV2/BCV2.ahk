@@ -24,6 +24,8 @@ TraySetIcon(BCBIcon)
  * Immediately exit script if run with the command argument **DoExit**; in combination with
  * **`#SingleInstance Force`**, this allows for safely exiting the compiled script -- still
  * catching `OnExit` registered functions -- by just running ".\BCV2.exe DoExit"
+ *
+ * Intended to be used with my main default-running script.
  */
 __1 := (A_Args.Length) ? A_Args[1] : ""
 if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
