@@ -1,8 +1,21 @@
 
-stdo(msg*) {
-    msg_out := ""
+stdo(_msg*) {
+    _def_opts := Map()
+    _def_opts["noprint"] := False
+    _msg_out := ""
     nest_level := 0
     indent_str := indent_default := " | "
+    if _msg.Length {
+        _last := _msg[_msg.Length]
+        if type(_last) == "Object" and _last.HasOwnProp("__opts") {
+            _new_opts := _last.__opts
+            for _cfg, _setting in _def_opts {
+                if _new_opts.HasOwnProp(_cfg)
+                    _def_opts[_cfg] := _new_opts.%_cfg%
+            }
+            _msg.Capacity := _msg.Length - 1
+        }
+    }
     TryStringOut(out_item) {
         indent := ""
         Loop nest_level
@@ -95,16 +108,19 @@ stdo(msg*) {
             Return
         }
     }
-    for itm in msg {
+    for _itm in _msg {
         nest_level := 0
         indent_str := indent_default
-        msg_out .= TryStringOut(itm)
+        _msg_out .= TryStringOut(_itm)
     }
-    FileAppend msg_out, "*"
+    if _def_opts["noprint"]
+        return _msg_out
+    FileAppend _msg_out, "*"
+    return _msg_out
 }
 
-dbgo(msg*) {
-    msg_out := ""
+dbgo(_msg*) {
+    _msg_out := ""
     nest_level := 0
     indent_str := indent_default := " | "
     TryStringOut(out_item) {
@@ -274,13 +290,13 @@ dbgo(msg*) {
             Return out_string
         } Else Return
     }
-    for itm in msg {
+    for _itm in _msg {
         nest_level := 0
         indent_str := indent_default
-        msg_out .= TryStringOut(itm)
+        _msg_out .= TryStringOut(_itm)
     }
-    OutputDebug(msg_out)
-    Return msg_out
+    OutputDebug(_msg_out)
+    Return _msg_out
 }
 
 _TryString(_AsString) {

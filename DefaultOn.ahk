@@ -2,7 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-; #Include <DEBUG\DBT>
+#Include <DEBUG\DBT>
 
 ; #Include <GdipLib\Gdip_Custom>
 
@@ -966,79 +966,6 @@ OpenEnvironmentVars(){
 *CapsLock Up::Return
 #HotIf
 
-Class LeaderKey {
-
-    leader := ""
-    , keys := Map()
-    , timeout   := 2000
-    /**
-     *
-     */
-    , boundmeth := {}
-    /**
-     * @type { LeaderKeys.Actions }
-     */
-    , actions  := {}
-    , _enabled := False
-
-
-    __New(_leader:="#a", _timeout:=2000) {
-        this.leader  := _leader
-        this.timeout := Abs(_timeout)
-        this.actions := LeaderKey.Actions()
-        this.boundmeth.newkey     := ObjBindMethod(this, "BindKey")
-        this.boundmeth.activate   := ObjBindMethod(this, "Activate")
-        this.boundmeth.deactivate := ObjBindMethod(this, "Deactivate")
-    }
-
-    Enabled {
-        Get => this._enabled
-        Set {
-            if !!Value and !this._enabled {
-                Hotkey this.leader, this.boundmeth.activate, "On"
-            }
-            else if !Value and !!this._enabled {
-                Hotkey this.leader, this.boundmeth.activate, "Off"
-            }
-            this._enabled := !!Value
-        }
-    }
-
-    Activate(*) {
-        SetTimer this.boundmeth.deactivate, ((-1)*this.timeout)
-        for k, a in this.keys
-            HotKey k, a, "On"
-    }
-
-    Deactivate(*) {
-        for k, a in this.keys
-            Hotkey k, a, "Off"
-    }
-
-    /**
-     * @param {String} _key
-     * @param {String|Func} _action
-     * @param {Func} _cond
-     */
-    BindKey(_key, _action) {
-        this.keys[_key] := _action
-    }
-
-    Class Actions {
-        __New()
-        {
-            ; ...
-        }
-        KillHelpWindows()
-        {
-            help_wins := WinGetList("ahk_exe hh.exe")
-            for hh in help_wins
-            {
-                WinClose hh
-            }
-        }
-    }
-}
 
 KillHelpWindows()
 {
@@ -1048,18 +975,179 @@ KillHelpWindows()
             WinClose hhwin
 }
 
-alt_comma_leader := LeaderKey("^,")
-alt_comma_leader.BindKey(
-    "m", (*)=>( MsgBox("message...") )
-)
-alt_comma_leader.BindKey(
-    "b", (*)=>( SearchBrowserFromClipboard() )
-)
-alt_comma_leader.BindKey(
-    "h", (*)=>( KillHelpWindows() )
-)
-alt_comma_leader.Enabled := True
+Class TiledWindows {
+    Static grids := [],
+           class_grids := Map()
 
+    Static TileActiveClass() 
+    {
+        awTitle := "ahk_id " WinExist("A")
+        awClass := WinGetClass(awTitle)
+        this.TileClassQuad(awClass)
+        WinActivate awTitle
+    }
+
+    Static ExpandActiveY()
+    {
+        awHwnd := WinExist("A")
+        awClass := WinGetClass("ahk_id " awHwnd)
+        dbgo awHwnd, awClass
+        if not this.class_grids.Has(awClass) {
+            dbgo "Could not find class grid"
+            dbgo stdo(this.class_grids,{__opts:{noprint:True}})
+            return
+        }
+        dbgo this.class_grids[awClass]
+        for _i, _item in this.class_grids[awClass].rowsflat {
+            if _item.HWND == awHwnd {
+                this.class_grids[awClass].ExpandY(_item.RowPos)
+                dbgo this.class_grids[awClass]
+                break
+            }
+        }
+    }
+
+    Static TileClassQuad(wClass) {
+        rows := columns := 2
+        if this.class_grids.Has(wClass) {
+            cGrid := this.class_grids[wClass]
+            cGrid.ResetDimensions()
+        } else {
+            cGrid := WinGrid(columns, rows)
+            this.class_grids[wClass] := cGrid
+        }
+        wList := WinGetList("ahk_class " wClass)
+        cGrid.HWNDs := wList
+        if (wList.Length == 1) {
+            _col_pos := (Random(1,10) > 5) ? 1 : 2
+            _g := cGrid.rows[1][1]
+            _g.ColumnPos := _col_pos
+            _g.RowSize := rows
+            _g.Place()
+            return 1
+        } else if (wList.Length == 2) {
+            _g := cGrid.rows[1]
+            _g[1].RowSize := _g[2].RowSize := rows
+            _g[1].Place(), _g[2].Place()
+            return 2
+        } else if (wList.Length == 3) {
+            _g := cGrid.rowsflat
+            _g[1].RowSize := rows
+            _g[3].ColumnPos := columns
+            for _g_itm in _g
+                _g_itm.Place()
+        } else if (wList.Length >= 4) {
+            _g := cGrid.rowsflat
+            for _g_itm in _g
+                _g_itm.Place()
+        }
+    }
+}
+
+Class TempKeys {
+    timeout := 2000
+    , boundmeth := {}
+    , keys := Map()
+    , maxtimeout := 60 * 1000
+    , _active := False
+    
+    __New(_timeout := 2000) {
+        this.timeout := IsNumber(_timeout) ? Abs(_timeout) : this.maxtimeout
+        this.boundmeth.bindkey := ObjBindMethod(this, "BindKey")
+        this.boundmeth.activate := ObjBindMethod(this, "Activate")
+        this.boundmeth.deactivate := ObjBindMethod(this, "Deactivate")
+    }
+
+    Activate(_timeout:=False, *) {
+        this._active := True
+        for _key, _action in this.keys
+            Hotkey _key, _action, "On"
+        if (_timeout = "none") or (not _timeout and (this.timeout = "none"))
+            return
+        SetTimer(
+            this.boundmeth.deactivate,
+            ((_to:=_timeout) = "max") ? (_mxto:=this.maxtimeout) :
+            (IsNumber(_to)) ? ((-1)*_to) : (_thto:=(-1)*this.timeout) ? (_thto) : _mxto
+        )
+    }
+
+    Deactivate(*) {
+        this._active := False
+        for _key, _action in this.keys
+            Hotkey _key, _action, "Off"
+    }
+
+    Map(_key_new, _action_new, *) {
+        this.keys[_key_new] := _action_new
+    }
+
+    BindKey(_key_new, _action_new, *) {
+        this.keys[_key_new] := _action_new
+    }
+
+    Active[_timeout:=False] {
+        Get => this._active
+        Set {
+            if !!Value and !this._active
+                this.Activate(_timeout)
+            else if !Value and !!this._active
+                this.Deactivate()
+            this._active := !!Value
+        }
+    }
+}
+
+Class LeaderKeys extends TempKeys {
+    
+    leader := ""
+    , _enabled := False
+    
+    __New(_leader := "#a", _timeout:=2000) {
+        super.__New(_timeout)
+        this.leader := _leader
+    }
+
+    Enabled {
+        Get => this._enabled
+        Set {
+            if !!Value and !this._enabled
+                Hotkey this.leader, this.boundmeth.activate, "On"
+            else if !Value and !!this._enabled
+                Hotkey this.leader, this.boundmeth.activate, "Off"
+            this._enabled := !!Value
+        }
+    }
+}
+
+ctrl_comma_leader := LeaderKeys("^,")
+ctrl_comma_leader.BindKey("m", (*)=>( MsgBox("message...") ))
+ctrl_comma_leader.BindKey("b", (*)=>( SearchBrowserFromClipboard() ))
+ctrl_comma_leader.BindKey("h", (*)=>( KillHelpWindows() ))
+
+win_grid_keys := TempKeys("none")
+wgk := win_grid_keys
+;|- win_grid_keys.BindKey("ScrollLock", (*) => ( TiledWindows.TileActiveClass() ))
+;--- wgk.Map("Insert", (*)=>( SizeWindow() ))
+;--- wgk.Map("Pause", (*)=>( SizeWindowHalf() ))
+wgk.Map("Pause", (*)=>( TiledWindows.ExpandActiveY() ))
+wgk.Map("PrintScreen", (*)=>( TiledWindows.TileActiveClass() ))
+
+ScrollLock::
+{
+    win_grid_keys.Active := !win_grid_keys.Active
+    JKQuickTip( "WinGridKeys <> " . 
+              ( (win_grid_keys.Active) ? "ENABLED" : "DISABLED" ), 
+              ( 1500 ))
+}
+
+;|- ctrl_comma_leader.BindKey("w", (*)=>( 
+;|-         win_grid_keys.Active["max"] := !win_grid_keys.Active 
+;|-     ))
+ctrl_comma_leader.Enabled := True
+
+;|- win_jay_leader := LeaderKeys("#j")
+;|- win_jay_leader.BindKey("j", (*)=>(ToolTip("#j[j]")))
+;|- win_jay_leader.Enabled := True
 
 TriggerReload(*)
 {
