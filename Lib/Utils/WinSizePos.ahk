@@ -41,6 +41,176 @@ SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
     WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
 }
 
+Class WindowGrid {
+    layouts :=  Map(
+        1, Map(
+            1 , { x:0, y:0, w:1, h:2 }
+        ),
+        2, Map(
+            1 , { x:0, y:0, w:1, h:2 },
+            2 , { x:1, y:0, w:1, h:2 }
+        ),
+        3, Map(
+            1 , { x:0, y:0, w:1, h:2 },
+            2 , { x:1, y:0, w:1, h:1 }, 
+            3 , { x:1, y:1, w:1, h:1 }
+        ),
+        4, Map(
+            1 , { x:0, y:0, w:1, h:1 },
+            2 , { x:1, y:0, w:1, h:1 }, 
+            3 , { x:0, y:1, w:1, h:1 }, 
+            4 , { x:1, y:1, w:1, h:1 }
+        )
+    )
+    _rows := 0
+    _columns := 0
+    _row_height := 0
+    _col_width := 0
+    outer_gap := 0
+    /** @prop {WindowGridItem[]} _items_as_array */
+    _items_as_array := []
+    _items_by_hWnd := Map()
+    _items_by_class := Map()
+
+
+    __New(rows:=4, columns:=4, outer_gap:=8) {
+        this.outer_gap := outer_gap
+        this.Rows := rows
+        this.Columns := columns
+    }
+
+    List[index_type := "hwnd"] => 
+        (index_type ~=  "hwnd") ? this._items_by_hWnd  : 
+        (index_type ~= "class") ? this._items_by_class :
+        (index_type ~=  "flat") ? this._items_as_array : this._items_as_array
+
+    /**
+     * @param {Integer} hWnd
+     * @param {(False|Object)} coords
+     * @return {WindowGridItem}
+     */
+    Add(hWnd, coords:=False) {
+        _cell_size := { w: this._row_height, h: this._col_width }
+        new_grid_item := WindowGridItem(coords, _cell_size, hWnd, this.outer_gap)
+        _cls := WinGetClass("ahk_id " hWnd)
+        if not this._items_by_class.Has(_cls)
+            this._items_by_class[_cls] := Map()
+        this._items_by_class[_cls][hWnd] := new_grid_item
+        this._items_by_hWnd[hwnd] := new_grid_item
+        this._items_as_array.Push new_grid_item
+        return new_grid_item
+    }
+
+    AddClass(wClass, layout:=False, overwrite:=False) {
+        new_items := Map()
+        if not overwrite and this.List["class"].Has(wClass)
+            return (-1)
+        wList := WinGetList("ahk_class " wClass)
+        if layout {
+            for index_1, map_1 in layout
+                for index_2, map_2 in map_1
+                    _:=_
+        }
+        for _i, _hWnd in wList
+            if layout and _i <= layout.Count
+                new_coords := 
+            new_items[_i] := this.Add(_hWnd)
+        return new_items
+    }
+
+    Rows {
+        Get => this._rows
+        Set {
+            this._rows := Value
+            this._row_height := ((A_ScreenHeight - this.outer_gap*2) // this._rows)
+        }
+    }
+
+    Columns {
+        Get => this._columns
+        Set {
+            this._columns := Value
+            this._col_width := ((A_ScreenWidth - this.outer_gap*2) // this._columns)
+        }
+    }
+
+    ApplyToClass(wClass:=False, recalc:=True) {
+        if not wClass
+            wClass := WinGetClass("ahk_id " WinExist("A"))
+        if this._items_by_class.Has(wClass) ; maybe add handling of new classes that can be accessed here
+            for _hwnd, _item in this._items_by_class[wClass]
+                _item.ApplyRealCoords(recalc)
+    }
+}
+
+Class WindowGridItem {
+    HWND := 0x0,
+    _cell_size := {},
+    _cell_coords := {},
+    _pixel_coords := {},
+    _real_coords := {},
+    outer_gap := 0
+
+    /**
+     * @param {Object} cell_coords
+     * @param {Object} cell_size
+     * @param {Integer} hWnd
+     * @param {Integer} outer_gap
+     */
+    __New(cell_coords:=False, cell_size:=False, hWnd:=0x0, outer_gap:=8) {
+        this.outer_gap := outer_gap
+        this._cell_coords := cell_coords ? cell_coords : this._cell_coords
+        this._cell_size := (cell_size) ? (cell_size) : {}
+        this.HWND := hWnd
+    }
+
+    RealCoords[calculate:=True] => (calculate) ? (
+        pCoord := this.Coords["pixel"], RealCoordsFromSuperficial( 
+            &realCoords:=0, this.HWND, pCoord.x, pCoord.y, pCoord.w, pCoord.h
+        ), this._real_coords := realCoords) : this._real_coords
+
+    ApplyRealCoords(recalculate:=True) {
+        rCoords := this.RealCoords[recalculate]
+        WinMove(rCoords.x, rCoords.y, rCoords.w, rCoords.h, "ahk_id " this.HWND)
+    }
+
+    IsCoords(_obj, _coord_names*) {
+        _needed_names := _coord_names.Length ? _coord_names : ["x","y","w","h"]
+        for _i, _nm in _needed_names
+            if ( not _obj.HasProp(_nm) ) or 
+               ( not _obj.%_nm% is Number )
+                return false
+        return True
+    }
+
+    CellSize {
+        Get => this._cell_size
+        Set {
+            if not (Value and (Value is Number) and 
+                    this.IsCoords(ccrd:=this._cell_coords))
+                return
+            this._cell_size := Value
+            this._pixel_coords := { 
+                x: (ccrd.x * Value)  +  (this.outer_gap),
+                y: (ccrd.y * Value)  +  (this.outer_gap),
+                w: (ccrd.w * Value), h: (ccrd.h * Value) }
+        }
+    }
+
+    Coords[ units:="cells", cell_size:=False ] {
+        Get => ( units ~=  "cells" ) ?  this._cell_coords : 
+               ( units ~= "pixels" ) ? this._pixel_coords : False
+        Set { 
+            if not this.IsCoords(Value)
+                return
+            if ( units ~= "cells" )
+                this._cell_coords := Value, this.CellSize := cell_size
+            else if ( units ~= "pixels" )
+                this._pixel_coords := Value
+        }
+    }
+}
+
 Class WinGridItem {
     _rows := 0,
     _columns := 0,
@@ -236,7 +406,27 @@ Class WinGrid {
         this._fill := fill
     }
 
-    ResetDimensions() {
+    Bisect() {
+        for _i, _item in this.rowsflat {
+            _item.Columns *= 2
+            _item.Rows *= 2
+            _item.RowSize *= 2
+            _item.ColumnSize *= 2
+            _item.RowPos *= 2
+            _item.ColumnPos *= 2
+        }
+    }
+
+    Resize(column, row, width_incr, height_incr) {
+        
+    }
+
+    PlaceAll() {
+        for _i, _item in this.rowsflat
+            _item.Place()
+    }
+
+    Resetcoords() {
         for ci, column in this.columns {
             for ri, _item in column {
                 _item.ColumnPos := ci
@@ -298,8 +488,8 @@ Class WinGrid {
          inactincr := (hincr // inactcnt)
              hincr := (inactincr * inactcnt)
         hhalflower := (hincr // 2), hhalfofst := Mod(hincr, 2)
-        blwcnt := Abs(rownr - rcnt)
-        abvcnt := inactcnt - blwcnt
+            blwcnt := Abs(rownr - rcnt)
+            abvcnt := inactcnt - blwcnt
         for _i, _item in this.rows[1]
             _item.RowHeight += (abvcnt ? inactincr : hincr)
         Loop abvcnt {
@@ -309,7 +499,7 @@ Class WinGrid {
             for _i, _item in this.rows[aidx] {
                 _prev_item := this.rows[(aidx - 1)][_i]
                 _item.RowHeight += inactincr
-                ;--- ??FIXME??
+                ;--- ?? FIXME ??
                 ;--- may need to add to _item.y if gaps are uneven
                 _item.y += (_prev_item.y + _prev_item.RowHeight)
             }
@@ -317,7 +507,7 @@ Class WinGrid {
         for _i, _item in this.rows[rownr] {
             _item.RowHeight += hincr
             if rownr > 1 {
-                _prev_item := this.rows[rownr]
+                _prev_item := this.rows[rownr][_i]
                 _item.y += (_prev_item.y + _prev_item.RowHeight)
             }
         }
@@ -329,10 +519,13 @@ Class WinGrid {
                 _item.y += (_prev_item.y + _prev_item.RowHeight)
             }
         }
-        for _i, _item in this.rows[rownr]
-            _item.RowHeight += hhalfofst
-        for _i, _item in this.rowsflat
+        ;--- for _i, _item in this.rows[rownr]
+            ;--- _item.RowHeight += hhalfofst
+        ;--- this.Resetcoords()
+        for _i, _item in this.rowsflat {
+            _item.changed := True
             _item.Place()
+        }
         ;--- for _i, _item in this.rows[1]
         ;---     _item.RowHeight += inactincr
         ;--- for _i, _item in this.rows[rcnt] {
@@ -423,6 +616,17 @@ Class WinGrid {
     }
 
     SizeActiveY(row_pos, shrink := False) {
+        db_str := ""
+        for _i, _item in this.rows[row_pos]
+            db_str .=   
+                "▼▼▼▼▼" row_pos . "▼▼▼▼▼" _i . "▼▼▼▼▼`n" .
+                stdo([
+                    "x: " _item.x, 
+                    "y: " _item.y, 
+                    "w: " _item.w, 
+                    "h: " _item.h
+                ], {__opts: {noprint: True}})
+        MsgBox db_str
         if (row_pos < 1)
             row_pos := 1
         else if (row_pos > this.rowcnt)
@@ -433,7 +637,7 @@ Class WinGrid {
         pre_actv_sum := 0
         post_actv_sum := 0
         pre_actv_cnt := 0
-        post_act_cnt := 0
+        post_actv_cnt := 0
         for ri, _row in this.rows {
             sum_heights += _row[1].h
             if ri < row_pos {
@@ -465,14 +669,25 @@ Class WinGrid {
                 }
             } else {
                 for ci, _grid_item in this.rows[ri] {
-                    _grid_itm.h -= row_incr
+                    _grid_item.h -= row_incr
                     if (ri > row_pos)
                         _grid_item.y -= row_incr
                     else
-                        _grid.item.y += row_incr
+                        _grid_item.y += row_incr
                 }
             }
         }
+        db_str := ""
+        for _i, _item in this.rows[row_pos]
+            db_str .=   
+                "▼▼▼▼▼" row_pos . "▼▼▼▼▼" _i . "▼▼▼▼▼`n" .
+                stdo([
+                    "x: " _item.x, 
+                    "y: " _item.y, 
+                    "w: " _item.w, 
+                    "h: " _item.h
+                ], {__opts: {noprint: True}})
+        MsgBox db_str
     }
 
     Layout {
@@ -595,6 +810,7 @@ SuperficialCoordsFromReal(&outCoords, wHwnd) {
     outCoords.x  := wX + offSetLeft
     outCoords.h  := wH - offSetBottom
     outCoords.w  := wW - (offSetRight * 2)
+    return outCoords
 }
 
 RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH) {
@@ -608,4 +824,5 @@ RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH) {
     outCoords.x  := wX - offSetLeft
     outCoords.h  := wH + offSetBottom
     outCoords.w  := wW + (offSetRight * 2)
+    return outCoords
 }

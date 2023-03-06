@@ -3,15 +3,6 @@
 #SingleInstance Force
 
 #Include <DEBUG\DBT>
-#Include <Utils\SearchV2Docs>
-#Include <Utils\VolumeChangeGUI>
-#Include <Utils\DllCoords>
-#Include <Utils\WinTransparency>
-#Include <Utils\WinUtil\WinUtil>
-#Include <Utils\BindUtil\BindUtil>
-#Include <Utils\WinSizePos>
-#Include <Utils\FormatComment>
-#Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 
 ; #Include <GdipLib\Gdip_Custom>
 
@@ -470,7 +461,7 @@ JKQuickToast(_msg, _title, _timeout_ms) {
                )
         SetTimer(
                     (*)=>HideTrayTip(),
-                    -4000
+                    -1000
                 )
     }
 }
@@ -509,6 +500,7 @@ if !!iENABLED.BCV2
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 ;
 if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) {
     ScritchResourcePath := A_ScriptDir "\ScinSkratch"
@@ -523,6 +515,7 @@ if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\FormatComment>
 ;
 if !!iENABLED.FormatComment {
     _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
@@ -687,12 +680,11 @@ if !!iENABLED.MouseHotkeys {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\WinSizePos>
 ;
 if !!iENABLED.WinSizePos {
-    Hotkey "#b", (*)=> WinUtil.Sizer.SizeWindow()
-    Hotkey "#s", (*)=> WinUtil.Sizer.SizeWindowHalf()
-    ; Hotkey "#b", (*)=> SizeWindow()
-    ; Hotkey "#s", (*)=> SizeWindowHalf()
+    Hotkey "#b", (*)=> SizeWindow()
+    Hotkey "#s", (*)=> SizeWindowHalf()
 }
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -702,6 +694,7 @@ if !!iENABLED.WinSizePos {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\SearchV2Docs>
 ;
 if !!iENABLED.SearchV2
     Hotkey "#z", (*)=> SearchV2DocsFromClipboard()
@@ -713,6 +706,7 @@ if !!iENABLED.SearchV2
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\VolumeChangeGUI>
 (VolChangeGui)
 ;
 #MaxThreadsBuffer True
@@ -755,6 +749,7 @@ if !!iENABLED.VolumeChange {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\DllCoords>
 if !!iENABLED.AltShiftWinDrag
     (AltShiftDragWindowRect).InitHotkeys()
 Class AltShiftDragWindowRect {
@@ -847,6 +842,7 @@ Class AltShiftDragWindowRect {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+#Include <Utils\WinTransparency>
 ;
 (WinTransparency)
 ;
@@ -897,30 +893,30 @@ if !!iENABLED.TabSwitcher {
 
 ; Windows applications *really* don't like it when their caption is removed,
 ; so this really doesn't have much use at all.
-; ToggleWindowCaption() {
-;     Static WS_CAPTION := 0x00C00000, GWL_STYLE := -16
-;     aHwnd := WinExist("A")
-;     wStyle := DllCall("GetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE)
+ToggleWindowCaption() {
+    Static WS_CAPTION := 0x00C00000, GWL_STYLE := -16
+    aHwnd := WinExist("A")
+    wStyle := DllCall("GetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE)
 
-;     DetectHiddenWindows 2
+    DetectHiddenWindows 2
 
-;     QuickTip(msg) {
-;         Tooltip msg
-;         SetTimer (*)=>ToolTip(), 1000
-;     }
+    QuickTip(msg) {
+        Tooltip msg
+        SetTimer (*)=>ToolTip(), 1000
+    }
 
-;     if (wStyle & WS_CAPTION) {
-;         QuickTip(wStyle ": Has Caption")
-;         wStyle &= ~WS_CAPTION
-;         DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
-;         WinRedraw "ahk_id " aHwnd
-;     } else {
-;         QuickTip(wStyle ": No Caption")
-;         wStyle &= WS_CAPTION
-;         DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
-;         WinRedraw "ahk_id " aHwnd
-;     }
-; }
+    if (wStyle & WS_CAPTION) {
+        QuickTip(wStyle ": Has Caption")
+        wStyle &= ~WS_CAPTION
+        DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
+        WinRedraw "ahk_id " aHwnd
+    } else {
+        QuickTip(wStyle ": No Caption")
+        wStyle &= WS_CAPTION
+        DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
+        WinRedraw "ahk_id " aHwnd
+    }
+}
 ; Hotkey "#F8", (*)=> ToggleWindowCaption()
 
 :*:insertdtime::
@@ -979,25 +975,267 @@ KillHelpWindows()
             WinClose hhwin
 }
 
-/** @param {String|Number} [_class]
-  * @param {...*} 
- */
-KillWindowClass(_class?, *) {
-    living_windows := WinGetList( "ahk_class " (IsSet(_class) ? _class :
-        (slaughtered := WinGetClass("ahk_id " WinExist("A")))))
-    death_total := 0
-    for target in living_windows
-        if WinExist("ahk_id " target)
-            WinClose target, death_total += 1
-    JKQuickToast(
-        ("[ " String(slaughtered ? slaughtered : _class) " ] R.I.P.")
-      , "Death Total: " String(death_total)
-      , 5000
-    )
+Class TiledWindows {
+    Static grids := [],
+        class_grids := Map(),
+        rows := 12,
+        columns := 16,
+        outer_gap := 8,
+        layouts := {
+            PreferTopLeftTall:
+            Map( ;>--,._,.-=~,._,.-,._,.-=~,._,.-=,._,.-=~,._,.-=~,._,.-=~=._          
+                1, Map( 1, { x: 0,                    ;,_/=_`-.,_/=_`-.,_/:" ^".
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.,:,
+                             w: this.columns,         ;,_/=_`-.,_/=_`-.,_/=_`-_`=-),
+                             h: this.rows        }) , ;,_/=_`-.,_/=_`-.,_/=_`-_`-=.'=,
+                2, Map( 1, { x: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-_`-.==;:+
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-_`--.==<:).
+                             w: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-_`---.+.-;).
+                             h: this.rows         } , ;,_/=_`-.,_/=_`-.,_/=_`-_`--.==-;=;=}
+                        2, { x: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-_`-..=-=;-=}=:,
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-_`-..=-=;':;.]=;
+                             w: (this.columns  // 2 ) + Mod(this.columns, 2), ;.=:-:-===]:==--,
+                             h: this.rows        }) , ;,_/=_`-.,_/=_`-.,_/=_`-..=|-|-=;/)=:;:=-,
+                3, Map( 1, { x: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.<=[;[;=.;/{:[=].:.
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.=<<.=.=.=;/]--[]-:,
+                             w: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.-)).=.=->]]=;\--==:.
+                             h: this.rows         } , ;,_/=_`-.,_/=_`-.,_/=_`-.-{{<=<==>.=].].=-=:;
+                        2, { x: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.)--=<=<<|].]>;==-=;:.
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.{---)-)-=).|=;;='=:+|
+                             w: (this.columns  // 2 ) + Mod(this.columns, 2), ;,)--{-{._{.)-=<|<<::=
+                             h: this.rows      // 2}, ;,_/=_`-.,_/=_`-.,_/=_`-.,{-)-)-)_..{'])=)=]:=
+                        3, { x: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/{--{_-..']::)::=,:
+                             y: this.rows      // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/.{.-._-.-'])=)-};:
+                             w: (this.columns  // 2 ) + Mod(this.columns, 2), ;,_/-.--->:|.']|<><=;'
+                             h: (this.rows     // 2 ) + Mod(this.rows , 2)}), ;,_.)---)|>:|>:==<=<:
+                4, Map( 1, { x: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.,/.{.--{==:.='+>=-='
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-._/...>-.-<=;-<>>=:<
+                             w: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/.-.=-->-=+-:<==-
+                             h: (this.rows     // 2 ) + Mod(this.rows,   2)}, ;,_/).-.=--:;=:<|-=
+                        2, { x: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/{.-.-:;<+)|>--
+                             y: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.,_/..-).<-)|>}=:
+                             w: (this.columns  // 2 ) + Mod(this.columns, 2), ;,_/-.-)>;<:-=):
+                             h: this.rows      // 2}, ;,_/=_`-.,_/=_`-.,_/=_`-.,_/.-):;<:--):
+                        3, { x: 0,                    ;,_/=_`-.,_/=_`-.,_/=_`-.,_/.-{]`<-:-:
+                             y: this.rows      // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/--.;<-:;'
+                             w: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/---<-:*'
+                             h: (this.rows     // 2 ) + Mod(this.rows,   2)}, ;,_/-:`:<-
+                        4, { x: this.columns   // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/-;=:`
+                             y: this.rows      // 2 , ;,_/=_`-.,_/=_`-.,_/=_`-.,_/<::`
+                             w: (this.columns  // 2 ) + Mod(this.columns, 2), ;,_/)`
+                             h: (this.rows     // 2 ) + Mod(this.rows,   2)}) ;_,`
+            ) ;>-,_,.-='^'=-.,_,.-='^'=-.,_,.-='^'=-.,_,.-='^'=-.,_,.-='^'-=+*"`
+        },
+        /** @prop {WindowGrid} alt_grid */
+        alt_grid := {}
+
+    Static __New() {
+        this.alt_grid := WindowGrid(this.columns, this.rows, this.outer_gap)
+    }
+
+    Static PleaseWorkActiveClass() 
+    {
+        aHwnd := WinExist("A")
+        aClass := WinGetClass(aHwnd)
+        if not this.alt_grid.List["class"].Has(aClass)
+            this.alt_grid.AddClass(aClass, this.layouts.PreferTopLeftTall, True)
+        if not this.alt_grid.List["hwnd"].Has(aHwnd)
+            this.alt_grid.Add(aHwnd)
+        
+    }
+
+    Static TileActiveClass() 
+    {
+        awTitle := "ahk_id " WinExist("A")
+        awClass := WinGetClass(awTitle)
+        this.TileClassQuad(awClass)
+        WinActivate awTitle
+    }
+
+    /**
+     * 
+     * @param {number} use_alt_func 
+     * @returns {void}
+     */
+    Static ExpandActiveY(use_alt_func := False)
+    {
+        awHwnd := WinExist("A")
+        awClass := WinGetClass("ahk_id " awHwnd)
+        dbgo awHwnd, awClass
+        if not this.class_grids.Has(awClass) {
+            dbgo "Could not find class grid"
+            dbgo stdo(this.class_grids,{__opts:{noprint:True}})
+            return
+        }
+        dbgo this.class_grids[awClass]
+        for _i, _item in this.class_grids[awClass].rowsflat {
+            if _item.HWND == awHwnd {
+                this.class_grids[awClass].%(
+                                        use_alt_func ? "SizeActiveY" : "ExpandY"
+                                    )%(_item.RowPos)
+                dbgo this.class_grids[awClass]
+                break
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {any} wClass 
+     * @returns {number}
+     */
+    Static TileClassQuad(wClass) {
+        rows := columns := 2
+        if this.class_grids.Has(wClass) {
+            cGrid := this.class_grids[wClass]
+            cGrid.ResetDimensions()
+        } else {
+            cGrid := WinGrid(columns, rows)
+            this.class_grids[wClass] := cGrid
+        }
+        wList := WinGetList("ahk_class " wClass)
+        cGrid.HWNDs := wList
+        if (wList.Length == 1) {
+            _rand := Random(1, 30)
+            _g := cGrid.rows[1][1]
+            if _rand <= 10
+                _col_pos := 1,
+                _g.ColumnSize := 1
+            else if _rand <= 20
+                _col_pos := 2,
+                _g.ColumnSize := 1
+            else
+                _col_pos := 1,
+                _g.ColumnSize := 2
+            if (Random(1,10) > 5)
+                _col_pos := 1,
+                _g.ColumnSize := columns
+            _g.ColumnPos := _col_pos
+            _g.RowSize := rows
+            _g.Place()
+            return 1
+        } else if (wList.Length == 2) {
+            _g := cGrid.rows[1]
+            _g[1].RowSize := _g[2].RowSize := rows
+            _g[1].Place(), _g[2].Place()
+            return 2
+        } else if (wList.Length == 3) {
+            _g := cGrid.rowsflat
+            _g[1].RowSize := rows
+            _g[3].ColumnPos := columns
+            for _g_itm in _g
+                _g_itm.Place()
+        } else if (wList.Length >= 4) {
+            _g := cGrid.rowsflat
+            for _g_itm in _g
+                _g_itm.Place()
+        }
+    }
 }
 
+/**@Class TemporaryKeys*/
+Class TempKeys {
+      timeout := 2000
+    , boundmeth := {bindkey:{}, activate:{}, deactivate:{}}
+    , keys := Map()
+    , maxtimeout := 60 * 1000
+    , _active := False
+    
+    /**
+     * 
+     * @param {number} _timeout 
+     * @returns {TempKeys}
+     */
+    __New(_timeout := 2000) {
+        this.timeout := IsNumber(_timeout) ? Abs(_timeout) : this.maxtimeout
+        this.boundmeth := {
+            bindkey:  ObjBindMethod(this, "BindKey"),
+            activate:  ObjBindMethod(this, "Activate"),
+            deactivate:  ObjBindMethod(this, "Deactivate")
+        }
+    }
 
+    /**
+     * 
+     * @param {number} _timeout 
+     * @returns {void}
+     */
+    Activate(_timeout:=False, *) {
+        this._active := True
+        for _key, _action in this.keys
+            Hotkey _key, _action, "On"
+        if (_timeout = "none") or (not _timeout and (this.timeout = "none"))
+            return
+        SetTimer(
+            this.boundmeth.deactivate,
+            ((_to:=_timeout) = "max") ? (_mxto:=this.maxtimeout) :
+            (IsNumber(_to)) ? ((-1)*_to) : (_thto:=(-1)*this.timeout) ? (_thto) : _mxto
+        )
+    }
 
+    Deactivate(*) {
+        this._active := False
+        for _key, _action in this.keys
+            Hotkey _key, _action, "Off"
+    }
+
+    MapKey(_key_new, _action_new, *) {
+        this.keys[_key_new] := _action_new
+    }
+
+    BindKey(_key_new, _action_new, *) {
+        this.keys[_key_new] := _action_new
+    }
+
+    Active[_timeout:=False] {
+        Get => this._active
+        Set {
+            if !!Value and !this._active
+                this.Activate(_timeout)
+            else if !Value and !!this._active
+                this.Deactivate()
+            this._active := !!Value
+        }
+    }
+}
+
+Class LeaderKeys extends TempKeys {
+    
+    leader := ""
+    , _enabled := False
+    
+    /**
+     * 
+     * @param {string} _leader 
+     * @param {number} _timeout 
+     * @returns {LeaderKeys}
+     */
+    __New(_leader := "#a", _timeout:=2000) {
+        super.__New(_timeout)
+        this.leader := _leader
+    }
+
+    Enabled {
+        Get => this._enabled
+        Set {
+            if !!Value and !this._enabled
+                Hotkey this.leader, this.boundmeth.activate, "On"
+            else if !Value and !!this._enabled
+                Hotkey this.leader, this.boundmeth.activate, "Off"
+            this._enabled := !!Value
+        }
+    }
+}
+
+;--- /**
+;---  * @param {Integer} _x
+;---  * @param {Integer} _y
+;---  * @param {Integer} _w
+;---  * @param {Boolean} _absolute
+;---  */
+;--- SizeWindowPrimitive(_x, _y, _w, _h, _absolute:=False) {
+;--- 
+;--- }
 
 Class LinkObj {
     Static DefaultBrowser := "Maxthon.exe"
@@ -1015,17 +1253,15 @@ Class LinkObj {
     }
 }
 
-/**
- * @class
- */
 Class WebLinkLeader extends LeaderKeys {
 
-    /** @prop {Map<String,LinkObj} */
+    /** @prop {Map<String,LinkObj>} */
     _links := Map()
 
     /**
      * @param {any} _leader 
      * @param {number} _timeout 
+     * @returns {WebLinkLeader}
      */
     __New(_leader, _timeout:=2000) {
         super.__New(_leader, _timeout)
@@ -1042,65 +1278,7 @@ Class WebLinkLeader extends LeaderKeys {
             return "set"
         }
     }
-}
 
-/**
- * @class
- */
-Class WinNavLeader extends LeaderKeys {
-
-    _excluded_classes := Map(
-        "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
-        "Internet Explorer_Hidden",                "ahk_class ",
-        "EdgeUiInputWndClass",                     "ahk_class ",
-        "Shell_TrayWnd",                           "ahk_class ",
-        "WorkerW",                                 "ahk_class ",
-        "Progman",                                 "ahk_class "
-    )
-    
-    increments := WinVector.Coordinates(20, 20, 30, 30)
-    default_increment_muls := WinVector.Coordinates(1, 1, 1, 1)
-    working_coords := WinVector.Coordinates()
-
-    /**
-     * @param {string} _leader 
-     * @param {number} _timeout 
-     */
-    __New(_leader, _timeout:= 6666) {    
-        super.__New(_leader, _timeout)
-    }
-
-    
-    PrevWin[look_behind:=1] {
-        Get {
-            look_index := look_behind + 1
-            _wl := WinGetList()
-            _wlnw := []
-            for _i, _hwnd in _wl {
-                _wClass := WinGetClass("ahk_id " _hwnd)
-                if not this._excluded_classes.Has(_wClass)
-                    _wlnw.Push _hwnd
-            }
-            return ((look_behind+1) > _wlnw.Length) ? _wlnw[_wlnw.Length] : _wlnw[look_behind+1]
-        }
-    }
-
-    ActivatePrevWin(look_behind := 1) {
-        WinActivate(this.PrevWin[look_behind])
-    }
-
-    /**
-     * @param {Boolean|wVector.Coordinates} increment_muls
-     * @param {Integer} _hwnd
-     */
-    IncrementWinDimensions(increment_muls:=False, _hwnd:=0x0) {
-        _hwnd := _hwnd ? _hwnd : WinExist("A")
-        increment_muls := increment_muls ? increment_muls : this.default_increment_muls
-        _increments := this.increments.Mul(&increment_muls, False)
-        WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
-        this.working_coords.Reset(_x, _y, _w, _h).Add(&_increments)
-        WinMove((this.working_coords.Flat[("ahk_id " _hwnd)])*)
-    }
 }
 
 
@@ -1110,78 +1288,21 @@ Class WinNavLeader extends LeaderKeys {
 ;--- ctrl_comma_leader.Enabled := True
 
 
-win_grid_keys := KeyTable("none")
+win_grid_keys := TempKeys("none")
 wgk := win_grid_keys
 ;--- wgk.MapKey("Pause",       (*)=>( TiledWindows.ExpandActiveY()     ))
 ;--- wgk.MapKey("Insert",      (*)=>( TiledWindows.ExpandActiveY(True) ))
 ;--- wgk.MapKey("PrintScreen", (*)=>( TiledWindows.TileActiveClass()   ))
 wgk.MapKey( "#Insert", (*)=>( TriggerReload() ) )
 
-
-/** @var {WinNavLeader} win_nav_leader */
-win_nav_leader := WinNavLeader("F24", 30 * 1000)
-win_nav_leader.MapKey("RShift", (*) => (
-    win_nav_leader.ActivatePrevWin(),
-    win_nav_leader.Deactivate()
-))
-/**
- * @typedef {Object} windir
- * @property {InputCoords} left
- * @property {InputCoords} down
- * @property {InputCoords} up
- * @property {InputCoords} right
- */
-windir := {}
-windir.left  := WinVector.Coordinates((-1), 0  , 0, 0)
-windir.down  := WinVector.Coordinates(0   , 1  , 0, 0)
-windir.up    := WinVector.Coordinates(0   ,(-1), 0, 0)
-windir.right := WinVector.Coordinates(1   , 0  , 0, 0)
-
-
-
-
-win_nav_leader.MapKey("Left", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.left)
-))
-win_nav_leader.MapKey("Right", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.right)
-))
-win_nav_leader.MapKey("Up", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.up)
-))
-win_nav_leader.MapKey("Down", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.down)
-))
-
-#/::
-{
-    _status := !win_nav_leader.Active
-    win_nav_leader.Active := _status
-}
+win_nav_keys := TempKeys("none")
+wnk := win_nav_keys
 
 
 weblink_leader := WebLinkLeader("RAlt & CapsLock", 2000)
-weblink_leader.Link["emmylua", "e"] :=
-                    "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
-
-weblink_leader.link["textnow", "t"] :=
-                    "https://www.textnow.com/"
-
-weblink_leader.Link["reddit", "r"] :=
-                    "reddit.com"
-
-weblink_leader.Link["fancyconver", "!f"] :=
-                    "https://textfancy.com/font-converter/"
-
-weblink_leader.Link["fancyedit", "+f"] :=
-                    "https://textpaint.net/"
-
-weblink_leader.Link["ddg", "d"] :=
-                    "duckduckgo.com"
-
-;--- weblink_leader.Link["ascii"      ,  "f"] := "https://textfancy.com/keyboard/"
-;--- https://textheads.com/
-
+weblink_leader.Link["reddit", "r"] := "reddit.com"
+weblink_leader.Link["emmylua", "e"] := "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
+weblink_leader.Link["ddg", "d"] := "duckduckgo.com"
 weblink_leader.Enabled := True
 
 
@@ -1192,23 +1313,17 @@ RAlt_Apps_leader.MapKey(
     "m", (*) => (Msgbox("Testing!"))
 )
 
-RAlt_Apps_leader.MapKey("h", (*) => ( KillHelpWindows() ))
-RAlt_Apps_leader.MapKey("k", (*) => ( KillWindowClass() ))
-
 RAlt_Apps_leader.MapKey(
     "Right", (*) => (WinActivate(
         "ahk_id " WinGetList(
             "ahk_class " WinGetClass(
                 "ahk_id " WinExist("A")
             )
-        )[2]
+        )[1]
     ))
 )
 
 RAlt_Apps_leader.Enabled := True
-
-
-LeaderFairy := KeyTable("none")
 
 
 ScrollLock::

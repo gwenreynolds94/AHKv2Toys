@@ -100,32 +100,82 @@
 ;|- dbgo (flt2flt:=1.112) ":flt2flt:" .
 ;|-----(HasBase(flt2flt, Float.Prototype) ? "True" : "False")
 
-gap := 8
-workheight := A_ScreenHeight - 2*gap
-workwidth := A_ScreenHeight - 2*gap
-hincr := (35 // 3) * 3
-wincr := (30 // 4) * 4
-hhalflower := (hincr // 2)
-tincr := hhalflower + Mod(hincr, 2) ; (hincr - 2*hhalflower)
-bincr := hhalflower
-whalflower := (wincr // 2)
-lincr := whalflower + Mod(wincr, 2) ; (wincr - 2*whalflower)
-rincr := whalflower
+; gap := 8
+; workheight := A_ScreenHeight - 2*gap
+; workwidth := A_ScreenHeight - 2*gap
+; hincr := (35 // 3) * 3
+; wincr := (30 // 4) * 4
+; hhalflower := (hincr // 2)
+; tincr := hhalflower + Mod(hincr, 2) ; (hincr - 2*hhalflower)
+; bincr := hhalflower
+; whalflower := (wincr // 2)
+; lincr := whalflower + Mod(wincr, 2) ; (wincr - 2*whalflower)
+; rincr := whalflower
 
+; stdo { t: tincr, b: bincr, l:lincr, r:rincr }
+; asd := []
+; asd.x := 13
+; stdo "map_is_obj: " (Map() is Object), 
+;      "str_literal_is_obj: " ("string" is Object),
+;      "str_instance_is_obj: " (String("string") is Object),
+;      "obj_literal_is_obj: " ({} is Object),
+;      "arr_literal_is_obj: " ([] is Object),
+;      asd.HasProp("x")
 
+Class Callaclass {
+    Static bigass := [1,2,3,4,5,6,7,8,9,10],
+           woah := {x: "no", xxx: "why"}
+    evilass := [6,6,6,6,6,6,],
+        what := {asd: "qwe", zxc: "dfg"}
 
-stdo { t: tincr, b: bincr, l:lincr, r:rincr }
+    __New(_what) {
+        this.what := _what
+    }
+
+    Static __New() {
+        this.woah := A_TickCount
+        (Callaclass.NestedAss.AnoterhClass)
+        (Callaclass.NestedAss)
+    }
+
+    Call(_args*) {
+        
+    }
+
+    __Call(_name, _params) {
+        
+    }
+    Class NestedAss {
+        Static PoopProp => (
+            (*) => MsgBox(this.OwnProps().Name)
+        )
+        Static WooProp => 666
+        Class AnoterhClass {
+
+        }
+    }
+}
+
+Class FakeClass {
+    Static cc => Callaclass
+    Static nA => this.cc.NestedAss
+    Static pp => Callaclass.NestedAss.PoopProp
+    Static wp => Callaclass.NestedAss.WooProp
+    Static ac => Callaclass.NestedAss.AnoterhClass
+}
 
 F10::
 {
-    tlst := []
-    Loop 66
-        tlst.Push (67-A_Index)
-    For _i, _nbr in tlst
-        stdo(_i "`t" _nbr)
-    Until (A_Index > 30)
+    stdo [1414,3646,345,([345,87,321,(TTT.asd)*])*]
+    ; Msgbox "abc := (" abc ")`ndef := (`n`t" def "`n)`nghi := " ghi "`n`t`t))"
+    ; tlst := []
+    ; Loop 66
+    ;     tlst.Push (67-A_Index)
+    ; For _i, _nbr in tlst
+    ;     stdo(_i "`t" _nbr)
+    ; Until (A_Index > 30)
 }
 
-SetTimer ((*)=>ExitApp()), -2000
+SetTimer ((*)=>ExitApp()), -20000
 
 F8:: ExitApp
