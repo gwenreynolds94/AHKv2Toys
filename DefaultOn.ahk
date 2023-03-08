@@ -1122,8 +1122,12 @@ WYWH_Factory(x, y, w, h) {
     }
 }
 
+/**
+ * STUB - A JSDoc-style class for a simple HWND
+ * @returns {Integer} HWND
+ */
 HWND_generate(_hwnd) {
-
+    return IsInteger(_hwnd) ? _hwnd : Integer(_hwnd)
 }
 
 
@@ -1168,11 +1172,12 @@ Class WindowFairy extends KeyTable {
         }
     }
 
+
     AdjustCoordsRelative(
         /** @param {RawCoord} units */
         units,
-        /** @param {Integer?} */
-        hWnd?
+        /** @param {HWND} [hWnd=0] */
+        hWnd := 0
     ) {
         units := {
             x: units.x ? units.x : 0,
