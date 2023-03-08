@@ -1106,11 +1106,7 @@ Class WinNavLeader extends LeaderKeys {
 }
 
  /**
- *
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} w
- * @param {Integer} h
+ **STUB - Testing a custom type for {x,y,w,h} objects
  * @returns {Object.<String,Integer>} RawCoord
  * @returns {Integer} RawCoord.x
  * @returns {Integer} RawCoord.y
@@ -1126,12 +1122,24 @@ WYWH_Factory(x, y, w, h) {
     }
 }
 
+HWND_generate(_hwnd) {
+
+}
+
+
+;;TODO - Setup window management functions for  {WindowFairy} class
 Class WindowFairy extends KeyTable {
 
     default_increment := 26,
     _coords           := WinVector.Coordinates(),
     _coords_ready := False
 
+    /**
+     *
+     * @param {string} _timeout
+     * @param {any} default_increment
+     * @returns {WindowFairy}
+     */
     __New(_timeout := "none", default_increment?) {
         super.__New(_timeout)
     }
@@ -1161,16 +1169,16 @@ Class WindowFairy extends KeyTable {
     }
 
     AdjustCoordsRelative(
-    /** @param {RawCoords} units */
+        /** @param {RawCoord} units */
         units,
-    /** @param {Integer?} */
+        /** @param {Integer?} */
         hWnd?
     ) {
         units := {
-            x: x,
-            y: y,
-            w: w,
-            h: h
+            x: units.x ? units.x : 0,
+            y: units.y ? units.y : 0,
+            w: units.w ? units.w : 0,
+            h: units.h ? units.h : 0
         }
     }
 }
