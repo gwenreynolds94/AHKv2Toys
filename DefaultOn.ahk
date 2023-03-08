@@ -2,14 +2,12 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <DEBUG\DBT>
+; #Include <DEBUG\DBT>
 #Include <Utils\SearchV2Docs>
 #Include <Utils\VolumeChangeGUI>
-#Include <Utils\DllCoords>
+; #Include <Utils\DllCoords>
 #Include <Utils\WinTransparency>
-#Include <Utils\WinUtil\WinUtil>
-#Include <Utils\BindUtil\BindUtil>
-#Include <Utils\WinSizePos>
+; #Include <Utils\WinSizePos>
 #Include <Utils\FormatComment>
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 
@@ -781,19 +779,20 @@ Class AltShiftDragWindowRect {
         this.isMoving := True
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        this.home.mouse := DllMouseGetPos()
-        this.home.win := DllWinGetRect(this.home.hwnd)
+        this.home.mouse := WinVector.DLLUtil.DllMouseGetPos()
+        this.home.mouse := WinVector.DLLUtil.DllMouseGetPos()
+        this.home.win := WinVector.DLLUtil.DllWinGetRect(this.home.hwnd)
         SetTimer MovingLoop, 1
         MovingLoop() {
             if !(GetKeyState("LButton", "P"))
                 SetTimer(,0), this.isMoving := False
             else {
-                mouseNow := DllMouseGetPos()
+                mouseNow := WinVector.DLLUtil.DllMouseGetPos()
                 mouseDelta := { x: mouseNow.x - this.home.mouse.x,
                                 y: mouseNow.y - this.home.mouse.y }
                 winPosNew := { x: this.home.win.x + mouseDelta.x,
                                y: this.home.win.y + mouseDelta.y }
-                DllWinSetRect(this.home.hwnd, winPosNew)
+                WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winPosNew)
             }
         }
     }
@@ -801,42 +800,42 @@ Class AltShiftDragWindowRect {
         this.isSizing := True
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        this.home.mouse := DllMouseGetPos()
-        this.home.win := DllWinGetRect(this.home.hwnd)
+        this.home.mouse := WinVector.DLLUtil.DllMouseGetPos()
+        this.home.win := WinVector.DLLUtil.DllWinGetRect(this.home.hwnd)
         SetTimer SizingLoop, 1
         PostMessage(0x1666,1,,, "ahk_id " this.home.hwnd)
         SizingLoop() {
             if !(GetKeyState("RButton", "P"))
                 SetTimer(,0), this.isSizing := False, PostMessage(0x1666,0,,, "ahk_id " this.home.hwnd)
             else {
-                mouseNow := DllMouseGetPos()
+                mouseNow := WinVector.DLLUtil.DllMouseGetPos()
                 mouseDelta := { x: mouseNow.x - this.home.mouse.x,
                                 y: mouseNow.y - this.home.mouse.y }
                 winSizeNew := {
                     w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ? _w : this.sizeMin.w,
                     h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ? _h : this.sizeMin.h
                 }
-                DllWinSetRect(this.home.hwnd, winSizeNew)
+                WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winSizeNew)
             }
         }
     }
     Static CenterWindow(*) {
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        this.home.win := DllWinGetRect(this.home.hwnd)
+        this.home.win := WinVector.DLLUtil.DllWinGetRect(this.home.hwnd)
         winPosNew := { x: (A_ScreenWidth - this.home.win.w)/2,
                        y: (A_ScreenHeight - this.home.win.h)/2 }
-        DllWinSetRect(this.home.hwnd, winPosNew)
+        WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winPosNew)
     }
     Static FitWindow(*) {
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        SizeWindow(this.home.hwnd)
+        WinUtil.Sizer.SizeWindow(this.home.hwnd)
     }
     Static HalfWindow(*) {
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        SizeWindowHalf(this.home.hwnd)
+        WinUtil.Sizer.SizeWindowHalf(this.home.hwnd)
     }
 }
 ;
@@ -980,7 +979,7 @@ KillHelpWindows()
 }
 
 /** @param {String|Number} [_class]
-  * @param {...*} 
+  * @param {...*}
  */
 KillWindowClass(_class?, *) {
     living_windows := WinGetList( "ahk_class " (IsSet(_class) ? _class :
@@ -997,6 +996,8 @@ KillWindowClass(_class?, *) {
 }
 
 
+#Include <Utils\BindUtil\BindUtil>
+#Include <Utils\WinUtil\WinUtil>
 
 
 Class LinkObj {
@@ -1023,14 +1024,15 @@ Class WebLinkLeader extends LeaderKeys {
     /** @prop {Map<String,LinkObj} */
     _links := Map()
 
+
     /**
-     * @param {any} _leader 
-     * @param {number} _timeout 
+     * @param {any} _leader
+     * @param {number} _timeout
      */
     __New(_leader, _timeout:=2000) {
         super.__New(_leader, _timeout)
     }
-    
+
     Link[_name, _key:=""] {
         Get => this._links.Has(_name) ? this._links[_name] : False
         Set {
@@ -1057,20 +1059,20 @@ Class WinNavLeader extends LeaderKeys {
         "WorkerW",                                 "ahk_class ",
         "Progman",                                 "ahk_class "
     )
-    
+
     increments := WinVector.Coordinates(20, 20, 30, 30)
     default_increment_muls := WinVector.Coordinates(1, 1, 1, 1)
     working_coords := WinVector.Coordinates()
 
     /**
-     * @param {string} _leader 
-     * @param {number} _timeout 
+     * @param {string} _leader
+     * @param {number} _timeout
      */
-    __New(_leader, _timeout:= 6666) {    
+    __New(_leader, _timeout:= 6666) {
         super.__New(_leader, _timeout)
     }
 
-    
+
     PrevWin[look_behind:=1] {
         Get {
             look_index := look_behind + 1
@@ -1103,6 +1105,75 @@ Class WinNavLeader extends LeaderKeys {
     }
 }
 
+ /**
+ *
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} w
+ * @param {Integer} h
+ * @returns {Object.<String,Integer>} RawCoord
+ * @returns {Integer} RawCoord.x
+ * @returns {Integer} RawCoord.y
+ * @returns {Integer} RawCoord.w
+ * @returns {Integer} RawCoord.h
+*/
+WYWH_Factory(x, y, w, h) {
+    return {
+        x: x,
+        y: y,
+        w: w,
+        h: h
+    }
+}
+
+Class WindowFairy extends KeyTable {
+
+    default_increment := 26,
+    _coords           := WinVector.Coordinates(),
+    _coords_ready := False
+
+    __New(_timeout := "none", default_increment?) {
+        super.__New(_timeout)
+    }
+
+    ActivationCallback() {
+        ; ...
+    }
+
+    Cycle(count:=1) {
+        target_window := WinUtil.PrevWindow[count]
+        WinActivate("ahk_id " target_window)
+    }
+
+    Coords[raw_coords?] {
+        Get {
+            raw_coords := IsSet(raw_coords) ? raw_coords : False
+            if (not this._coords_ready) and raw_coords
+            _coords_raw := [
+                raw_coords.HasProp("x") ? raw_coords.x : 0,
+                raw_coords.HasProp("y") ? raw_coords.y : 0,
+                raw_coords.HasProp("w") ? raw_coords.w : 0,
+                raw_coords.HasProp("h") ? raw_coords.h : 0
+            ]
+            this._coords := WinVector.Coordinates(_coords_raw*)
+            return this._coords
+        }
+    }
+
+    AdjustCoordsRelative(
+    /** @param {RawCoords} units */
+        units,
+    /** @param {Integer?} */
+        hWnd?
+    ) {
+        units := {
+            x: x,
+            y: y,
+            w: w,
+            h: h
+        }
+    }
+}
 
 ;--- ctrl_comma_leader.MapKey("m", (*)=>( MsgBox("message...") ))
 ;--- ctrl_comma_leader.MapKey("b", (*)=>( SearchBrowserFromClipboard() ))
@@ -1214,15 +1285,15 @@ LeaderFairy := KeyTable("none")
 ScrollLock::
 {
     win_grid_keys.Active := !win_grid_keys.Active
-    JKQuickTip( "WinGridKeys <> " . 
-              ( (win_grid_keys.Active) ? "ENABLED" : "DISABLED" ), 
+    JKQuickTip( "WinGridKeys <> " .
+              ( (win_grid_keys.Active) ? "ENABLED" : "DISABLED" ),
               ( 1500 ))
 }
 
 
 
-;|- ctrl_comma_leader.BindKey("w", (*)=>( 
-;|-         win_grid_keys.Active["max"] := !win_grid_keys.Active 
+;|- ctrl_comma_leader.BindKey("w", (*)=>(
+;|-         win_grid_keys.Active["max"] := !win_grid_keys.Active
 ;|-     ))
 
 ;|- win_jay_leader := LeaderKeys("#j")

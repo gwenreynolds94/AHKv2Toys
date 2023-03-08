@@ -20,8 +20,8 @@
 ;      * @property {Number} h
 ;      */
 
-; /** 
-;  * @class 
+; /**
+;  * @class
 ;  * @typedef {Object} WinVector
 ;  * @property {Object} WinVector.Coordinates
 ;  * @property {RawCoords} WinVector.Coordinates.defaults
@@ -32,17 +32,28 @@
 ;  */
 
 
-
 Class WinVector {
 
 
-    Static _coord := {},
-            _dll := {}
-    
+    ; Static _coord := {},
+    ;         _dll := {}
+
     Static __New() {
-        this._coord := WinVector.Coordinates
-        this._dll := WinVector.DLLUtil
+        ; this._coord := WinVector.Coordinates
+        ; this._dll := WinVector.DLLUtil
+
     }
+
+    /**
+     * TODO
+     *
+     * I would like to come up with a less manual solution for accessing a class's
+     * own static methods. Eventually at least
+     */
+
+    Static _MgnWinRect => WinVector.DLLUtil.GetWindowMarginsRect
+    static _VisWinRect => WinVector.DLLUtil.GetWindowVisibleRect
+    static _MsPosDll => winvector.DLLUtil.DllMouseGetPos
 
     Class Coordinates {
 
@@ -90,12 +101,10 @@ Class WinVector {
          */
         Static Mul(&coords1, &coords2, store_results:=False) {
             /** @var {wVector.Coordinates} new_coords */
-            new_coords := (
-                    (store_results ~= "left")  ? coords1 :
-                    (store_results ~= "right") ? coords2 :
-                    (store_results ~= "new")   ? WinVector.Coordinates() :
-                                              { x: 0, y: 0, w: 0, h: 0 }
-            )
+            new_coords := (store_results ~= "left")  ? coords1 :
+                          (store_results ~= "right") ? coords2 :
+                          (store_results ~= "new")   ? WinVector.Coordinates() :
+                                                      { x: 0, y: 0, w: 0, h: 0 }
             for _i, _v in (['x','y','w','h'])
                 new_coords.%_v% := coords1.%_v% * coords2.%_v%
             return new_coords
@@ -127,7 +136,7 @@ Class WinVector {
             new_coords := (store_results ~= "left")  ? coords1 :
                           (store_results ~= "right") ? coords2 :
                           (store_results ~= "new")   ? WinVector.Coordinates() :
-                                            { x: 0, y: 0, w: 0, h: 0 }
+                                                      { x: 0, y: 0, w: 0, h: 0 }
             for _i, _v in (['x','y','w','h'])
                 new_coords.%_v% := coords1.%_v% + coords2.%_v%
             return new_coords
@@ -148,13 +157,11 @@ Class WinVector {
 
     class DLLUtil {
 
-        Static __New() {
-        }
 
         Static GetWindowMarginsRect(&win, wHwnd) {
             win := {}
             newWinRect := Buffer(16)
-            DllCall("GetWindowRect", "Ptr", wHwnd, "Ptr", newWinRect.Ptr)
+            DllCall("GetWindowRect", "Ptr", wHwnd, "Ptr", newWinRect.Ptr)|
             win.x := NumGet(newWinRect,  0, "Int")
             win.y := NumGet(newWinRect,  4, "Int")
             win.w := NumGet(newWinRect,  8, "Int")
@@ -179,8 +186,8 @@ Class WinVector {
 
         Static SuperficialCoordsFromReal(&outCoords, wHwnd) {
             WinGetPos &wX, &wY, &wW, &wH, "ahk_id " wHwnd
-            this.GetWindowMarginsRect( &win , wHwnd)
-            this.GetWindowVisibleRect(&frame, wHwnd)
+            WinVector._MgnWinRect( &win , wHwnd )
+            WinVector._VisWinRect( &frame, wHwnd )
             offSetLeft   := frame.x - win.x
             offSetRight  := win.w - frame.w
             offSetBottom := win.h - frame.h
@@ -193,8 +200,8 @@ Class WinVector {
         }
 
         Static RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH) {
-            this.GetWindowMarginsRect( &win , wHwnd)
-            this.GetWindowVisibleRect(&frame, wHwnd)
+            WinVector._MgnWinRect( &win , wHwnd )
+            WinVector._VisWinRect( &frame, wHwnd )
             offSetLeft   := frame.x - win.x
             offSetRight  := win.w - frame.w
             offSetBottom := win.h - frame.h
@@ -215,7 +222,7 @@ Class WinVector {
         Static DllMouseGetPos() {
             cPOINT := Buffer(8)
             DllCall "GetCursorPos", "Ptr", cPOINT
-            /** 
+            /**
              * @typedef {{}.<String,Integer>} MPoint
              * @property {Integer} MPoint.x
              * @property {Integer} MPoint.y
@@ -233,13 +240,13 @@ Class WinVector {
          */
         Static DllMouseSetPos(_mX?, _mY?) {
             if !(IsSet(_mX) and IsSet(_mY))
-                _ogPos := WinVector.DLLUtil.DllMouseGetPos()
+                _ogPos := WinVector._MsPosDll()
             DllCall("SetCursorPos", "Int", _mX ?? _ogPos.x, "Int", _mY ?? _ogPos.y)
         }
         /**
          * @param {HWND} _wHwnd
          * @return {Object}
-         * 
+         * h.bf.h.bf.h.bf.
          *      ReturnObj := {
          *          x: 666,
          *          y: 666,
@@ -258,21 +265,21 @@ Class WinVector {
             }
         }
         /**
-         * Parameter formats 
-         * 
+         * Parameter formats
+         *
          *      ; -<_wRECT>-  takes precedence over -<_wN>-
          *      ; -<X>- is ignored if -<Y>- is not defined, and vice versa
          *      ; -<W>- is ignored if -<H>- is not defined, and vice versa
-         *      _wHwnd := 0x666666   ; HWND    
-         *      _wRECT := { x: 666,  ; client X  [Optional] 
-         *                  y: 666,  ; client Y  [Optional] 
+         *      _wHwnd := 0x666666   ; HWND
+         *      _wRECT := { x: 666,  ; client X  [Optional]
+         *                  y: 666,  ; client Y  [Optional]
          *                  w: 666,  ; Width     [Optional]
          *                  h: 666 } ; Height    [Optional]
          *      _wX := 666  ; client X  [Optional]
          *      _wY := 666  ; client Y  [Optional]
          *      _wW := 666  ; Width     [Optional]
          *      _wH := 666  ; Height    [Optional]
-         * 
+         *
          * @param {HWND} _wHwnd
          * @param {Object} [_wRECT]
          * @param {Integer} [_wX]
@@ -318,11 +325,13 @@ Class WinVector {
         }
 
     }
+
+    Class Grid {
+
+    }
 }
 
 
 
 
 
-
-#Include <Gdip_Custom>

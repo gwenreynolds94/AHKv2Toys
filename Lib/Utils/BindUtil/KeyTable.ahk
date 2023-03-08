@@ -22,7 +22,7 @@ Class KeyTable {
     , maxtimeout := 60 * 1000
     /** @prop {Boolean} _active */
     , _active := False
-    
+
     /** @param {number} _timeout */
     __New(_timeout := 2000) {
         this.timeout := IsNumber(_timeout) ? Abs(_timeout) : this.maxtimeout
@@ -33,8 +33,8 @@ Class KeyTable {
         }
     }
 
-    /** 
-     * @typedef {Func} Activate 
+          /**
+     * @typedef {Func} Activate
      * @param {Number} _timeout
      */
     Activate(_timeout:=False, *) {

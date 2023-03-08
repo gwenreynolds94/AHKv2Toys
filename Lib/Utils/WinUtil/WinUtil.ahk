@@ -5,17 +5,58 @@
 #Include <Utils\WinUtil\WinVector>
 
 
+    /** @alias HWND @type {Integer} */
 
 
 ; Class WinUtil extends WinVector {
 Class WinUtil {
+    Static _excluded_classes := Map(
+        "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
+        "Internet Explorer_Hidden",                "ahk_class ",
+        "EdgeUiInputWndClass",                     "ahk_class ",
+        "Shell_TrayWnd",                           "ahk_class ",
+        "WorkerW",                                 "ahk_class ",
+        "Progman",                                 "ahk_class "
+    )
+
+    __New() {
+    }
+
+    /**
+     * @param {Integer} look_behind
+     * @return {HWND}
+     */
+    Static PrevWindow[look_behind:=1] {
+        Get {
+            look_at := look_behind + 1
+            clean_list := WinUtil.FilteredWinList[WinGetList()]
+            return ((look_behind + 1) > clean_list.Length) ?
+                clean_list[clean_list.Length] : (look_behind + 1)
+        }
+    }
+
+    /**
+     * @param {HWND[]} _list
+     * @return {HWND[]}
+     */
+    Static FilteredWinList[_list:=""] {
+        Get {
+            _filtered := []
+            for _i, _hwnd in _list {
+                _class := WinGetClass("ahk_id " _hwnd)
+                if not this._excluded_classes.Has(_class)
+                    _filtered.Push _hwnd
+            }
+            return _filtered
+        }
+    }
 
     Class Sizer {
-        
+
         Static wvC := WinVector.Coordinates,
                wvD := WinVector.DLLUtil,
                ext := {}
-    
+
         Static __New() {
         }
 

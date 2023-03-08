@@ -32,11 +32,11 @@
 ;|-         }
 ;|-     }
 ;|-     A[_param*] {
-;|-         Set => (_param.Length == 1) ? 
-;|-                 (this.aaa[_param[1]] := Value) : 
+;|-         Set => (_param.Length == 1) ?
+;|-                 (this.aaa[_param[1]] := Value) :
 ;|-                 (this.aaa:=Value)
-;|-         Get => (_param.Length == 1) ? 
-;|-                 this.aaa[_param[1]] : 
+;|-         Get => (_param.Length == 1) ?
+;|-                 this.aaa[_param[1]] :
 ;|-                 this.aaa
 ;|-     }
 ;|-     B[_param] {
@@ -61,30 +61,30 @@
 ;|-         }
 ;|-     }
 ;|- }
-;|- 
+;|-
 ;|- c := tstclass()
-;|- 
+;|-
 ;|- stdo_opts := { _stdo_opts: { noprint : True } }
-;|- 
+;|-
 ;|- c.penis["asdasd"] := "qweqweqwe"
-;|- 
+;|-
 ;|- dbgo(stdo(c.penis,{ __opts: { noprint : True }}))
-;|- 
+;|-
 ;|- stdo(
 ;|-     (
 ;|-     false ?
 ;|-     "000" :
 ;|-     false ?
 ;|-     "111" :
-;|-     "222" 
+;|-     "222"
 ;|-     ),
 ;|-     Type(123),
 ;|-     Type(1.23),
 ;|-     Type("000"),
 ;|-     Type("asd"),
 ;|- )
-;|- 
-;|- 
+;|-
+;|-
 ;|- dbgo "asdasdasd", "Asdasdasdas"
 
 ;|- dbgo (flt2nbr:=1.34) ":flt2nbr:" .
@@ -115,7 +115,7 @@
 ; stdo { t: tincr, b: bincr, l:lincr, r:rincr }
 ; asd := []
 ; asd.x := 13
-; stdo "map_is_obj: " (Map() is Object), 
+; stdo "map_is_obj: " (Map() is Object),
 ;      "str_literal_is_obj: " ("string" is Object),
 ;      "str_instance_is_obj: " (String("string") is Object),
 ;      "obj_literal_is_obj: " ({} is Object),
@@ -139,11 +139,11 @@ Class Callaclass {
     }
 
     Call(_args*) {
-        
+
     }
 
     __Call(_name, _params) {
-        
+
     }
     Class NestedAss {
         Static PoopProp => (
@@ -164,9 +164,53 @@ Class FakeClass {
     Static ac => Callaclass.NestedAss.AnoterhClass
 }
 
+
+NoImplement(*)
+{
+    throw Error("Not Implemented")
+}
+
+/**
+ * @interface
+ */
+Color()
+{
+
+}
+
+/**
+ * @return {Array<Number>}
+ */
+Color.Prototype.RGB = NoImplement.Bind()
+
+/**
+ * @class
+ * @implements {Color}
+ */
+TransparentColor()
+{
+
+}
+
+TransparentColor.Prototype.RGB := (*)=>()
+
+/**
+ * @return {Array<Number, Number, Number, Number>}
+ */
+TransparentColor().Prototype.RGBA := (*)=>[1,2,3,4]
+
+aasds := TransparentColor.Prototype.RGBA()
+
+
 F10::
 {
-    stdo [1414,3646,345,([345,87,321,(TTT.asd)*])*]
+    stdo [1414
+         ,3646
+         ,345
+         ,(
+            [ 345
+             ,87,
+             321,(TTT.asd)*])*]
     ; Msgbox "abc := (" abc ")`ndef := (`n`t" def "`n)`nghi := " ghi "`n`t`t))"
     ; tlst := []
     ; Loop 66
@@ -174,6 +218,8 @@ F10::
     ; For _i, _nbr in tlst
     ;     stdo(_i "`t" _nbr)
     ; Until (A_Index > 30)
+
+
 }
 
 SetTimer ((*)=>ExitApp()), -20000
