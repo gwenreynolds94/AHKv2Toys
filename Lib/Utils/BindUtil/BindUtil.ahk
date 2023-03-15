@@ -36,3 +36,34 @@ Class LeaderKeys extends KeyTable {
     }
 }
 
+Class LinkTable extends KeyTable {
+    Static BrowserExe := "Maxthon.exe"
+
+    _links := Map()
+
+    Link[_name, _key:=""] {
+        Get => this._links.Has(_name) ? this._links[_name] : false
+        Set {
+            _link := LinkTable.LinkItem(_name, Value)
+            this._links[_name] := _link
+            this.MapKey(_key, _link.bflaunch)
+        }
+    }
+
+    Class LinkItem {
+        name := "",
+        address := "",
+        bflaunch := {}
+
+        __New(_name, _addr) {
+            this.name := _name
+            this.address := _addr
+            this.bflaunch := ObjBindMethod(this, "Launch")
+        }
+
+        Launch() {
+            Run LinkTable.BrowserExe " `"" this.address "`""
+        }
+    }
+}
+

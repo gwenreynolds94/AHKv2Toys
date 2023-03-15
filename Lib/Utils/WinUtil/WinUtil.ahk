@@ -31,7 +31,7 @@ Class WinUtil {
             look_at := look_behind + 1
             clean_list := WinUtil.FilteredWinList[WinGetList()]
             return ((look_behind + 1) > clean_list.Length) ?
-                clean_list[clean_list.Length] : (look_behind + 1)
+                clean_list[clean_list.Length] : clean_list[(look_behind + 1)]
         }
     }
 

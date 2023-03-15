@@ -35,14 +35,7 @@
 Class WinVector {
 
 
-    ; Static _coord := {},
-    ;         _dll := {}
-
-    Static __New() {
-        ; this._coord := WinVector.Coordinates
-        ; this._dll := WinVector.DLLUtil
-
-    }
+    Static  Unit := { w: 30, h: 20 }
 
     /**
      * TODO
@@ -52,8 +45,20 @@ Class WinVector {
      */
 
     Static _MgnWinRect => WinVector.DLLUtil.GetWindowMarginsRect
-    static _VisWinRect => WinVector.DLLUtil.GetWindowVisibleRect
-    static _MsPosDll => winvector.DLLUtil.DllMouseGetPos
+    Static _VisWinRect => WinVector.DLLUtil.GetWindowVisibleRect
+    Static _MsPosDll => winvector.DLLUtil.DllMouseGetPos
+
+    ; Static ActiveCoord {
+    ;     Get {
+    ;         WinGetPos &_x, &_y, &_w, &_h, "ahk_id " WinExist("A")
+    ;         Return WinVector.Coord(_x, _y, _w, _h)
+    ;     }
+    ; }
+
+    Static ActiveCoord => (
+        WinGetPos(&_x, &_y, &_w, &_h),
+        WinVector.Coord(_x, _y, _w, _h)
+    )
 
     Class Coordinates {
 
@@ -155,8 +160,81 @@ Class WinVector {
         }
     }
 
-    class DLLUtil {
+    Class Directions {
+               /** @prop {WinVector.Coord} Left */
+        Static Left := 0
+               /** @prop {WinVector.Coord} Right */
+             , Right := 0
+               /** @prop {WinVector.Coord} Up */
+             , Up := 0
+               /** @prop {WinVector.Coord} Down */
+             , Down := 0
 
+        Static __New() {
+            this.Left := WinVector.Coord((-1), 0, 0, 0)
+            this.Right := WinVector.Coord(1, 0, 0, 0)
+            this.Up := WinVector.Coord(0, (-1), 0, 0)
+            this.Down := WinVector.Coord(0, 1, 0, 0)
+        }
+    }
+
+    Class Coord {
+
+        x := 0,
+        y := 0,
+        w := 0,
+        h := 0
+
+        __New(x:=0, y:=0, w:=0, h:=0) {
+            this.x := x
+            this.y := y
+            this.w := w
+            this.h := h
+        }
+
+        Add(xywh) {
+            if IsNumber(xywh)
+                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
+            this.x += xywh.x
+            this.y += xywh.y
+            this.w += xywh.w
+            this.h += xywh.h
+            return this
+        }
+
+        Sub(xywh) {
+            if IsNumber(xywh)
+                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
+            this.x -= xywh.x
+            this.y -= xywh.y
+            this.w -= xywh.w
+            this.h -= xywh.h
+            return this
+        }
+
+        Div(xywh) {
+            if IsNumber(xywh)
+                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
+            this.x /= xywh.x
+            this.y /= xywh.y
+            this.w /= xywh.w
+            this.h /= xywh.h
+            return this
+        }
+
+        Mul(xywh) {
+            if IsNumber(xywh)
+                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
+            this.x *= xywh.x
+            this.y *= xywh.y
+            this.w *= xywh.w
+            this.h *= xywh.h
+            return this
+        }
+
+    }
+
+    class DLLUtil {
 
         Static GetWindowMarginsRect(&win, wHwnd) {
             win := {}

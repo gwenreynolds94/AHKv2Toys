@@ -1004,6 +1004,7 @@ Class LinkObj {
     Static DefaultBrowser := "Maxthon.exe"
     name := "", address := "", boundlaunch := {}
     __New(_name, _address) {
+
         this.name := _name
         this.address := _address
         this.boundlaunch := ObjBindMethod(this, "Launch")
@@ -1045,96 +1046,72 @@ Class WebLinkLeader extends LeaderKeys {
         }
     }
 }
-
-/**
- * @class
- */
-Class WinNavLeader extends LeaderKeys {
-
-    _excluded_classes := Map(
-        "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
-        "Internet Explorer_Hidden",                "ahk_class ",
-        "EdgeUiInputWndClass",                     "ahk_class ",
-        "Shell_TrayWnd",                           "ahk_class ",
-        "WorkerW",                                 "ahk_class ",
-        "Progman",                                 "ahk_class "
-    )
-
-    increments := WinVector.Coordinates(20, 20, 30, 30)
-    default_increment_muls := WinVector.Coordinates(1, 1, 1, 1)
-    working_coords := WinVector.Coordinates()
-
-    /**
-     * @param {string} _leader
-     * @param {number} _timeout
-     */
-    __New(_leader, _timeout:= 6666) {
-        super.__New(_leader, _timeout)
-    }
-
-
-    PrevWin[look_behind:=1] {
-        Get {
-            look_index := look_behind + 1
-            _wl := WinGetList()
-            _wlnw := []
-            for _i, _hwnd in _wl {
-                _wClass := WinGetClass("ahk_id " _hwnd)
-                if not this._excluded_classes.Has(_wClass)
-                    _wlnw.Push _hwnd
-            }
-            return ((look_behind+1) > _wlnw.Length) ? _wlnw[_wlnw.Length] : _wlnw[look_behind+1]
-        }
-    }
-
-    ActivatePrevWin(look_behind := 1) {
-        WinActivate(this.PrevWin[look_behind])
-    }
-
-    /**
-     * @param {Boolean|wVector.Coordinates} increment_muls
-     * @param {Integer} _hwnd
-     */
-    IncrementWinDimensions(increment_muls:=False, _hwnd:=0x0) {
-        _hwnd := _hwnd ? _hwnd : WinExist("A")
-        increment_muls := increment_muls ? increment_muls : this.default_increment_muls
-        _increments := this.increments.Mul(&increment_muls, False)
-        WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
-        this.working_coords.Reset(_x, _y, _w, _h).Add(&_increments)
-        WinMove((this.working_coords.Flat[("ahk_id " _hwnd)])*)
-    }
-}
-
- /**
- **STUB - Testing a custom type for {x,y,w,h} objects
- * @returns {Object.<String,Integer>} RawCoord
- * @returns {Integer} RawCoord.x
- * @returns {Integer} RawCoord.y
- * @returns {Integer} RawCoord.w
- * @returns {Integer} RawCoord.h
-*/
-WYWH_Factory(x, y, w, h) {
-    return {
-        x: x,
-        y: y,
-        w: w,
-        h: h
-    }
-}
-
-/**
- * STUB - A JSDoc-style class for a simple HWND
- * @returns {Integer} HWND
- */
-HWND_generate(_hwnd) {
-    return IsInteger(_hwnd) ? _hwnd : Integer(_hwnd)
-}
+;
+; /**
+;  * @class
+;  */
+; Class WinNavLeader extends LeaderKeys {
+;
+;     _excluded_classes := Map(
+;         "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
+;         "Internet Explorer_Hidden",                "ahk_class ",
+;         "EdgeUiInputWndClass",                     "ahk_class ",
+;         "Shell_TrayWnd",                           "ahk_class ",
+;         "WorkerW",                                 "ahk_class ",
+;         "Progman",                                 "ahk_class "
+;     )
+;
+;     increments := WinVector.Coordinates(20, 20, 30, 30)
+;     default_increment_muls := WinVector.Coordinates(1, 1, 1, 1)
+;     working_coords := WinVector.Coordinates()
+;
+;     /**
+;      * @param {string} _leader
+;      * @param {number} _timeout
+;      */
+;     __New(_leader, _timeout:= 6666) {
+;         super.__New(_leader, _timeout)
+;     }
+;
+;
+;     PrevWin[look_behind:=1] {
+;         Get {
+;             look_index := look_behind + 1
+;             _wl := WinGetList()
+;             _wlnw := []
+;             for _i, _hwnd in _wl {
+;                 _wClass := WinGetClass("ahk_id " _hwnd)
+;                 if not this._excluded_classes.Has(_wClass)
+;                     _wlnw.Push _hwnd
+;             }
+;             return ((look_behind+1) > _wlnw.Length) ? _wlnw[_wlnw.Length] : _wlnw[look_behind+1]
+;         }
+;     }
+;
+;     ActivatePrevWin(look_behind := 1) {
+;         WinActivate(this.PrevWin[look_behind])
+;     }
+;
+;     /**
+;      * @param {Boolean|wVector.Coordinates} increment_muls
+;      * @param {Integer} _hwnd
+;      */
+;     IncrementWinDimensions(increment_muls:=False, _hwnd:=0x0) {
+;         _hwnd := _hwnd ? _hwnd : WinExist("A")
+;         increment_muls := increment_muls ? increment_muls : this.default_increment_muls
+;         _increments := this.increments.Mul(&increment_muls, False)
+;         WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
+;         this.working_coords.Reset(_x, _y, _w, _h).Add(&_increments)
+;         WinMove((this.working_coords.Flat[("ahk_id " _hwnd)])*)
+;     }
+; }
 
 
 ;;TODO - Setup window management functions for  {WindowFairy} class
 Class WindowFairy extends KeyTable {
 
-    default_increment := 26,
+    increment := WinVector.Coordinates(20, 20, 30, 30)
+    default_mult := WinVector.Coordinates(1, 1, 1, 1),
     _coords           := WinVector.Coordinates(),
     _coords_ready := False
 
@@ -1148,43 +1125,49 @@ Class WindowFairy extends KeyTable {
         super.__New(_timeout)
     }
 
-    ActivationCallback() {
-        ; ...
-    }
-
     Cycle(count:=1) {
         target_window := WinUtil.PrevWindow[count]
         WinActivate("ahk_id " target_window)
     }
 
-    Coords[raw_coords?] {
+    Coords {
+        Get => this._coords
+        Set => this._coords := Value
+    }
+
+    AHwnd => WinExist("A")
+
+    APos[_hwnd:=0] {
         Get {
-            raw_coords := IsSet(raw_coords) ? raw_coords : False
-            if (not this._coords_ready) and raw_coords
-            _coords_raw := [
-                raw_coords.HasProp("x") ? raw_coords.x : 0,
-                raw_coords.HasProp("y") ? raw_coords.y : 0,
-                raw_coords.HasProp("w") ? raw_coords.w : 0,
-                raw_coords.HasProp("h") ? raw_coords.h : 0
-            ]
-            this._coords := WinVector.Coordinates(_coords_raw*)
-            return this._coords
+            _hwnd := _hwnd ? _hwnd : WinExist("A")
+            WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
+            return {
+                x: _x,
+                y: _y,
+                w: _w,
+                h: _h
+            }
         }
     }
 
+    Nudge(delta, hwnd:=0) {
+        hwnd := hwnd ? hwnd : this.AHwnd
+        ; _aPos := this.APos[hwnd]
+        _aPos := WinVector.ActiveCoord
+        _aPos.x += delta.x
+        _aPos.y += delta.y
+        _aPos.w += delta.w
+        _aPos.h += delta.h
+        WinMove _aPos.x, _aPos.y, _aPos.w, _aPos.h, "ahk_id " hwnd
+    }
 
-    AdjustCoordsRelative(
-        /** @param {RawCoord} units */
-        units,
-        /** @param {HWND} [hWnd=0] */
-        hWnd := 0
-    ) {
-        units := {
-            x: units.x ? units.x : 0,
-            y: units.y ? units.y : 0,
-            w: units.w ? units.w : 0,
-            h: units.h ? units.h : 0
-        }
+    AdjustCoordsRelative( units := False, hWnd := 0 ) {
+        hWnd := hWnd ? hWnd : WinExist("A")
+        units := units ? units : this.default_mult
+        incr := this.increment.Mul(&units, False)
+        WinGetPos &x, &y, &w, &h, "ahk_id " hWnd
+        this.Coords.Reset(x, y, w, h).Add(incr)
+        WinMove((this.Coords.Flat[("ahk_id " hWnd)])*)
     }
 }
 
@@ -1193,55 +1176,62 @@ Class WindowFairy extends KeyTable {
 ;--- ctrl_comma_leader.MapKey("h", (*)=>( KillHelpWindows() ))
 ;--- ctrl_comma_leader.Enabled := True
 
-
-win_grid_keys := KeyTable("none")
-wgk := win_grid_keys
-;--- wgk.MapKey("Pause",       (*)=>( TiledWindows.ExpandActiveY()     ))
-;--- wgk.MapKey("Insert",      (*)=>( TiledWindows.ExpandActiveY(True) ))
-;--- wgk.MapKey("PrintScreen", (*)=>( TiledWindows.TileActiveClass()   ))
-wgk.MapKey( "#Insert", (*)=>( TriggerReload() ) )
-
-
-/** @var {WinNavLeader} win_nav_leader */
-win_nav_leader := WinNavLeader("F24", 30 * 1000)
-win_nav_leader.MapKey("RShift", (*) => (
-    win_nav_leader.ActivatePrevWin(),
-    win_nav_leader.Deactivate()
+wFairy := WindowFairy()
+wFairy.BindKey("Left", (*) => (
+    wFairy.Nudge({x:(-20), y:0, w:0, h:0})
 ))
-/**
- * @typedef {Object} windir
- * @property {InputCoords} left
- * @property {InputCoords} down
- * @property {InputCoords} up
- * @property {InputCoords} right
- */
-windir := {}
-windir.left  := WinVector.Coordinates((-1), 0  , 0, 0)
-windir.down  := WinVector.Coordinates(0   , 1  , 0, 0)
-windir.up    := WinVector.Coordinates(0   ,(-1), 0, 0)
-windir.right := WinVector.Coordinates(1   , 0  , 0, 0)
-
-
-
-
-win_nav_leader.MapKey("Left", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.left)
+wFairy.BindKey(",", (*) => (
+    wFairy.Cycle()
 ))
-win_nav_leader.MapKey("Right", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.right)
+wFairy.BindKey(".", (*) => (
+    wFairy.Cycle(2)
 ))
-win_nav_leader.MapKey("Up", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.up)
-))
-win_nav_leader.MapKey("Down", (*)=>(
-    win_nav_leader.IncrementWinDimensions(windir.down)
-))
-
-#/::
+#.::
 {
-    _status := !win_nav_leader.Active
-    win_nav_leader.Active := _status
+    wFairy.Active := !wFairy.Active
 }
+
+;
+; /** @var {WinNavLeader} win_nav_leader */
+; win_nav_leader := WinNavLeader("F24", 30 * 1000)
+; win_nav_leader.MapKey("RShift", (*) => (
+;     win_nav_leader.ActivatePrevWin(),
+;     win_nav_leader.Deactivate()
+; ))
+; /**
+;  * @typedef {Object} windir
+;  * @property {InputCoords} left
+;  * @property {InputCoords} down
+;  * @property {InputCoords} up
+;  * @property {InputCoords} right
+;  */
+; windir := {}
+; windir.left  := WinVector.Coordinates((-1),  0  , 0, 0)
+; windir.down  := WinVector.Coordinates(0   ,  1  , 0, 0)
+; windir.up    := WinVector.Coordinates(0   , (-1), 0, 0)
+; windir.right := WinVector.Coordinates(1   ,  0  , 0, 0)
+;
+;
+;
+;
+; win_nav_leader.MapKey("Left", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.left)
+; ))
+; win_nav_leader.MapKey("Right", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.right)
+; ))
+; win_nav_leader.MapKey("Up", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.up)
+; ))
+; win_nav_leader.MapKey("Down", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.down)
+; ))
+;
+; #/::
+; {
+;     _status := !win_nav_leader.Active
+;     win_nav_leader.Active := _status
+; }
 
 
 weblink_leader := WebLinkLeader("RAlt & CapsLock", 2000)
@@ -1252,7 +1242,7 @@ weblink_leader.link["textnow", "t"] :=
                     "https://www.textnow.com/"
 
 weblink_leader.Link["reddit", "r"] :=
-                    "reddit.com"
+                    "https://www.reddit.com"
 
 weblink_leader.Link["fancyconver", "!f"] :=
                     "https://textfancy.com/font-converter/"
@@ -1261,7 +1251,7 @@ weblink_leader.Link["fancyedit", "+f"] :=
                     "https://textpaint.net/"
 
 weblink_leader.Link["ddg", "d"] :=
-                    "duckduckgo.com"
+                    "https://duckduckgo.com"
 
 ;--- weblink_leader.Link["ascii"      ,  "f"] := "https://textfancy.com/keyboard/"
 ;--- https://textheads.com/
@@ -1292,8 +1282,12 @@ RAlt_Apps_leader.MapKey(
 RAlt_Apps_leader.Enabled := True
 
 
-LeaderFairy := KeyTable("none")
-
+win_grid_keys := KeyTable("none")
+wgk := win_grid_keys
+;--- wgk.MapKey("Pause",       (*)=>( TiledWindows.ExpandActiveY()     ))
+;--- wgk.MapKey("Insert",      (*)=>( TiledWindows.ExpandActiveY(True) ))
+;--- wgk.MapKey("PrintScreen", (*)=>( TiledWindows.TileActiveClass()   ))
+wgk.MapKey( "#Insert", (*)=>( TriggerReload() ) )
 
 ScrollLock::
 {

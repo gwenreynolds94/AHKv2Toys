@@ -9,45 +9,43 @@
     },
     "scm.alwaysShowActions": true,
     "scm.defaultViewMode": "tree",
-    "scm.diffDecorationsGutterPattern": {
-        "added": true
-    },
     "scm.inputFontFamily": "editor",
     "scm.providerCountBadge": "visible",
     "terminal.integrated.tabs.defaultColor": "terminal.ansiMagenta",
     "explorer.fileNesting.enabled": true,
     "workbench.startupEditor": "none",
     "files.watcherExclude": {
-        "**/Documents/AutoHotkey/**": true
+        "**/Documents/AutoHotkey/**": true,
+        "**/Resources/**": true,
+        "**/Scripts/**": true
     },
     "editor.suggest.showStatusBar": true,
     "editor.suggest.preview": true,
-    "editor.suggest.localityBonus": true,
+    "editor.suggest.localityBonus": false,
     "editor.quickSuggestions": {
         "other": "inline",
-        "comments": "inline"
+        "comments": "inline",
+        "strings": "inline"
     },
     "editor.inlineSuggest.showToolbar": "always",
-    "editor.acceptSuggestionOnEnter": "smart",
-    "diffEditor.codeLens": true,
     "editor.formatOnSave": false,
     "editor.formatOnPaste": true,
-    "editor.formatOnType": true,
+    "editor.formatOnType": false,
     "editor.find.seedSearchStringFromSelection": "selection",
     "editor.find.autoFindInSelection": "multiline",
     "editor.cursorStyle": "block-outline",
-    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.cursorSmoothCaretAnimation": "off",
     "editor.cursorBlinking": "phase",
     "editor.unfoldOnClickAfterEndOfLine": true,
     "editor.stickyTabStops": true,
-    "editor.stickyScroll.maxLineCount": 10,
+    "editor.stickyScroll.maxLineCount": 3,
     "editor.stickyScroll.enabled": true,
     "editor.showFoldingControls": "always",
     "editor.semanticHighlighting.enabled": true,
     "editor.scrollBeyondLastLine": false,
     "editor.scrollbar.verticalScrollbarSize": 20,
     "editor.scrollbar.horizontalScrollbarSize": 20,
-    "editor.renderWhitespace": "all",
+    "editor.renderWhitespace": "boundary",
     "editor.renderLineHighlight": "all",
     "editor.renderFinalNewline": "dimmed",
     "editor.padding.top": 4,
@@ -56,11 +54,37 @@
     "editor.linkedEditing": true,
     "editor.lineNumbers": "relative",
     "editor.inlayHints.padding": true,
-    "editor.guides.bracketPairs": "active",
+    "editor.guides.bracketPairs": false,
     "editor.experimentalWhitespaceRendering": "font",
     "editor.experimental.pasteActions.enabled": true,
     "editor.comments.ignoreEmptyLines": false,
     "editor.colorDecorators": true,
-    "editor.autoSurround": "quotes",
-    "editor.autoIndent": "advanced"
+    "scm.diffDecorationsGutterPattern": {
+        "added": true
+    },
+    "scm.showActionButton": true,
+    "editor.snippets.codeActions.enabled": true,
+    "editor.lightbulb.enabled": true,
+    "editor.tabCompletion": "on",
+    "editor.formatOnSaveMode": "modifications",
+    "editor.suggestSelection": "first",
+    "files.trimTrailingWhitespace": true,
+    "emmet.triggerExpansionOnTab": true,
+    "Lua.codeLens.enable": true,
+    "Lua.completion.displayContext": 50,
+    "Lua.hint.enable": true,
+    "Lua.hint.setType": true,
+    "Lua.runtime.pathStrict": false,
+    "Lua.hint.arrayIndex": "Enable",
+    "Lua.runtime.version": "Lua 5.1",
+    "Lua.typeFormat.config": {
+        "auto_complete_end": "true",
+        "auto_complete_table_sep": "true",
+        "format_line": "true"
+    }, "Lua.workspace.library": [
+        "C:/Users/jonat/.config/nvim",
+        "C:/Users/jonat/Portables/Neovim/lib/nvim",
+        "C:/Users/jonat/Portables/Neovim/share/nvim/runtime",
+        "C:/Users/jonat/Portables/Neovim/share/nvim/runtime/pack/dist/opt/matchit"
+    ]
 }
