@@ -3,7 +3,9 @@
 #SingleInstance Force
 
 #Include <Utils\WinUtil\WinVector>
-#Include <.ignore\Gdip_v2Ex>
+
+
+
 
 
 ; Class WinUtil extends WinVector {
@@ -76,7 +78,9 @@ Class WinUtil {
 
         Static wvC := WinVector.Coordinates,
                wvD := WinVector.DLLUtil,
-               ext := {}
+               ext := {},
+               ScreenGap := { x: 8, y: 8 },
+               WindowOffset := { x: 0, y: 0 }
 
         Static __New() {
         }
@@ -84,21 +88,31 @@ Class WinUtil {
         Static RlCoords => WinVector.DLLUtil.RealCoordsFromSuperficial
         Static SprCoords => WinVector.DLLUtil.SuperficialCoordsFromReal
 
-        Static WinFull(wHwnd:=0, wScrGap:=8, *) {
+        Static WinFull(wHwnd:=0, screengap?, windowoffset?, *) {
+            screengap := IsSet(screengap) ? screengap : this.ScreenGap
+            windowoffset := IsSet(windowoffset) ? windowoffset : this.WindowOffset
             if !wHwnd
                 wHwnd := WinExist("A")
             wTitle  := "ahk_id " wHwnd
-            wWidth  := A_ScreenWidth - wScrGap*2
-            wHeight := A_ScreenHeight - wScrGap*2
-            this.RlCoords(&wRect:=0, wHwnd, wScrGap, wScrGap, wWidth, wHeight)
+            wWidth  := A_ScreenWidth - screengap.x*2
+            wHeight := A_ScreenHeight - screengap.y*2
+            this.RlCoords(&wRect:=0, wHwnd, 
+                        screengap.x + windowoffset.x, 
+                        screengap.y + windowoffset.y, 
+                        wWidth, 
+                        wHeight)
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }
 
-        Static WinHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
+        Static WinHalf(wHwnd:=0, screengap?, windowoffset?, side:=0, *) {
+            screengap := IsSet(screengap) ? screengap : this.ScreenGap
+            windowoffset := IsSet(windowoffset) ? windowoffset : this.WindowOffset
             wHwnd   := (!wHwnd) ? WinExist("A") : (wHwnd)
-            wWidth  := (A_ScreenWidth-wScrGap*2)//2
-            wHeight :=  A_ScreenHeight-wScrGap*2
-            wLX := wScrGap, wRX := wScrGap+wWidth
+            wWidth  := (A_ScreenWidth-screengap.x*2)//2
+            wHeight :=  A_ScreenHeight-screengap.y*2
+            wLX := screengap.x + windowoffset.x
+            wRX := wLX + wWidth
+            wY := screengap.y + windowoffset.y
             wTitle  := "ahk_id " wHwnd
             if (side=1) or (side="left")
                 wX := wLX
@@ -120,7 +134,6 @@ Class WinUtil {
                     else wX := wRX
                 }
             }
-            wY := wScrGap
             this.RlCoords(&wRect:=0, wHwnd, wX, wY, wWidth, wHeight)
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }
