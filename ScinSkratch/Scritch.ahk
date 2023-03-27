@@ -24,7 +24,7 @@ Class ScritchGui {
                          . "x" this.iXPosition  " "
                          . "y" this.iYPosition
         , sGuiHideOpts  := this.sGuiOpts " Hide"
-        , sGuiFontName  := "Fira Code"
+        , sGuiFontName  := "FiraCode NFM"
         , sGuiFontOpts  := "s9"
         ; , sGuiBG        := "ce1cae4"
         , sGuiBG        := "cffccdd"
@@ -440,9 +440,14 @@ Class ScritchNotes {
             for ooNote in this.aNotes
                 if ooNote.sTimestamp = sTimestamp
                     oNote := ooNote
-        oNoteFile := FileOpen(this.sNotesDir "\" oNote.sFileName, "w")
-        oNoteFile.Write(sContent)
-        oNoteFile.Close
+        notePath := this.sNotesDir "\" oNote.sFileName
+        noteExists := FileExist(notePath)
+        if noteExists
+            FileDelete notePath
+        FileAppend(sContent, notePath, "UTF-8")
+        ;oNoteFile := FileOpen(notePath, "w", "utf-8")
+        ;oNoteFile.Write(sContent)
+        ;oNoteFile.Close
         Return oNote.sFileName
     }
 

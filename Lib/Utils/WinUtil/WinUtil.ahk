@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0-rc
+#Requires AutoHotkey v2.0
 #Warn All, StdOut
 #SingleInstance Force
 
@@ -83,6 +83,9 @@ Class WinUtil {
                WindowOffset := { x: 0, y: 0 }
 
         Static __New() {
+            if A_ComputerName = "DESKTOP-HJ4S4Q2"
+                this.ScreenGap := { x: 10, y: 26 },
+                this.WindowOffset := { x: 0, y: (-10) }
         }
 
         Static RlCoords => WinVector.DLLUtil.RealCoordsFromSuperficial

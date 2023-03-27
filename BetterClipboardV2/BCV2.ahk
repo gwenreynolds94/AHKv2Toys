@@ -2,7 +2,7 @@
 ;@Ahk2Exe-Base C:\Program Files\AutoHotkey\v2\AutoHotkey.exe
 ;@Ahk2Exe-SetMainIcon %A_ScriptDir%\BCB.ico
 ;@Ahk2Exe-AddResource *14 %A_ScriptDir%\BCB.ico, BCBICON
-#Requires Autohotkey v2.0-rc.2
+#Requires Autohotkey v2.0
 #Warn All, StdOut
 #SingleInstance Force
 SetWorkingDir A_ScriptDir
@@ -1170,6 +1170,9 @@ Class BCBApp {
         this.edit.Caret.Sticky := "on"
         this.edit.Caret.Width := 2
         ; this.edit.Caret.FrameDraw := True
+        if A_ComputerName = "DESKTOP-HJ4S4Q2"
+            Loop 3
+                this.edit.ZoomIn()
 
         this.gui.Show("NA x" A_ScreenWidth)
         WinSetTransparent(0, this.gui)

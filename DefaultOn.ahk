@@ -6,15 +6,11 @@
 #Include <Utils\ConfTool>
 #Include <Utils\SearchV2Docs>
 #Include <Utils\VolumeChangeGUI>
-; #Include <Utils\DllCoords>
 #Include <Utils\WinTransparency>
-; #Include <Utils\WinSizePos>
 #Include <Utils\FormatComment>
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 #Include <Utils\BindUtil\BindUtil>
 #Include <Utils\WinUtil\WinUtil>
-
-; #Include <GdipLib\Gdip_Custom>
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Configuration ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1377,6 +1373,13 @@ Hotkey "RAlt & CapsLock", (*)=>( weblinks.Activate(3000) )
 ; )
 ;
 ; RAlt_Apps_leader.Enabled := True
+
+
+#F10:: 
+{
+    Msgbox A_ComputerName
+    A_Clipboard := A_ComputerName
+}
 
 
 TriggerReload(*)
