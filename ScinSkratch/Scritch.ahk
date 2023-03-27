@@ -464,7 +464,7 @@ Class ScritchNotes {
     NewNote(sFileName:="", sTimestamp:="", sGroup:="") {
         oNewNote := ScritchNotes.Note(sFileName, sTimestamp, sGroup)
         this.aNotes.Push oNewNote
-        FileAppend "", this.sNotesDir "\" oNewNote.sFileName
+        FileAppend "", this.sNotesDir "\" oNewNote.sFileName, "UTF-8"
         this.UpdateConf
         Return oNewNote
     }
@@ -534,7 +534,7 @@ Class ScritchConf {
     __New(sScritchWorkingDir) {
         ScritchConf.sScritchWorkingDir := sScritchWorkingDir
         if !IsFile(sScritchWorkingDir "\Scritch.conf")
-            FileAppend "", sScritchWorkingDir "\Scritch.conf"
+            FileAppend "", sScritchWorkingDir "\Scritch.conf", "UTF-8"
         if IniRead(sScritchWorkingDir "\Scritch.conf", "Config", "Groups", 0) = 0
             IniWrite("General", sScritchWorkingDir "\Scritch.conf", "Config", "Groups")
     }
@@ -623,6 +623,7 @@ _Debug_LoopNoteInfo(oScritchNotes) {
                  . "`t" tNote.sTimestamp "`n"
                  . "`t" tNote.sGroup     "`n"
                  , "*"
+                 , "UTF-8"
 }
 ;  ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;  DEBUG FUNCTIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
