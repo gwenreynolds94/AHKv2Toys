@@ -38,7 +38,7 @@ Class WinVector {
     Static  Unit := { w: 30, h: 20 }
 
     /**
-     * TODO
+     * TODO - Easy access for own static methods
      *
      * I would like to come up with a less manual solution for accessing a class's
      * own static methods. Eventually at least
@@ -171,10 +171,10 @@ Class WinVector {
              , Down := 0
 
         Static __New() {
-            this.Left := WinVector.Coord((-1), 0, 0, 0)
+            this.Left  := WinVector.Coord((-1), 0, 0, 0)
             this.Right := WinVector.Coord(1, 0, 0, 0)
-            this.Up := WinVector.Coord(0, (-1), 0, 0)
-            this.Down := WinVector.Coord(0, 1, 0, 0)
+            this.Up    := WinVector.Coord(0, (-1), 0, 0)
+            this.Down  := WinVector.Coord(0, 1, 0, 0)
         }
     }
 
@@ -191,6 +191,16 @@ Class WinVector {
             this.w := w
             this.h := h
         }
+
+        Static Left  => WinVector.Coord((-1), 0, 0, 0)
+        Static Right => WinVector.Coord(1, 0, 0, 0)
+        Static Up    => WinVector.Coord(0, (-1), 0, 0)
+        Static Down  => WinVector.Coord(0, 1, 0, 0)
+        Static Thin  => WinVector.Coord(0, 0, (-1), 0)
+        Static Wide  => WinVector.Coord(0, 0, 1, 0)
+        Static Short => WinVector.Coord(0, 0, 0, (-1))
+        Static Tall  => WinVector.Coord(0, 0, 0, 1)
+
 
         Add(xywh) {
             if IsNumber(xywh)
@@ -345,7 +355,7 @@ Class WinVector {
         /**
          * Parameter formats
          *
-         *      ; -<_wRECT>-  takes precedence over -<_wN>-
+         *      ; -<_wRECT>-  takes precedence over -<_w[XYWH]>-
          *      ; -<X>- is ignored if -<Y>- is not defined, and vice versa
          *      ; -<W>- is ignored if -<H>- is not defined, and vice versa
          *      _wHwnd := 0x666666   ; HWND

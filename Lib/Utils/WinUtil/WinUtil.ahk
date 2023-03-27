@@ -3,9 +3,7 @@
 #SingleInstance Force
 
 #Include <Utils\WinUtil\WinVector>
-
-
-    /** @alias HWND @type {Integer} */
+#Include <.ignore\Gdip_v2Ex>
 
 
 ; Class WinUtil extends WinVector {
@@ -24,7 +22,7 @@ Class WinUtil {
 
     /**
      * @param {Integer} look_behind
-     * @return {HWND}
+     * @return {Integer}
      */
     Static PrevWindow[look_behind:=1] {
         Get {
@@ -36,8 +34,8 @@ Class WinUtil {
     }
 
     /**
-     * @param {HWND[]} _list
-     * @return {HWND[]}
+     * @param {Integer[]} _list
+     * @return {Integer[]}
      */
     Static FilteredWinList[_list:=""] {
         Get {
@@ -48,6 +46,29 @@ Class WinUtil {
                     _filtered.Push _hwnd
             }
             return _filtered
+        }
+    }
+
+    Static WinCloseClass(_class?, _callback?, *) {
+        HideTrayTip(*) {
+            TrayTip()
+            if SubStr(A_OSVersion, 1, 3) = "10." {
+                A_IconHidden := True
+                SetTimer((*)=>(A_IconHidden := False), (-200))
+            }
+        }
+        _class := IsSet(_class) ? _class : WinGetClass("ahk_id " WinExist("A"))
+        living_windows := WinGetList("ahk_class" _class)
+        deaths := 0
+        for live_hwnd in living_windows
+            if WinExist("ahk_id " live_hwnd)
+                WinClose(live_hwnd), deaths++
+        if IsSet(_callback) {
+            _callback(_class, deaths)
+        }
+        else {
+            TrayTip("[ " _class " ]", "Deaths: " deaths)
+            SetTimer(HideTrayTip, -4000)
         }
     }
 
@@ -63,7 +84,7 @@ Class WinUtil {
         Static RlCoords => WinVector.DLLUtil.RealCoordsFromSuperficial
         Static SprCoords => WinVector.DLLUtil.SuperficialCoordsFromReal
 
-        Static SizeWindow(wHwnd:=0, wScrGap:=8, *) {
+        Static WinFull(wHwnd:=0, wScrGap:=8, *) {
             if !wHwnd
                 wHwnd := WinExist("A")
             wTitle  := "ahk_id " wHwnd
@@ -73,7 +94,7 @@ Class WinUtil {
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }
 
-        Static SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
+        Static WinHalf(wHwnd:=0, wScrGap:=8, side:=0, *) {
             wHwnd   := (!wHwnd) ? WinExist("A") : (wHwnd)
             wWidth  := (A_ScreenWidth-wScrGap*2)//2
             wHeight :=  A_ScreenHeight-wScrGap*2

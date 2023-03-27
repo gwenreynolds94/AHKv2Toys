@@ -3,7 +3,6 @@
 #SingleInstance Force
 
 ; #Include <DEBUG\DBT>
-#Include <Utils\ConfTool>
 #Include <Utils\SearchV2Docs>
 #Include <Utils\VolumeChangeGUI>
 ; #Include <Utils\DllCoords>
@@ -11,8 +10,6 @@
 ; #Include <Utils\WinSizePos>
 #Include <Utils\FormatComment>
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
-#Include <Utils\BindUtil\BindUtil>
-#Include <Utils\WinUtil\WinUtil>
 
 ; #Include <GdipLib\Gdip_Custom>
 
@@ -419,152 +416,6 @@ iENABLED := DefaultOnConfiguration.Conf.LiteralIniEnabled()
  * @var {DefaultOnConfiguration.Defaults.CONF_INSTALLS} iINSTALLS
  */
 iINSTALLS := DefaultOnConfiguration.Conf.LiteralIniInstalls()
-
-_G := Map()
-
-Class DOConf extends ConfTool {
-    /** @prop {ConfTool.SectionEdit} _enabled_edit */
-    _enabled_edit := {}
-
-    __New() {
-        super.__New(".\DOsrc\.ahkonf", Map(
-            "General", Map(
-                "X1Delay", 325,
-                "X2Delay", 325,
-                "CloseCortanaInterval", 5000,
-                "X1NoCopy", 0,
-                "X2IsDown", 0
-            ),
-            "Paths", Map(
-                "BCV2Exe", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "ScritchAhk", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
-                "AhkCodeTemp", "C:\WINDOWS\TEMP\A_TempCode.ahk",
-                "AhkUIA", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-                "OpenEnvVars", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
-            ),
-            "Enabled", Map(
-                "AltShiftWinDrag", 1,
-                "BCV2",            1,
-                "FormatComment",   1,
-                "MouseHotkeys",    1,
-                "Scritch",         1,
-                "SearchV2",        1,
-                "TabSwitcher",     1,
-                "Transparency",    1,
-                "VolumeChange",    1,
-                "WinSizePos",      1,
-                "CloseCortana",    1,
-                "SearchFirefox",   1,
-                "ShiftDelete",     1
-            ),
-            "BCV2", Map(
-                "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
-            ),
-            "OpenEnvVars", Map(
-                "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
-                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
-            ),
-            "UIA64", Map(
-                "Source", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
-            )
-        ))
-        this.Validate()
-        this._enabled_edit := ConfTool.SectionEdit(this, "Enabled", "bool")
-        for _ctrlname, _guictrl in this._enabled_edit._guictrls {
-
-        }
-    }
-
-    Class InstallProp {
-        /** @prop {String} Dest */
-        Dest => ""
-        /** @prop {String} Source */
-        Source => ""
-    }
-
-    EnabledEdit => this._enabled_edit
-
-    Enabled => this.Ini.Enabled
-    General => this.Ini.General
-    Paths   => this.Ini.Paths
-    /** @prop {DOConf.InstallProp} BCV2 */
-    BCV2 => this.Ini.BCV2
-    /** @prop {DOConf.InstallProp} OpenEnvVars */
-    OpenEnvVars => this.Ini.OpenEnvVars
-    /** @prop {DOConf.InstallProp} UIA64 */
-    UIA64 => this.Ini.UIA64
-}
-
-
-DConf := DOConf()
-Hotkey "#F11", (*)=>DConf.EnabledEdit.Show()
-
-; ConfT := ConfTool(".\DOsrc\.ahkonf", Map(
-;     "General", Map(
-;         "X1Delay", 325,
-;         "X2Delay", 325,
-;         "CloseCortanaInterval", 5000,
-;         "X1NoCopy", 0,
-;         "X2IsDown", 0
-;     ),
-;     "Paths", Map(
-;         "BCV2Exe", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-;         "ScritchAhk", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
-;         "AhkCodeTemp", "C:\WINDOWS\TEMP\A_TempCode.ahk",
-;         "AhkUIA", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-;         "OpenEnvVars", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
-;     ),
-;     "Enabled", Map(
-;         "AltShiftWinDrag", 1,
-;         "BCV2",            1,
-;         "FormatComment",   1,
-;         "MouseHotkeys",    1,
-;         "Scritch",         1,
-;         "SearchV2",        1,
-;         "TabSwitcher",     1,
-;         "Transparency",    1,
-;         "VolumeChange",    1,
-;         "WinSizePos",      1,
-;         "CloseCortana",    1,
-;         "SearchFirefox",   1,
-;         "ShiftDelete",     1
-;     ),
-;     "BCV2", Map(
-;         "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
-;     ),
-;     "OpenEnvVars", Map(
-;         "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
-;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
-;     ),
-;     "UIA64", Map(
-;         "Source", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
-;     )
-; ))
-;
-; ConfT.Validate()
-
-; ConfT.Sett["Enabled", "FormatComment"] := false
-; ConfT.Sett["Enabled", "TabSwitcher"] := false
-
-; DConf.Enabled.FormatComment := false
-; DConf.Enabled.TabSwitcher := false
-; DConf.Enabled.Scritch := True
-; DConf.Enabled.WinSizePos := True
-
-DConf.General.CloseCortanaInterval := 6666
-DConf.General.X1Delay := 325
-DConf.General.X2Delay := 325
-
-
-; ConfT.Ini.Enabled.FormatComment := False
-; ConfT.Ini.Enabled.TabSwitcher := False
-; ConfT.Ini.Enabled.Scritch := True
-
-
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
@@ -629,8 +480,8 @@ FuckCortana(*) {
     if ProcessExist("Cortana.exe")
         ProcessClose("Cortana.exe")
 }
-if !!(DConf.Enabled.CloseCortana)
-    SetTimer FuckCortana, DConf.General.CloseCortanaInterval
+if !!(iENABLED.CloseCortana)
+    SetTimer FuckCortana, iGENERAL.CloseCortanaInterval
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -639,14 +490,14 @@ if !!(DConf.Enabled.CloseCortana)
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-if !ProcessExist("BCV2.exe") and !!DConf.Enabled.BCV2 {
-    Run(DConf.Paths.BCV2Exe)
+if !ProcessExist("BCV2.exe") and !!iENABLED.BCV2 {
+    Run(iPATHS.BCV2Exe)
 }
 ExitBCB(ExitReason, ExitCode) {
     if (ExitReason!="Reload") and !!ProcessExist("BCV2.exe")
-        Run(DConf.Paths.BCV2Exe " DoExit")
+        Run(iPATHS.BCV2Exe " DoExit")
 }
-if !!DConf.Enabled.BCV2
+if !!iENABLED.BCV2
     OnExit ExitBCB
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -836,8 +687,8 @@ if !!iENABLED.MouseHotkeys {
 ;
 ;
 if !!iENABLED.WinSizePos {
-    Hotkey "#b", (*)=> WinUtil.Sizer.WinFull()
-    Hotkey "#s", (*)=> WinUtil.Sizer.WinHalf()
+    Hotkey "#b", (*)=> WinUtil.Sizer.SizeWindow()
+    Hotkey "#s", (*)=> WinUtil.Sizer.SizeWindowHalf()
     ; Hotkey "#b", (*)=> SizeWindow()
     ; Hotkey "#s", (*)=> SizeWindowHalf()
 }
@@ -979,12 +830,12 @@ Class AltShiftDragWindowRect {
     Static FitWindow(*) {
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        WinUtil.Sizer.WinFull(this.home.hwnd)
+        WinUtil.Sizer.SizeWindow(this.home.hwnd)
     }
     Static HalfWindow(*) {
         MouseGetPos(,,&_aHwnd)
         this.home.hwnd := _aHwnd
-        WinUtil.Sizer.WinHalf(this.home.hwnd)
+        WinUtil.Sizer.SizeWindowHalf(this.home.hwnd)
     }
 }
 ;
@@ -1071,15 +922,15 @@ if !!iENABLED.TabSwitcher {
 ; }
 ; Hotkey "#F8", (*)=> ToggleWindowCaption()
 
-:*:iidt::
+:*:insertdtime::
 {
     SendInput FormatTime(, "M/d/yyyy HH:mm")
 }
-:*:iidate::
+:*:insertdate::
 {
     SendInput FormatTime(, "M/d/yyyy")
 }
-:*:iitime::
+:*:inserttime::
 {
     SendInput FormatTime(, "HH:mm")
 }
@@ -1139,61 +990,62 @@ KillWindowClass(_class?, *) {
             WinClose target, death_total += 1
     JKQuickToast(
         ("[ " String(slaughtered ? slaughtered : _class) " ] R.I.P.")
-      , "Deaths: " String(death_total)
+      , "Death Total: " String(death_total)
       , 5000
     )
 }
 
 
+#Include <Utils\BindUtil\BindUtil>
+#Include <Utils\WinUtil\WinUtil>
 
 
-; Class LinkObj {
-;     Static DefaultBrowser := "Maxthon.exe"
-;     name := "", address := "", boundlaunch := {}
-;     __New(_name, _address) {
-;
-;         this.name := _name
-;         this.address := _address
-;         this.boundlaunch := ObjBindMethod(this, "Launch")
-;     }
-;
-;     Launch(*) {
-;         Run (
-;             LinkObj.DefaultBrowser . " `"" . this.address . "`""
-;         )
-;     }
-; }
-;
-; /**
-;  * @class
-;  */
-; Class WebLinkLeader extends LeaderKeys {
-;
-;     /** @prop {Map<String,LinkObj} */
-;     _links := Map()
-;
-;
-;     /**
-;      * @param {any} _leader
-;      * @param {number} _timeout
-;      */
-;     __New(_leader, _timeout:=2000) {
-;         super.__New(_leader, _timeout)
-;     }
-;
-;     Link[_name, _key:=""] {
-;         Get => this._links.Has(_name) ? this._links[_name] : False
-;         Set {
-;             _new_link := LinkObj(_name, Value)
-;             this._links[_name] := _new_link
-;             if not _key
-;                 return "unset"
-;             this.MapKey(_key, _new_link.boundlaunch)
-;             return "set"
-;         }
-;     }
-; }
+Class LinkObj {
+    Static DefaultBrowser := "Maxthon.exe"
+    name := "", address := "", boundlaunch := {}
+    __New(_name, _address) {
 
+        this.name := _name
+        this.address := _address
+        this.boundlaunch := ObjBindMethod(this, "Launch")
+    }
+
+    Launch(*) {
+        Run (
+            LinkObj.DefaultBrowser . " `"" . this.address . "`""
+        )
+    }
+}
+
+/**
+ * @class
+ */
+Class WebLinkLeader extends LeaderKeys {
+
+    /** @prop {Map<String,LinkObj} */
+    _links := Map()
+
+
+    /**
+     * @param {any} _leader
+     * @param {number} _timeout
+     */
+    __New(_leader, _timeout:=2000) {
+        super.__New(_leader, _timeout)
+    }
+
+    Link[_name, _key:=""] {
+        Get => this._links.Has(_name) ? this._links[_name] : False
+        Set {
+            _new_link := LinkObj(_name, Value)
+            this._links[_name] := _new_link
+            if not _key
+                return "unset"
+            this.MapKey(_key, _new_link.boundlaunch)
+            return "set"
+        }
+    }
+}
 ;
 ; /**
 ;  * @class
@@ -1258,13 +1110,9 @@ KillWindowClass(_class?, *) {
 ;;TODO - Setup window management functions for  {WindowFairy} class
 Class WindowFairy extends KeyTable {
 
-    increment := WinVector.Coordinates(20, 20, 30, 30),
-    segment := {
-        x: Round((A_ScreenWidth - 8*2) / 4),
-        y: Round((A_ScreenHeight - 8*2) / 4)
-    }
+    increment := WinVector.Coordinates(20, 20, 30, 30)
     default_mult := WinVector.Coordinates(1, 1, 1, 1),
-    _coords := WinVector.Coordinates(),
+    _coords           := WinVector.Coordinates(),
     _coords_ready := False
 
     /**
@@ -1289,95 +1137,175 @@ Class WindowFairy extends KeyTable {
 
     AHwnd => WinExist("A")
 
+    APos[_hwnd:=0] {
+        Get {
+            _hwnd := _hwnd ? _hwnd : WinExist("A")
+            WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
+            return {
+                x: _x,
+                y: _y,
+                w: _w,
+                h: _h
+            }
+        }
+    }
+
     Nudge(delta, hwnd:=0) {
         hwnd := hwnd ? hwnd : this.AHwnd
         ; _aPos := this.APos[hwnd]
-        _aPos := WinVector.ActiveCoord.Add(delta)
-        ; _aPos.x += delta.x
-        ; _aPos.y += delta.y
-        ; _aPos.w += delta.w
-        ; _aPos.h += delta.h
+        _aPos := WinVector.ActiveCoord
+        _aPos.x += delta.x
+        _aPos.y += delta.y
+        _aPos.w += delta.w
+        _aPos.h += delta.h
         WinMove _aPos.x, _aPos.y, _aPos.w, _aPos.h, "ahk_id " hwnd
     }
 
-    ; APos[_hwnd:=0] {
-    ;     Get {
-    ;         _hwnd := _hwnd ? _hwnd : WinExist("A")
-    ;         WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
-    ;         return {
-    ;             x: _x,
-    ;             y: _y,
-    ;             w: _w,
-    ;             h: _h
-    ;         }
-    ;     }
-    ; }
-
-    ; AdjustCoordsRelative( units := False, hWnd := 0 ) {
-    ;     hWnd := hWnd ? hWnd : WinExist("A")
-    ;     units := units ? units : this.default_mult
-    ;     incr := this.increment.Mul(&units, False)
-    ;     WinGetPos &x, &y, &w, &h, "ahk_id " hWnd
-    ;     this.Coords.Reset(x, y, w, h).Add(incr)
-    ;     WinMove((this.Coords.Flat[("ahk_id " hWnd)])*)
-    ; }
-
+    AdjustCoordsRelative( units := False, hWnd := 0 ) {
+        hWnd := hWnd ? hWnd : WinExist("A")
+        units := units ? units : this.default_mult
+        incr := this.increment.Mul(&units, False)
+        WinGetPos &x, &y, &w, &h, "ahk_id " hWnd
+        this.Coords.Reset(x, y, w, h).Add(incr)
+        WinMove((this.Coords.Flat[("ahk_id " hWnd)])*)
+    }
 }
 
+;--- ctrl_comma_leader.MapKey("m", (*)=>( MsgBox("message...") ))
+;--- ctrl_comma_leader.MapKey("b", (*)=>( SearchBrowserFromClipboard() ))
+;--- ctrl_comma_leader.MapKey("h", (*)=>( KillHelpWindows() ))
+;--- ctrl_comma_leader.Enabled := True
+
 wFairy := WindowFairy()
-wFairy.BindKey("Up", (*) => wFairy.Nudge(WinVector.Coord.Up.Mul(wFairy.segment.y)))
-wFairy.BindKey("Down", (*) => wFairy.Nudge(WinVector.Coord.Down.Mul(wFairy.segment.y)))
-wFairy.BindKey("Left", (*) => wFairy.Nudge(WinVector.Coord.Left.Mul(wFairy.segment.x)))
-wFairy.BindKey("Right", (*) => wFairy.Nudge(WinVector.Coord.Right.Mul(wFairy.segment.x)))
-wFairy.BindKey("[", (*) => wFairy.Nudge(WinVector.Coord.Thin.Mul(wFairy.segment.x)))
-wFairy.BindKey("]", (*) => wFairy.Nudge(WinVector.Coord.Wide.Mul(wFairy.segment.x)))
-wFairy.BindKey("-", (*) => wFairy.Nudge(WinVector.Coord.Short.Mul(wFairy.segment.y)))
-wFairy.BindKey("=", (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
-wFairy.BindKey(",", (*) => wFairy.Cycle())
-wFairy.BindKey(".", (*) => wFairy.Cycle(2))
-wFairy.BindKey("k", (*) => WinUtil.WinCloseClass())
+wFairy.BindKey("Left", (*) => (
+    wFairy.Nudge({x:(-20), y:0, w:0, h:0})
+))
+wFairy.BindKey(",", (*) => (
+    wFairy.Cycle()
+))
+wFairy.BindKey(".", (*) => (
+    wFairy.Cycle(2)
+))
 #.::
 {
     wFairy.Active := !wFairy.Active
 }
 
-weblinks := LinkTable()
-weblinks.Link["emmylua", "e"] := "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
-
-weblinks.link["textnow", "t"] := "https://www.textnow.com/"
-
-weblinks.Link["reddit", "r"] := "https://www.reddit.com"
-
-weblinks.Link["fancyconvert", "!f"] := "https://textfancy.com/font-converter/"
-
-weblinks.Link["fancyedit", "+f"] := "https://textpaint.net/"
-
-weblinks.Link["ddg", "d"] := "https://duckduckgo.com"
-
-Hotkey "RAlt & CapsLock", (*)=>( weblinks.Activate(3000) )
-
-
-; RAlt_Apps_leader := LeaderKeys("RAlt & AppsKey")
 ;
-; RAlt_Apps_leader.MapKey(
-;     "m", (*) => (Msgbox("Testing!"))
-; )
+; /** @var {WinNavLeader} win_nav_leader */
+; win_nav_leader := WinNavLeader("F24", 30 * 1000)
+; win_nav_leader.MapKey("RShift", (*) => (
+;     win_nav_leader.ActivatePrevWin(),
+;     win_nav_leader.Deactivate()
+; ))
+; /**
+;  * @typedef {Object} windir
+;  * @property {InputCoords} left
+;  * @property {InputCoords} down
+;  * @property {InputCoords} up
+;  * @property {InputCoords} right
+;  */
+; windir := {}
+; windir.left  := WinVector.Coordinates((-1),  0  , 0, 0)
+; windir.down  := WinVector.Coordinates(0   ,  1  , 0, 0)
+; windir.up    := WinVector.Coordinates(0   , (-1), 0, 0)
+; windir.right := WinVector.Coordinates(1   ,  0  , 0, 0)
 ;
-; RAlt_Apps_leader.MapKey("h", (*) => ( KillHelpWindows() ))
-; RAlt_Apps_leader.MapKey("k", (*) => ( KillWindowClass() ))
 ;
-; RAlt_Apps_leader.MapKey(
-;     "Right", (*) => (WinActivate(
-;         "ahk_id " WinGetList(
-;             "ahk_class " WinGetClass(
-;                 "ahk_id " WinExist("A")
-;             )
-;         )[2]
-;     ))
-; )
 ;
-; RAlt_Apps_leader.Enabled := True
+;
+; win_nav_leader.MapKey("Left", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.left)
+; ))
+; win_nav_leader.MapKey("Right", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.right)
+; ))
+; win_nav_leader.MapKey("Up", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.up)
+; ))
+; win_nav_leader.MapKey("Down", (*)=>(
+;     win_nav_leader.IncrementWinDimensions(windir.down)
+; ))
+;
+; #/::
+; {
+;     _status := !win_nav_leader.Active
+;     win_nav_leader.Active := _status
+; }
 
+
+weblink_leader := WebLinkLeader("RAlt & CapsLock", 2000)
+weblink_leader.Link["emmylua", "e"] :=
+                    "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
+
+weblink_leader.link["textnow", "t"] :=
+                    "https://www.textnow.com/"
+
+weblink_leader.Link["reddit", "r"] :=
+                    "https://www.reddit.com"
+
+weblink_leader.Link["fancyconver", "!f"] :=
+                    "https://textfancy.com/font-converter/"
+
+weblink_leader.Link["fancyedit", "+f"] :=
+                    "https://textpaint.net/"
+
+weblink_leader.Link["ddg", "d"] :=
+                    "https://duckduckgo.com"
+
+;--- weblink_leader.Link["ascii"      ,  "f"] := "https://textfancy.com/keyboard/"
+;--- https://textheads.com/
+
+weblink_leader.Enabled := True
+
+
+
+RAlt_Apps_leader := LeaderKeys("RAlt & AppsKey")
+
+RAlt_Apps_leader.MapKey(
+    "m", (*) => (Msgbox("Testing!"))
+)
+
+RAlt_Apps_leader.MapKey("h", (*) => ( KillHelpWindows() ))
+RAlt_Apps_leader.MapKey("k", (*) => ( KillWindowClass() ))
+
+RAlt_Apps_leader.MapKey(
+    "Right", (*) => (WinActivate(
+        "ahk_id " WinGetList(
+            "ahk_class " WinGetClass(
+                "ahk_id " WinExist("A")
+            )
+        )[2]
+    ))
+)
+
+RAlt_Apps_leader.Enabled := True
+
+
+win_grid_keys := KeyTable("none")
+wgk := win_grid_keys
+;--- wgk.MapKey("Pause",       (*)=>( TiledWindows.ExpandActiveY()     ))
+;--- wgk.MapKey("Insert",      (*)=>( TiledWindows.ExpandActiveY(True) ))
+;--- wgk.MapKey("PrintScreen", (*)=>( TiledWindows.TileActiveClass()   ))
+wgk.MapKey( "#Insert", (*)=>( TriggerReload() ) )
+
+ScrollLock::
+{
+    win_grid_keys.Active := !win_grid_keys.Active
+    JKQuickTip( "WinGridKeys <> " .
+              ( (win_grid_keys.Active) ? "ENABLED" : "DISABLED" ),
+              ( 1500 ))
+}
+
+
+
+;|- ctrl_comma_leader.BindKey("w", (*)=>(
+;|-         win_grid_keys.Active["max"] := !win_grid_keys.Active
+;|-     ))
+
+;|- win_jay_leader := LeaderKeys("#j")
+;|- win_jay_leader.BindKey("j", (*)=>(ToolTip("#j[j]")))
+;|- win_jay_leader.Enabled := True
 
 TriggerReload(*)
 {
@@ -1394,3 +1322,6 @@ TriggerReload(*)
 
 Hotkey( "#F12", (*)=>TriggerReload() )
 Hotkey( "#F7", (*)=>ExitApp() )
+
+
+

@@ -43,9 +43,10 @@ Class KeyTable {
             Hotkey _key, _action, "On"
         if (_timeout = "none") or (not _timeout and (this.timeout = "none"))
             return
+        _to := _timeout, _mxto := this.maxtimeout
         SetTimer(
             this.boundmeth.deactivate,
-            ((_to:=_timeout) = "max") ? (_mxto:=this.maxtimeout) :
+            (_to = "max") ? _mxto:=this.maxtimeout :
             (IsNumber(_to)) ? ((-1)*_to) : (_thto:=(-1)*this.timeout) ? (_thto) : _mxto
         )
     }
@@ -83,19 +84,6 @@ Class KeyTable {
                 this.Deactivate()
             this._active := !!Value
         }
-    }
-}
-
-
-Class NumericListener extends KeyTable {
-    Class Callback {
-        when := ""
-        do := {}
-    }
-
-    __New(_timeout := 2000, _callback_object := False) {
-        super.__New(_timeout)
-
     }
 }
 

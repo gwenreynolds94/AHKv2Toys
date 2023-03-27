@@ -41,6 +41,10 @@ Class LinkTable extends KeyTable {
 
     _links := Map()
 
+    __New(_timeout:=3000) {
+        super.__New(_timeout)
+    }
+
     Link[_name, _key:=""] {
         Get => this._links.Has(_name) ? this._links[_name] : false
         Set {
@@ -61,9 +65,21 @@ Class LinkTable extends KeyTable {
             this.bflaunch := ObjBindMethod(this, "Launch")
         }
 
-        Launch() {
+        Launch(*) {
             Run LinkTable.BrowserExe " `"" this.address "`""
         }
+    }
+}
+
+Class CountLeader extends KeyTable {
+    Class Callback {
+        when := ""
+        do := {}
+    }
+
+    __New(_timeout := 2000, _callback_object := False) {
+        super.__New(_timeout)
+
     }
 }
 

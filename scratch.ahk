@@ -68,7 +68,7 @@
 ;|-
 ;|- c.penis["asdasd"] := "qweqweqwe"
 ;|-
-;|- dbgo(stdo(c.penis,{ __opts: { noprint : True }}))
+;|- stdo(stdo(c.penis,{ __opts: { noprint : True }}))
 ;|-
 ;|- stdo(
 ;|-     (
@@ -85,19 +85,19 @@
 ;|- )
 ;|-
 ;|-
-;|- dbgo "asdasdasd", "Asdasdasdas"
+;|- stdo "asdasdasd", "Asdasdasdas"
 
-;|- dbgo (flt2nbr:=1.34) ":flt2nbr:" .
+;|- stdo (flt2nbr:=1.34) ":flt2nbr:" .
 ;|-----(HasBase(flt2nbr, Number.Prototype) ? "True" : "False")
-;|- dbgo (int2nbr:=1123) ":int2nbr:" .
+;|- stdo (int2nbr:=1123) ":int2nbr:" .
 ;|-----(HasBase(int2nbr, Number.Prototype) ? "True" : "False")
-;|- dbgo (flt2int:=1.3) ":flt2int:" .
+;|- stdo (flt2int:=1.3) ":flt2int:" .
 ;|-----(HasBase(flt2int, Integer.Prototype) ? "True" : "False")
-;|- dbgo (int2int:=123) ":int2int:" .
+;|- stdo (int2int:=123) ":int2int:" .
 ;|-----(HasBase(int2int, Integer.Prototype) ? "True" : "False")
-;|- dbgo (int2flt:=41233) ":int2flt:" .
+;|- stdo (int2flt:=41233) ":int2flt:" .
 ;|-----(HasBase(int2flt, Float.Prototype) ? "True" : "False")
-;|- dbgo (flt2flt:=1.112) ":flt2flt:" .
+;|- stdo (flt2flt:=1.112) ":flt2flt:" .
 ;|-----(HasBase(flt2flt, Float.Prototype) ? "True" : "False")
 
 ; gap := 8
@@ -122,95 +122,179 @@
 ;      "arr_literal_is_obj: " ([] is Object),
 ;      asd.HasProp("x")
 
-Class Callaclass {
-    Static bigass := [1,2,3,4,5,6,7,8,9,10],
-           woah := {x: "no", xxx: "why"}
-    evilass := [6,6,6,6,6,6,],
-        what := {asd: "qwe", zxc: "dfg"}
+; Class Callaclass {
+;     Static bigass := [1,2,3,4,5,6,7,8,9,10],
+;            woah := {x: "no", xxx: "why"}
+;     evilass := [6,6,6,6,6,6,],
+;         what := {asd: "qwe", zxc: "dfg"}
+;
+;     __New(_what) {
+;         this.what := _what
+;     }
+;
+;     Static __New() {
+;         this.woah := A_TickCount
+;         (Callaclass.NestedAss.AnoterhClass)
+;         (Callaclass.NestedAss)
+;     }
+;
+;     Call(_args*) {
+;
+;     }
+;
+;     __Call(_name, _params) {
+;
+;     }
+;     Class NestedAss {
+;         Static PoopProp => (
+;             (*) => MsgBox(this.OwnProps().Name)
+;         )
+;         Static WooProp => 666
+;         Class AnoterhClass {
+;
+;         }
+;     }
+; }
+;
+; Class FakeClass {
+;     Static cc => Callaclass
+;     Static nA => this.cc.NestedAss
+;     Static pp => Callaclass.NestedAss.PoopProp
+;     Static wp => Callaclass.NestedAss.WooProp
+;     Static ac => Callaclass.NestedAss.AnoterhClass
+; }
+;
+;
+; NoImplement(*)
+; {
+;     throw Error("Not Implemented")
+; }
+;
+; /**
+;  * @interface
+;  */
+; Color()
+; {
+;
+; }
+;
+; /**
+;  * @return {Array<Number>}
+;  */
+; Color.Prototype.RGB = NoImplement.Bind()
+;
+; /**
+;  * @class
+;  * @implements {Color}
+;  */
+; TransparentColor()
+; {
+;
+; }
+;
+; TransparentColor.Prototype.RGB := (*)=>()
+;
+; /**
+;  * @return {Array<Number, Number, Number, Number>}
+;  */
+; TransparentColor().Prototype.RGBA := (*)=>[1,2,3,4]
+;
+; aasds := TransparentColor.Prototype.RGBA()
 
-    __New(_what) {
-        this.what := _what
+Class TestConf {
+    Static Values := Map()
+
+    __Get(Key, Params) {
+        Return TestConf.Values[Key]
     }
 
-    Static __New() {
-        this.woah := A_TickCount
-        (Callaclass.NestedAss.AnoterhClass)
-        (Callaclass.NestedAss)
-    }
-
-    Call(_args*) {
-
-    }
-
-    __Call(_name, _params) {
-
-    }
-    Class NestedAss {
-        Static PoopProp => (
-            (*) => MsgBox(this.OwnProps().Name)
-        )
-        Static WooProp => 666
-        Class AnoterhClass {
-
-        }
+    __Set(Key, Params, Value) {
+        TestConf.Values[Key] := Value
     }
 }
 
-Class FakeClass {
-    Static cc => Callaclass
-    Static nA => this.cc.NestedAss
-    Static pp => Callaclass.NestedAss.PoopProp
-    Static wp => Callaclass.NestedAss.WooProp
-    Static ac => Callaclass.NestedAss.AnoterhClass
+tMap := Map(
+    "abc", Map(
+        "a", "AAA",
+        "b", "BBB",
+        "c", "CCC"
+    ),
+    "def", Map(
+        "d", "DDD",
+        "e", "EEE",
+        "f", "FFF"
+    ),
+    "ghi", Map(
+        "g", "GGG",
+        "h", "HHH",
+        "i", "III"
+    )
+)
+
+Class THMap {
+
+    Static CurrentValue := 0
+
+    __Get(Key, Params) {
+        return tMap[THMap.CurrentValue][Key]
+    }
+    __Set(Key, Params, Value) {
+        tMap[THMap.CurrentValue][Key] := Value
+    }
 }
 
+Class THMapp {
+    __Get(Key, Params) {
+        THMap.CurrentValue := Key
+        return THMap()
+    }
+    __Set(Key, Params, Value) {
 
-NoImplement(*)
-{
-    throw Error("Not Implemented")
+    }
 }
 
-/**
- * @interface
- */
-Color()
-{
+timap := THMapp()
 
-}
 
-/**
- * @return {Array<Number>}
- */
-Color.Prototype.RGB = NoImplement.Bind()
+tpaths := [
+    ".\butt.conf",
+    ".\butss\buttss.conf",
+    "buttsss.conf"
+]
 
-/**
- * @class
- * @implements {Color}
- */
-TransparentColor()
-{
-
-}
-
-TransparentColor.Prototype.RGB := (*)=>()
-
-/**
- * @return {Array<Number, Number, Number, Number>}
- */
-TransparentColor().Prototype.RGBA := (*)=>[1,2,3,4]
-
-aasds := TransparentColor.Prototype.RGBA()
-
+tcf := [
+    "asdasda=4tgag4G4WRGaergwa4gg",
+    "ASFA23rffadf=232G4G4TGAE",
+    "AsdQrgs23234=1"
+]
 
 F10::
 {
-    stdo [1414
-         ,3646
-         ,345
-         ,(
-            [ 345
-             ,87,
-             321,(TTT.asd)*])*]
+    tenb := IniRead(".\DOsrc\.ahkonf", "Enabled")
+    tenbp := Map()
+    Loop Parse, tenb, "`n", "`r" {
+        RegExMatch(A_LoopField, "([^=]+)=(.+)", &_re_match)
+        tenbp[_re_match.1] := _re_match.2
+    }
+    for k,v in tenbp
+        stdo k, v
+    ; for _, tp in tpaths{
+    ;     SplitPath(tp, &_fname, &_fdir)
+    ;     stdo    "name: " _fname "`n`txists: " FileExist(_fname) ,
+    ;             "dir: " _fdir "`n`texists: " DirExist(_fdir)
+    ; }
+    ; asd := TestConf()
+    ; stdo TestConf.Butts
+    ; TestConf.Butts := "New Butt"
+    ; stdo TestConf.Butts
+    ; asd.asd := "asdasd"
+    ; stdo [1414
+    ;      ,3646
+    ;      ,345
+    ;      ,(
+    ;         [ 345
+    ;          ,87,
+    ;          321,(TTT.asd)*])*]
     ; Msgbox "abc := (" abc ")`ndef := (`n`t" def "`n)`nghi := " ghi "`n`t`t))"
     ; tlst := []
     ; Loop 66

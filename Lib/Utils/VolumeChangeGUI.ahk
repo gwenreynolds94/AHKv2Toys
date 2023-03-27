@@ -7,7 +7,7 @@ Class VolChangeGui {
         ; @prop {Object} size
         , size := { w: 25, h: A_ScreenHeight }
         ; @prop {Object} pos
-        , pos := { x: 62, y: 0 }
+        , pos := { x: A_ScreenWidth - 25, y: 0 }
         ; @prop {Boolean} init
         , init := False
         ; @prop {Boolean} hidden
@@ -69,7 +69,7 @@ Class VolChangeGui {
         this.UpdateMuteStatus()
         if (this.hidden) {
             ; _showParam := (this.init) ? "NA" : ("NA x" ((this.init:=True)*this.pos.x) " y" this.pos.y)
-            _showParam := "NA x" (this.pos.x) " y" this.pos.y 
+            _showParam := "NA x" (this.pos.x) " y" this.pos.y
                         . ((this.init) ? " Hide" : (this.init:=True, ""))
             this.hidden := False
             this.gui.Show(_showParam)
