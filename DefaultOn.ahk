@@ -309,7 +309,7 @@ Class DefaultOnConfiguration {
                 Return _iniSections
             }
             FPValidate(fp, dp) {
-                DOConf := DefaultOnConfiguration
+                GlobalDOConf := DefaultOnConfiguration
                 if (!FileExist(fp) and !!FileExist(dp)) {
                     FileAppend "[General]`r`n`r`n[Paths]`r`n`r`n[Enabled]", fp
                     initRes := IniValidate()
@@ -319,18 +319,18 @@ Class DefaultOnConfiguration {
                     return initRes
                 } else if (!FileExist(dp)) {
                     retVal := Map(), retVal.__Class := "InvalidDir"
-                    Return DOConf.FileDirInvalid(fp, dp)
+                    Return GlobalDOConf.FileDirInvalid(fp, dp)
                 }
             }
             DirValidate(fp, dp) {
-                DOConf := DefaultOnConfiguration
+                GlobalDOConf := DefaultOnConfiguration
                 if !(FileExist(dp)) {
                     SplitPath dp,, &confDirParent
                     if !!(DirExist(confDirParent)) {
                         DirCreate dp
-                        Return DOConf.FileDirWritten(fp, dp)
-                    } else Return DOConf.FileDirInvalid(fp, dp)
-                } else DOConf.FileDirValid(fp, dp)
+                        Return GlobalDOConf.FileDirWritten(fp, dp)
+                    } else Return GlobalDOConf.FileDirInvalid(fp, dp)
+                } else GlobalDOConf.FileDirValid(fp, dp)
             }
             retVal := { dir: DirValidate(this.CONF_INI_FP, this.CONF_DIR)
                       , file: FPValidate(this.CONF_INI_FP, this.CONF_DIR)
@@ -416,9 +416,33 @@ iENABLED := DefaultOnConfiguration.Conf.LiteralIniEnabled()
  */
 iINSTALLS := DefaultOnConfiguration.Conf.LiteralIniInstalls()
 
-_G := Map()
+_G := Map(
+    "IsCapsDown", False
+)
 
-Class DOConf extends ConfTool {
+Class ScriptDOConf {
+    IsCapsDown := False
+    CurrentCapsMod := ""
+    CapsUpLeftHandKeys := [
+        "",
+        "+",
+        "^",
+        "#",
+        "!",
+        "+^",
+        "+!",
+        "+#",
+        "^!",
+        "^#",
+        "!#",
+        "+^!",
+        "+^#",
+        "^!#",
+        "+!#",
+    ]
+}
+
+Class GlobalDOConf extends ConfTool {
     /** @prop {ConfTool.SectionEdit} _enabled_edit */
     _enabled_edit := {}
 
@@ -494,8 +518,9 @@ Class DOConf extends ConfTool {
 }
 
 
-DConf := DOConf()
-Hotkey "#F11", (*)=>DConf.EnabledEdit.Show()
+_G := GlobalDOConf()
+_S := ScriptDOConf()
+Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
 ; ConfT := ConfTool(".\DOsrc\.ahkonf", Map(
 ;     "General", Map(
@@ -551,9 +576,9 @@ Hotkey "#F11", (*)=>DConf.EnabledEdit.Show()
 ; DConf.Enabled.Scritch := True
 ; DConf.Enabled.WinSizePos := True
 
-DConf.General.CloseCortanaInterval := 6666
-DConf.General.X1Delay := 325
-DConf.General.X2Delay := 325
+_G.General.CloseCortanaInterval := 6666
+_G.General.X1Delay := 325
+_G.General.X2Delay := 325
 
 
 ; ConfT.Ini.Enabled.FormatComment := False
@@ -625,8 +650,8 @@ FuckCortana(*) {
     if ProcessExist("Cortana.exe")
         ProcessClose("Cortana.exe")
 }
-if !!(DConf.Enabled.CloseCortana)
-    SetTimer FuckCortana, DConf.General.CloseCortanaInterval
+if !!(_G.Enabled.CloseCortana)
+    SetTimer FuckCortana, _G.General.CloseCortanaInterval
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -635,14 +660,14 @@ if !!(DConf.Enabled.CloseCortana)
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  BETTER CLIPBOARD ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-if !ProcessExist("BCV2.exe") and !!DConf.Enabled.BCV2 {
-    Run(DConf.Paths.BCV2Exe)
+if !ProcessExist("BCV2.exe") and !!_G.Enabled.BCV2 {
+    Run(_G.Paths.BCV2Exe)
 }
 ExitBCB(ExitReason, ExitCode) {
     if (ExitReason!="Reload") and !!ProcessExist("BCV2.exe")
-        Run(DConf.Paths.BCV2Exe " DoExit")
+        Run(_G.Paths.BCV2Exe " DoExit")
 }
-if !!DConf.Enabled.BCV2
+if !!_G.Enabled.BCV2
     OnExit ExitBCB
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1096,6 +1121,20 @@ OpenEnvironmentVars(){
 ; --- Wezterm Config ----------------------------------------------------------
 ; -----------------------------------------------------------------------------
 
+OnCapsDownGlobal(*) {
+    _S.IsCapsDown := True
+    if GetKeyState("LWin")
+        _S.CurrentCapsMod := "LWin", Click("Middle Down")
+    else _S.CurrentCapsMod := "other", Click("Left Down")
+}
+
+OnCapsUpGlobal(*) {
+    _S.IsCapsDown := False
+    if _S.CurrentCapsMod = "LWin"
+        Click("Middle Up")
+    else Click("Left Up")
+}
+
 #HotIf WinActive("ahk_exe wezterm-gui.exe")
 *CapsLock::
 {
@@ -1112,7 +1151,13 @@ OpenEnvironmentVars(){
                     "{LCtrl Up}"    )
 }
 *CapsLock Up::Return
+#HotIf (not WinActive("ahk_exe wezterm-gui.exe")) and (not _S.IsCapsDown)
+*CapsLock::OnCapsDownGlobal()
 #HotIf
+HotIf (*)=>((not WinActive("ahk_exe wezterm-gui.exe")) and (_S.IsCapsDown))
+for _, lfk in _S.CapsUpLeftHandKeys
+    Hotkey lfk . "CapsLock Up", OnCapsUpGlobal
+HotIf
 
 
 KillHelpWindows()
@@ -1332,7 +1377,8 @@ wFairy.BindKey("=", (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.
 wFairy.BindKey(",", (*) => wFairy.Cycle())
 wFairy.BindKey(".", (*) => wFairy.Cycle(2))
 wFairy.BindKey("k", (*) => WinUtil.WinCloseClass())
-#.::
+; wFairy.BindKey("^/", (*) => (wFairy.Active := False))
+RAlt & AppsKey::
 {
     wFairy.Active := !wFairy.Active
 }
@@ -1375,7 +1421,7 @@ Hotkey "RAlt & CapsLock", (*)=>( weblinks.Activate(3000) )
 ; RAlt_Apps_leader.Enabled := True
 
 
-#F10:: 
+#F10::
 {
     Msgbox A_ComputerName
     A_Clipboard := A_ComputerName
