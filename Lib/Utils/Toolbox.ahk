@@ -61,11 +61,11 @@ TryInt(_AsInt, _returnLiteral := True) {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-Tooltip.On := (  (_this, _msg := "", _dur := False) => 
-                                (   Tooltip(_msg),
-                                    (!!_dur and IsInteger(_dur)) ? 
-                                    (SetTimer((*) => Tooltip(), _dur), True) : False   )  )
-Tooltip.Off := (  (_this, _delay:=1000) => (SetTimer((*) => Tooltip(), _delay))  )
+; Tooltip.On := (  (_this, _msg := "", _dur := False) =>
+                                ; (   Tooltip(_msg),
+                                    ; (!!_dur and IsInteger(_dur)) ?
+                                    ; (SetTimer((*) => Tooltip(), _dur), True) : False   )  )
+; Tooltip.Off := (  (_this, _delay:=1000) => (SetTimer((*) => Tooltip(), _delay))  )
 ; Tooltip.OwnProps := _Tooltip.OwnProps
 
 ; dbgo Tooltip, _Tooltip

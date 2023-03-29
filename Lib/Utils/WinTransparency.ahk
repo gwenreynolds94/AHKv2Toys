@@ -62,11 +62,11 @@ Class WinTransparency {
             Return
         nearest := activeWinItem.NearestStep[_transparency]
         newStepOffset := (nearest.dist>0) ? (1) : 
-                         (nearest.dist<0) ? (0) : -1
+                         (nearest.dist<0) ? (0) : (-1)
         newStep := nearest.step + newStepOffset
-        if (newStepOffset>=0)
+        if nearest.dist
             activeWinItem.AddStep(newStep, _transparency)
-        else newStep += 1
+        else newStep++
         activeWinItem.CurrentStep := newStep
     }
 
@@ -179,12 +179,16 @@ Class WinTransparency {
             Tooltip.On("(Reset): " this.CurrentStep ": " this.transparencyValues[this.CurrentStep], 1000)
         }
 
-        AddStep(_step, _trans) {
-            Loop (startCount:=this.StepCount)-_step+1 {
-                _s := startCount-A_Index+1
-                this.transparencyValues[_s+1] := this.transparencyValues[_s]
+        /**
+          * @param {Integer} _step_order
+          * @param {Integer} _trans
+          */
+        AddStep(_step_order, _trans) {
+            Loop (startCount:=this.StepCount)-_step_order+1 {
+                _istep := startCount-A_Index+1
+                this.transparencyValues[_istep+1] := this.transparencyValues[_istep]
             }
-            this.transparencyValues[_step] := _trans
+            this.transparencyValues[_step_order] := _trans
         }
 
         /**

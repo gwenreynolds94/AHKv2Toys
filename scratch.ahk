@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0-rc
+#Requires AutoHotkey v2.0
 #Warn All, StdOut
 #SingleInstance Force
 
@@ -268,16 +268,45 @@ tcf := [
     "AsdQrgs23234=1"
 ]
 
+
+Class ObjectImproved extends Object {
+
+    /** @param {Array} _prop_pairs */
+    __New(_prop_pairs*) {
+        if Mod(_prop_pairs.Length, 2)
+            _prop_pairs.Pop
+        _last_key := ""
+        for _idx, _itm in _prop_pairs
+            if Mod(_idx, 2)
+                _last_key := _itm
+            else this.%_last_key% := _itm
+    }
+
+    ShoutLength() {
+        MsgBox this.asd
+    }
+}
+ObjSetBase(Object, ObjectImproved.Prototype.Base)
+; Object.Prototype
+
+Class ImprovedObjects {
+
+}
+
+asd := Object("asd", 666)
+
+asd.ShoutLength()
+
 F10::
 {
-    tenb := IniRead(".\DOsrc\.ahkonf", "Enabled")
-    tenbp := Map()
-    Loop Parse, tenb, "`n", "`r" {
-        RegExMatch(A_LoopField, "([^=]+)=(.+)", &_re_match)
-        tenbp[_re_match.1] := _re_match.2
-    }
-    for k,v in tenbp
-        stdo k, v
+    ; tenb := IniRead(".\DOsrc\.ahkonf", "Enabled")
+    ; tenbp := Map()
+    ; Loop Parse, tenb, "`n", "`r" {
+    ;     RegExMatch(A_LoopField, "([^=]+)=(.+)", &_re_match)
+    ;     tenbp[_re_match.1] := _re_match.2
+    ; }
+    ; for k,v in tenbp
+    ;     stdo k, v
     ; for _, tp in tpaths{
     ;     SplitPath(tp, &_fname, &_fdir)
     ;     stdo    "name: " _fname "`n`txists: " FileExist(_fname) ,

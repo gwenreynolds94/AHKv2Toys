@@ -113,9 +113,9 @@ Class WinUtil {
             wHwnd   := (!wHwnd) ? WinExist("A") : (wHwnd)
             wWidth  := (A_ScreenWidth-screengap.x*2)//2
             wHeight :=  A_ScreenHeight-screengap.y*2
-            wLX := screengap.x + windowoffset.x
-            wRX := wLX + wWidth
-            wY := screengap.y + windowoffset.y
+            wLX     := screengap.x + windowoffset.x
+            wRX     := wLX + wWidth
+            wY      := screengap.y + windowoffset.y
             wTitle  := "ahk_id " wHwnd
             if (side=1) or (side="left")
                 wX := wLX

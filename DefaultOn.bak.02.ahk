@@ -2,17 +2,6 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-
-Array_Reverse(__this) {
-    new_array := []
-    Loop __this.Length
-        new_array.Push(__this[(__this.Length - A_Index) + 1])
-    return new_array
-}
-if not Array.Prototype.HasMethod("Reverse")
-    Array.Prototype.Reverse := Array_Reverse
-
-
 ; #Include <DEBUG\DBT>
 #Include <Utils\ConfTool>
 #Include <Utils\SearchV2Docs>
@@ -421,7 +410,7 @@ Class DefaultOnConfiguration {
         }
     }
 }
-CONF := (DefaultOnConfiguration)
+CONF:=(DefaultOnConfiguration)
 CONF.Validate(True)
 
 /**
@@ -448,70 +437,70 @@ Class ScriptDOConf {
     IsCapsDown := False
     CurrentCapsMod := ""
     CapsUpLeftHandKeys := [
-          "",
-         "+",
-         "^",
-         "#",
-         "!",
+        "",
+        "+",
+        "^",
+        "#",
+        "!",
         "+^",
         "+!",
         "+#",
         "^!",
         "^#",
         "!#",
-       "+^!",
-       "+^#",
-       "^!#",
-       "+!#"
+        "+^!",
+        "+^#",
+        "^!#",
+        "+!#",
     ]
 }
 
-Class GblDOConf extends ConfTool {
+Class GlobalDOConf extends ConfTool {
     /** @prop {ConfTool.SectionEdit} _enabled_edit */
     _enabled_edit := {}
 
     __New() {
         super.__New(".\DOsrc\.ahkonf", Map(
             "General", Map(
-                "X1Delay" , 325,
-                "X2Delay" , 325,
-                "X1NoCopy", 0,
-                "X2IsDown", 0,
+                "X1Delay", 325,
+                "X2Delay", 325,
                 "CloseCortanaInterval", 5000,
+                "X1NoCopy", 0,
+                "X2IsDown", 0
             ),
             "Paths", Map(
-                "BCV2Exe"    , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "ScritchAhk" , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
+                "BCV2Exe", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
+                "ScritchAhk", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
                 "AhkCodeTemp", "C:\WINDOWS\TEMP\A_TempCode.ahk",
-                "AhkUIA"     , "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
+                "AhkUIA", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
                 "OpenEnvVars", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
             ),
             "Enabled", Map(
-                "AltShiftWinDrag", 1 ,
-                "BCV2"           , 1 ,
-                "FormatComment"  , 1 ,
-                "MouseHotkeys"   , 1 ,
-                "Scritch"        , 1 ,
-                "SearchV2"       , 1 ,
-                "TabSwitcher"    , 1 ,
-                "Transparency"   , 1 ,
-                "VolumeChange"   , 1 ,
-                "WinSizePos"     , 1 ,
-                "CloseCortana"   , 1 ,
-                "SearchFirefox"  , 1 ,
-                "ShiftDelete"    , 1
+                "AltShiftWinDrag", 1,
+                "BCV2",            1,
+                "FormatComment",   1,
+                "MouseHotkeys",    1,
+                "Scritch",         1,
+                "SearchV2",        1,
+                "TabSwitcher",     1,
+                "Transparency",    1,
+                "VolumeChange",    1,
+                "WinSizePos",      1,
+                "CloseCortana",    1,
+                "SearchFirefox",   1,
+                "ShiftDelete",     1
             ),
             "BCV2", Map(
                 "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
+                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
             ),
             "OpenEnvVars", Map(
                 "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
+                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
             ),
             "UIA64", Map(
                 "Source", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
+                "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
             )
         ))
         this.Validate()
@@ -542,13 +531,72 @@ Class GblDOConf extends ConfTool {
 }
 
 
-_G := GblDOConf()
+_G := GlobalDOConf()
 _S := ScriptDOConf()
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
+
+; ConfT := ConfTool(".\DOsrc\.ahkonf", Map(
+;     "General", Map(
+;         "X1Delay", 325,
+;         "X2Delay", 325,
+;         "CloseCortanaInterval", 5000,
+;         "X1NoCopy", 0,
+;         "X2IsDown", 0
+;     ),
+;     "Paths", Map(
+;         "BCV2Exe", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
+;         "ScritchAhk", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
+;         "AhkCodeTemp", "C:\WINDOWS\TEMP\A_TempCode.ahk",
+;         "AhkUIA", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
+;         "OpenEnvVars", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
+;     ),
+;     "Enabled", Map(
+;         "AltShiftWinDrag", 1,
+;         "BCV2",            1,
+;         "FormatComment",   1,
+;         "MouseHotkeys",    1,
+;         "Scritch",         1,
+;         "SearchV2",        1,
+;         "TabSwitcher",     1,
+;         "Transparency",    1,
+;         "VolumeChange",    1,
+;         "WinSizePos",      1,
+;         "CloseCortana",    1,
+;         "SearchFirefox",   1,
+;         "ShiftDelete",     1
+;     ),
+;     "BCV2", Map(
+;         "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
+;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
+;     ),
+;     "OpenEnvVars", Map(
+;         "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
+;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
+;     ),
+;     "UIA64", Map(
+;         "Source", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
+;         "Dest", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
+;     )
+; ))
+;
+; ConfT.Validate()
+
+; ConfT.Sett["Enabled", "FormatComment"] := false
+; ConfT.Sett["Enabled", "TabSwitcher"] := false
+
+; DConf.Enabled.FormatComment := false
+; DConf.Enabled.TabSwitcher := false
+; DConf.Enabled.Scritch := True
+; DConf.Enabled.WinSizePos := True
 
 _G.General.CloseCortanaInterval := 6666
 _G.General.X1Delay := 325
 _G.General.X2Delay := 325
+
+
+; ConfT.Ini.Enabled.FormatComment := False
+; ConfT.Ini.Enabled.TabSwitcher := False
+; ConfT.Ini.Enabled.Scritch := True
 
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -779,18 +827,16 @@ SearchBrowserFromClipboard(*) {
 ; Activate window below current in the z-order
 ActivateZIndex3(*) {
     SetTimer(SendXButton2, 0)
-    WinActivate("ahk_id " WinUtil.PrevWindow)
-    ; DetectHiddenWindows False
-    ; WinActivate WinGetList()[3+3]
-    ; DetectHiddenWindows True
+    DetectHiddenWindows False
+    WinActivate WinGetList()[3+3]
+    DetectHiddenWindows True
 }
 ; Activate window 2 z-orders down
 ActivateZIndex4(*) {
     SetTimer(SendXButton2, 0)
-    WinActivate("ahk_id " WinUtil.PrevWindow[2])
-    ; DetectHiddenWindows False
-    ; WinActivate WinGetList()[4+3]
-    ; DetectHiddenWindows True
+    DetectHiddenWindows False
+    WinActivate WinGetList()[4+3]
+    DetectHiddenWindows True
 }
 if !!iENABLED.MouseHotkeys {
     HotKey "$XButton2", (*)=>OnX2Down()
@@ -801,6 +847,19 @@ if !!iENABLED.MouseHotkeys {
     Hotkey("RButton", ActivateZIndex4)
     HotIf
 }
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+
+
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+; ; ; ; ; ; ; ;  Horizontal Scrolling (relies on <iGENERAL.X2IsDown> variable) ; ; ; ;
+;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; BROKEN ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+; #HotIf !!iGENERAL.X2IsDown
+; WheelUp::WheelLeft
+; WheelDown::WheelRight
+; #HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -980,6 +1039,15 @@ if !!iENABLED.Transparency {
     Hotkey "!#b", (*)=>WinTransparency.PromptSetActive()
     Hotkey "!#r", (*)=>WinTransparency.ResetActive()
 }
+
+; if (A_Clipboard or A_Clipboard and 123 or "asd" or WinExist) or WinExist {
+
+; } else if !!iENABLED.Transparency {
+
+; }
+; else if (A_Clipboard or A_Clipboard and 123 or "asd" or WinExist) or WinExist {
+
+; }
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -1018,6 +1086,34 @@ if !!iENABLED.TabSwitcher {
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
+; Windows applications *really* don't like it when their caption is removed,
+; so this really doesn't have much use at all.
+; ToggleWindowCaption() {
+;     Static WS_CAPTION := 0x00C00000, GWL_STYLE := -16
+;     aHwnd := WinExist("A")
+;     wStyle := DllCall("GetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE)
+
+;     DetectHiddenWindows 2
+
+;     QuickTip(msg) {
+;         Tooltip msg
+;         SetTimer (*)=>ToolTip(), 1000
+;     }
+
+;     if (wStyle & WS_CAPTION) {
+;         QuickTip(wStyle ": Has Caption")
+;         wStyle &= ~WS_CAPTION
+;         DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
+;         WinRedraw "ahk_id " aHwnd
+;     } else {
+;         QuickTip(wStyle ": No Caption")
+;         wStyle &= WS_CAPTION
+;         DllCall("SetWindowLongPtrW", "Ptr", aHwnd, "Int", GWL_STYLE, "Int", wStyle)
+;         WinRedraw "ahk_id " aHwnd
+;     }
+; }
+; Hotkey "#F8", (*)=> ToggleWindowCaption()
+
 :*:iidt::
 {
     SendInput FormatTime(, "M/d/yyyy HH:mm")
@@ -1030,6 +1126,11 @@ if !!iENABLED.TabSwitcher {
 {
     SendInput FormatTime(, "HH:mm")
 }
+; :*:ahkdore::
+; {
+;     Reload
+; }
+
 
 Hotkey "^#e", (*)=> OpenEnvironmentVars()
 OpenEnvironmentVars(){
@@ -1093,7 +1194,7 @@ KillHelpWindows()
   * @param {...*}
  */
 KillWindowClass(_class?, *) {
-    living_windows   := WinGetList( "ahk_class " (IsSet(_class) ? _class :
+    living_windows := WinGetList( "ahk_class " (IsSet(_class) ? _class :
         (slaughtered := WinGetClass("ahk_id " WinExist("A")))))
     death_total := 0
     for target in living_windows
@@ -1105,6 +1206,139 @@ KillWindowClass(_class?, *) {
       , 5000
     )
 }
+
+
+
+
+; Class LinkObj {
+;     Static DefaultBrowser := "Maxthon.exe"
+;     name := "", address := "", boundlaunch := {}
+;     __New(_name, _address) {
+;
+;         this.name := _name
+;         this.address := _address
+;         this.boundlaunch := ObjBindMethod(this, "Launch")
+;     }
+;
+;     Launch(*) {
+;         Run (
+;             LinkObj.DefaultBrowser . " `"" . this.address . "`""
+;         )
+;     }
+; }
+;
+; /**
+;  * @class
+;  */
+; Class WebLinkLeader extends LeaderKeys {
+;
+;     /** @prop {Map<String,LinkObj} */
+;     _links := Map()
+;
+;
+;     /**
+;      * @param {any} _leader
+;      * @param {number} _timeout
+;      */
+;     __New(_leader, _timeout:=2000) {
+;         super.__New(_leader, _timeout)
+;     }
+;
+;     Link[_name, _key:=""] {
+;         Get => this._links.Has(_name) ? this._links[_name] : False
+;         Set {
+;             _new_link := LinkObj(_name, Value)
+;             this._links[_name] := _new_link
+;             if not _key
+;                 return "unset"
+;             this.MapKey(_key, _new_link.boundlaunch)
+;             return "set"
+;         }
+;     }
+; }
+
+;
+; /**
+;  * @class
+;  */
+; Class WinNavLeader extends LeaderKeys {
+;
+;     _excluded_classes := Map(
+;         "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
+;         "Internet Explorer_Hidden",                "ahk_class ",
+;         "EdgeUiInputWndClass",                     "ahk_class ",
+;         "Shell_TrayWnd",                           "ahk_class ",
+;         "WorkerW",                                 "ahk_class ",
+;         "Progman",                                 "ahk_class "
+;     )
+;
+;     increments := WinVector.Coordinates(20, 20, 30, 30)
+;     default_increment_muls := WinVector.Coordinates(1, 1, 1, 1)
+;     working_coords := WinVector.Coordinates()
+;
+;     /**
+;      * @param {string} _leader
+;      * @param {number} _timeout
+;      */
+;     __New(_leader, _timeout:= 6666) {
+;         super.__New(_leader, _timeout)
+;     }
+;
+;
+;     PrevWin[look_behind:=1] {
+;         Get {
+;             look_index := look_behind + 1
+;             _wl := WinGetList()
+;             _wlnw := []
+;             for _i, _hwnd in _wl {
+;                 _wClass := WinGetClass("ahk_id " _hwnd)
+;                 if not this._excluded_classes.Has(_wClass)
+;                     _wlnw.Push _hwnd
+;             }
+;             return ((look_behind+1) > _wlnw.Length) ? _wlnw[_wlnw.Length] : _wlnw[look_behind+1]
+;         }
+;     }
+;
+;     ActivatePrevWin(look_behind := 1) {
+;         WinActivate(this.PrevWin[look_behind])
+;     }
+;
+;     /**
+;      * @param {Boolean|wVector.Coordinates} increment_muls
+;      * @param {Integer} _hwnd
+;      */
+;     IncrementWinDimensions(increment_muls:=False, _hwnd:=0x0) {
+;         _hwnd := _hwnd ? _hwnd : WinExist("A")
+;         increment_muls := increment_muls ? increment_muls : this.default_increment_muls
+;         _increments := this.increments.Mul(&increment_muls, False)
+;         WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
+;         this.working_coords.Reset(_x, _y, _w, _h).Add(&_increments)
+;         WinMove((this.working_coords.Flat[("ahk_id " _hwnd)])*)
+;     }
+; }
+    ; APos[_hwnd:=0] {
+    ;     Get {
+    ;         _hwnd := _hwnd ? _hwnd : WinExist("A")
+    ;         WinGetPos &_x, &_y, &_w, &_h, "ahk_id " _hwnd
+    ;         return {
+    ;             x: _x,
+    ;             y: _y,
+    ;             w: _w,
+    ;             h: _h
+    ;         }
+    ;     }
+    ; }
+
+    ; AdjustCoordsRelative( units := False, hWnd := 0 ) {
+    ;     hWnd := hWnd ? hWnd : WinExist("A")
+    ;     units := units ? units : this.default_mult
+    ;     incr := this.increment.Mul(&units, False)
+    ;     WinGetPos &x, &y, &w, &h, "ahk_id " hWnd
+    ;     this.Coords.Reset(x, y, w, h).Add(incr)
+    ;     WinMove((this.Coords.Flat[("ahk_id " hWnd)])*)
+    ; }
+
+
 
 ;;TODO - Setup window management functions for  {WindowFairy} class
 Class WindowFairy extends KeyTable {
@@ -1221,10 +1455,10 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
     (*) => TriggerReload())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
     "BackSpace",
-    (*) => wFairy.Deactivate())
+    (*) => (wFairy.Active := False))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
     "^/",
-    (*) => wFairy.Deactivate())
+    (*) => (wFairy.Active := False))
 ; RAlt & AppsKey::
 Alt & Space::
 {
@@ -1245,14 +1479,10 @@ wFairy.MapKeyPath(["p", "p"], (*)=> (
     )
 ))
 
-LaunchPath(_path) {
-    Run _path
-}
-
-wFairy.MapKeyPath(["l", "v"], LaunchPath.Bind("VSCodium.exe"))
-wFairy.MapKeyPath(["l", "m"], LaunchPath.Bind("Maxthon.exe"))
-wFairy.MapKeyPath(["l", "w"], LaunchPath.Bind("wezterm-gui.exe"))
-wFairy.MapKeyPath(["l", "e"], LaunchPath.Bind("explorer.exe"))
+wFairy.MapKeyPath(["l", "v"], (*)=>Run("VSCodium.exe"))
+wFairy.MapKeyPath(["l", "w"], (*)=>Run("wezterm-gui.exe"))
+wFairy.MapKeyPath(["l", "m"], (*)=>Run("Maxthon.exe"))
+wFairy.MapKeyPath(["l", "e"], (*)=>Run("explorer.exe"))
 
 ; #.::lFairy.main.Activate()
 
