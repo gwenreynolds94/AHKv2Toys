@@ -20,18 +20,50 @@ Class LeaderKeys extends KeyTable {
      * @param {number} _timeout
      */
     __New(_leader := "#a", _timeout:=2000) {
-        super.__New(_timeout)
         this.leader := _leader
+        super.__New(_timeout)
+        this.boundmeth.toggletable := ObjBindMethod(this, "ToggleLeader")
+        this.boundmeth.disable := ObjBindMethod(this, "DisableLeader")
+        this.boundmeth.enable := ObjBindMethod(this, "EnableLeader")
     }
 
-    Enabled {
+    EnableLeader(_timeout?, *) {
+        this._enabled := True
+        _timeout := _timeout ?? this.timeout
+        Hotkey this.leader,
+               this.boundmeth.togglekeypaths.Bind(_timeout),
+               "On"
+    }
+
+    DisableLeader(_timeout?, *) {
+        this.Active := False
+        Hotkey this.leader, "Off"
+        this._enabled := False
+    }
+
+    ToggleLeader(_timeout?, *) {
+        _timeout := _timeout ?? this.timeout
+        this.Enabled[_timeout] := !this.Enabled
+        ; if !this.Enabled
+            ; this.Active[_timeout] := False
+    }
+
+    __Noop[_placeholder?] => (*)=>""
+
+    Enabled[_timeout?] {
         Get => this._enabled
         Set {
+            _timeout := _timeout ?? this.timeout
+            ; (   (!!Value and !this._enabled) ?
+            ;                this.EnableLeader :
+            ;     (!Value and !!this._enabled) ?
+            ;               this.DisableLeader :
+            ;                      this.__Noop
+            ; )(_timeout)
             if !!Value and !this._enabled
-                Hotkey this.leader, this.boundmeth.activate, "On"
+                this.EnableLeader(_timeout)
             else if !Value and !!this._enabled
-                Hotkey this.leader, this.boundmeth.activate, "Off"
-            this._enabled := !!Value
+                this.DisableLeader(_timeout)
         }
     }
 }
@@ -66,7 +98,10 @@ Class LinkTable extends KeyTable {
         }
 
         Launch(*) {
-            Run LinkTable.BrowserExe " `"" this.address "`""
+            Run LinkTable.BrowserExe  " " . (
+                   (this.address ~= "`"")   ?
+                   (this.address)           :
+                   ("`"" this.address "`"") )
         }
     }
 }

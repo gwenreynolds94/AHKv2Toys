@@ -4,7 +4,6 @@
 
 #Include <DEBUG\DBT>
 
-
 ;|- Class tstclass {
 ;|-     aaa := Map(666, "sixxx", 10563, "ran", 98798, "hi")
 ;|-     penis := Map([1,1], "oneone", [1,2], "onetwo", [2,1], "twoone", [2,2], "twotwo")
@@ -201,104 +200,275 @@
 ;
 ; aasds := TransparentColor.Prototype.RGBA()
 
-Class TestConf {
-    Static Values := Map()
+; Class TestConf {
+;     Static Values := Map()
+;
+;     __Get( Key, Params ) {
+;         Return TestConf.Values[ Key ]
+;     }
+;
+;     __Set( Key, Params, Value ) {
+;         TestConf.Values[ Key ] := Value
+;     }
+; }
+;
+; tMap := Map(
+;     "abc", Map(
+;         "a", "AAA",
+;         "b", "BBB",
+;         "c", "CCC"
+;     ),
+;     "def", Map(
+;         "d", "DDD",
+;         "e", "EEE",
+;         "f", "FFF"
+;     ),
+;     "ghi", Map(
+;         "g", "GGG",
+;         "h", "HHH",
+;         "i", "III"
+;     )
+; )
+;
+; Class THMap {
+;
+;     Static CurrentValue := 0
+;
+;     __Get( Key, Params ) {
+;         Return tMap[ THMap.CurrentValue ][ Key ]
+;     }
+;     __Set( Key, Params, Value ) {
+;         tMap[ THMap.CurrentValue ][ Key ] := Value
+;     }
+; }
+;
+; Class THMapp {
+;     __Get( Key, Params ) {
+;         THMap.CurrentValue := Key
+;         Return THMap()
+;     }
+;     __Set( Key, Params, Value ) {
+;
+;     }
+; }
+;
+; timap := THMapp()
+;
+; tpaths := [
+;     ".\butt.conf",
+;     ".\butss\buttss.conf",
+;     "buttsss.conf"
+; ]
+;
+; tcf := [
+;     "asdasda=4tgag4G4WRGaergwa4gg",
+;     "ASFA23rffadf=232G4G4TGAE",
+;     "AsdQrgs23234=1"
+; ]
 
-    __Get(Key, Params) {
-        Return TestConf.Values[Key]
-    }
+; Class ObjectImproved extends Object {
+;
+;     /** @param {Array} _prop_pairs */
+;     __New(_prop_pairs*) {
+;         if Mod(_prop_pairs.Length, 2)
+;             _prop_pairs.Pop
+;         _last_key := ""
+;         for _idx, _itm in _prop_pairs
+;             if Mod(_idx, 2)
+;                 _last_key := _itm
+;             else this.%_last_key% := _itm
+;     }
+;
+;     ShoutLength() {
+;         MsgBox this.asd
+;     }
+; }
+; ObjSetBase(Object, ObjectImproved.Prototype.Base)
+; ; Object.Prototype
+;
+; Class ImprovedObjects {
+;
+; ; }
 
-    __Set(Key, Params, Value) {
-        TestConf.Values[Key] := Value
+; Class __BuiltinClassExtension {
+;     Static __New() {
+;         clsproto := this.Prototype.__Class
+;         clsname := SubStr(clsproto, 3)
+;         if clsproto ~= "^[^_]{1,2}|__BuiltinClassExtension"
+;             Return
+;         cls := %clsname%
+;         for _prop in this.Prototype.OwnProps()
+;             if SubStr(_prop, 1, 1) != "__"
+;                 cls.Prototype.%_prop% := this.Prototype.%_prop%
+;     }
+; }
+
+; /**
+;  * @extends {Array}
+;  * @example <caption>Hello this is me</caption>
+;  */
+; Class __Array extends __BuiltinClassExtension {
+;     ; Static __TargetClass := Array
+;     ; Static __New() {
+;     ;     for k in this.Prototype.OwnProps()
+;     ;         if SubStr(k, 1, 1) != "_"
+;     ;             Array.Prototype.%k% := this.Prototype.%k%
+;     ; }
+
+;     Reverse() {
+;         new_array := []
+;         Loop this.Length
+;             new_array.Push(this[this.Length-A_Index + 1])
+;         return new_array
+;     }
+
+;     IndexOf(_value) {
+;         _found := False
+;         for _i, _v in this
+;             if _v = _value
+;                 _found := _i
+;         return _found
+;     }
+
+;     PushAnd(_v*) {
+;         this.Push(_v*)
+;         return this[this.Length]
+;     }
+
+; }
+
+; Class __String extends __BuiltinClassExtension {
+
+;     Length() {
+;         Return StrLen(this)
+;     }
+
+;     Sub(_starting_pos, _length?) {
+;         Return SubStr(this, _starting_pos, _length ?? unset)
+;     }
+
+;     StartsWith(_chars) {
+;         Return this.Sub(1, _chars.Length()) == _chars
+;     }
+
+;     EndsWith(_chars) {
+;         Return this.Sub((-1) * _chars.Length(), _chars.Length()) == _chars
+;     }
+; }
+
+; Class __Butts extends Array {
+;     _getthis := ObjBindMethod(this, "GetThis")
+;     Len => this.Length
+;     GetThis(something?, orelse?) {
+;         stdo "!!!" (something ?? "%%") "!!!"
+;         (orelse ?? (*)=>(0))()
+;     }
+; }
+
+; ; asd := __Butts(1,2,3,4,5,6,66,666)
+; ; getbutt := asd._getthis.Bind("oowie")
+; ; stdo asd, __Butts, asd is __Butts
+; ; getbutt()
+; ;
+; ; dsf := Map(1, "o", 2, "t")
+; ; stdo (_:=dsf).Has(1) and _[1]
+
+; stdo Array
+; stdo __Array
+
+; stdo Gui.Control.Prototype.GetOwnPropDesc("SetFont")
+
+; String.Base := __String.Base
+; String.Prototype.Append := __String.Prototype.Append
+; for _p in String.Base.OwnProps()
+;     stdo _p
+; stdo String.Prototype
+; for o in [Object, Array, Map, Primitive,
+;             Number, Float, Integer, Float,
+;             VarRef, Buffer, File, Func, Gui,
+;             RegExMatchInfo, String, Gui.Control,
+;             Gui.List, Gui.Tab, Gui.Pic, Error,
+;             TypeError, UnsetError, MemberError,
+;             PropertyError, MethodError, Closure,
+;             Enumerator, InputHook, Menu, MenuBar,
+;             ComValue, ComObjArray, ComValueRef,
+;             ClipboardAll, Class]
+;     stdo o, o.Base, "-----------------------------"
+
+; /** @extends String */
+; Class __String
+; {
+;     Len(*) {
+;         Return StrLen(this)
+;     }
+; }
+;
+; ; __String.
+;
+;
+; ; ObjSetBase(String, __String.Base)
+; ; String.Prototype := __String.Prototype
+;
+; /** @var {Any} Array @extends __Array */
+;
+; /**
+;  * @param {Any} _asd
+;  * @return {__String}
+;  */
+; asdasd(_asd) {
+;     Return __String(_asd)
+; }
+;
+;
+; for k in ObjOwnProps(String.Prototype)
+;     stdo k
+;
+; for k in ObjOwnProps(String)
+;     stdo k
+;
+;
+;
+; __Array__New(_This) {
+;     cls := %(_This.Base.Prototype.__Class)%
+;     for _prop in _This.Prototype.OwnProps()
+;         if SubStr(_prop, 1, 2) != "__"
+;             cls.Prototype.%_prop% := _This.Prototype.%_prop%
+; }
+
+; /** @type {TestConf} */
+; asdasd := {x: 1, y: 2}
+
+; /** @var {Butts} String */
+; String := String
+; String.Prototype.Len := __String.Prototype.Len
+
+; __Array.Base.__New := __Array__New
+; __Array.DefineProp()
+
+; (__Array)
+
+; stdo __Array(), Array.Prototype, String("asd").Len()
+
+Class __Array extends Array {
+    Reverse() {
+        new_array := []
+        Loop this.Length
+            new_array.Push( this[ this.Length - A_Index + 1 ] )
+        Return new_array
     }
 }
 
-tMap := Map(
-    "abc", Map(
-        "a", "AAA",
-        "b", "BBB",
-        "c", "CCC"
-    ),
-    "def", Map(
-        "d", "DDD",
-        "e", "EEE",
-        "f", "FFF"
-    ),
-    "ghi", Map(
-        "g", "GGG",
-        "h", "HHH",
-        "i", "III"
-    )
-)
+__Array.Prototype.__Class := "Array"
+For _prop in ObjOwnProps( __Array.Prototype )
+    Array.Prototype.%_prop% := __Array.Prototype.%_prop%
 
-Class THMap {
-
-    Static CurrentValue := 0
-
-    __Get(Key, Params) {
-        return tMap[THMap.CurrentValue][Key]
-    }
-    __Set(Key, Params, Value) {
-        tMap[THMap.CurrentValue][Key] := Value
-    }
-}
-
-Class THMapp {
-    __Get(Key, Params) {
-        THMap.CurrentValue := Key
-        return THMap()
-    }
-    __Set(Key, Params, Value) {
-
-    }
-}
-
-timap := THMapp()
+stdo [ 1, 2, 3, 4, 5 ].Reverse()
 
 
-tpaths := [
-    ".\butt.conf",
-    ".\butss\buttss.conf",
-    "buttsss.conf"
-]
-
-tcf := [
-    "asdasda=4tgag4G4WRGaergwa4gg",
-    "ASFA23rffadf=232G4G4TGAE",
-    "AsdQrgs23234=1"
-]
-
-
-Class ObjectImproved extends Object {
-
-    /** @param {Array} _prop_pairs */
-    __New(_prop_pairs*) {
-        if Mod(_prop_pairs.Length, 2)
-            _prop_pairs.Pop
-        _last_key := ""
-        for _idx, _itm in _prop_pairs
-            if Mod(_idx, 2)
-                _last_key := _itm
-            else this.%_last_key% := _itm
-    }
-
-    ShoutLength() {
-        MsgBox this.asd
-    }
-}
-ObjSetBase(Object, ObjectImproved.Prototype.Base)
-; Object.Prototype
-
-Class ImprovedObjects {
-
-}
-
-asd := Object("asd", 666)
-
-asd.ShoutLength()
-
-F10::
-{
+F10:: {
+    boop := "boop"
+    stdo boop
+    stdo String.Base.Base
     ; tenb := IniRead(".\DOsrc\.ahkonf", "Enabled")
     ; tenbp := Map()
     ; Loop Parse, tenb, "`n", "`r" {
@@ -332,9 +502,8 @@ F10::
     ;     stdo(_i "`t" _nbr)
     ; Until (A_Index > 30)
 
-
 }
 
-SetTimer ((*)=>ExitApp()), -20000
+SetTimer ( ( * ) => ExitApp() ), -20000
 
 F8:: ExitApp

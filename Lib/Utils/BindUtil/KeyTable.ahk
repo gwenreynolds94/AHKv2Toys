@@ -2,6 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
+#Include ..\BuiltinsExtend.ahk
 
 /**
  * KeyTable
@@ -13,158 +14,180 @@
  */
 Class KeyTable {
 
-    Static __New() {
-        Array_Reverse(__this) {
-            new_array := []
-            Loop __this.Length
-                new_array.Push(__this[(__this.Length - A_Index) + 1])
-            return new_array
-        }
-        if not Array.Prototype.HasMethod("Reverse")
-            Array.Prototype.Reverse := Array_Reverse
-    }
+;    Class BoundMethods {
+;        /** @prop {Func} bindkey */
+;        bindkey     := {}
+;        /** @prop {Func} activate */
+;        activate    := {}
+;        /** @prop {Func} deactivate */
+;        deactivate  := {}
+;        /** @prop {Func} disableontrigger */
+;        disableontrigger := {}
+;    }
 
-    Class BoundMethods {
+    boundmeth := {
         /** @prop {Func} bindkey */
-        bindkey    := {}
+        bindkey          : {},
         /** @prop {Func} activate */
-        activate   := {}
+        activate         : {},
         /** @prop {Func} deactivate */
-        deactivate := {}
-        /** @prop {Func} autooffcode */
-        autooffcode := {}
+        deactivate       : {},
+        /** @prop {Func} toggletable */
+        toggletable      : {},
+        /** @prop {Func} togglekeypaths */
+        togglekeypaths   : {},
+        /** @prop {Func} disableontrigger */
+        disableontrigger : {},
+        /** @prop {Func} enable */
+        enable           : {},
+        /** @prop {Func} disable */
+        disable          : {}
     }
 
-      timeout := 2000
-    /** @prop {KeyTable.BoundMethods} boundmeth */
-    , boundmeth := {bindkey:{}, activate:{}, deactivate:{}}
+    Class Defaults {
+        /** @prop {Number} timeout */
+        Static timeout := False,
+        /** @prop {Integer} maxtimeout */
+            maxtimeout := (60 * 1000)
+    }
+
+    /** @prop {Number|Boolean} timeout */
+        timeout := 2000
+
+    ; /** @prop {KeyTable.BoundMethods} boundmeth */
+        ; , boundmeth := {bindkey:{}, activate:{}, deactivate:{}, disableontrigger:{}}
+
     /** @prop {Map<String,(Func|BoundFunc)>} keys */
-    , keys := Map()
+        , keys := Map()
+
     /** @prop {Map} ktbls */
-    , ktbls := Map()
+        , ktbls := Map()
+
     /** @prop {Integer} maxtimeout */
-    , maxtimeout := 60 * 1000
+        , maxtimeout := 60 * 1000
+
     /** @prop {Boolean} _active */
-    , _active := False
+        , _active := False
 
-    /** @param {number} _timeout */
+    /**
+     *  ### **`_timeout`**
+     *  ----------
+     *
+     *  ```AutoHotkey2
+     *
+     *  {String} _timeout :=
+     *         (_t == "none")  /*
+     *      or (_t == "unset") ; KeyTable.Defaults.timeout == (60 * 1000)
+     *      or (_t == "max")   ; this.maxtimeout
+     * ```
+     *
+     *
+     * @param {String|Number|Boolean} _timeout
+     * @return {KeyTable}
+     */
     __New(_timeout := 2000) {
-        this.timeout := IsNumber(_timeout) ? Abs(_timeout) :
-                        IsAlpha(_timeout)  ? (_timeout="max") ?
-                        this.maxtimeout : _timeout : _timeout
-
-        this.boundmeth := KeyTable.BoundMethods()
-        this.boundmeth.bindkey := ObjBindMethod(this, "MapKey")
-        this.boundmeth.activate := ObjBindMethod(this, "Activate")
-        this.boundmeth.deactivate := ObjBindMethod(this, "Deactivate")
-        this.boundmeth.autooffcode := ObjBindMethod(this, "AutoOffCode")
+        this.timeout   := this.ParsedTimeout[_timeout]
+        this.boundmeth.bindkey          := ObjBindMethod(this, "MapKey"          )
+        this.boundmeth.activate         := ObjBindMethod(this, "Activate"        )
+        this.boundmeth.deactivate       := ObjBindMethod(this, "Deactivate"      )
+        this.boundmeth.disableontrigger := ObjBindMethod(this, "DisableOnTrigger")
+        this.boundmeth.togglekeypaths   := ObjBindMethod(this, "ToggleKeyPaths"  )
     }
 
     /**
-     * @param {Number} _timeout
+     * @prop {Number|Boolean} ParsedTimeout
+     * @param {String|Number|Boolean} _timeout
+     */
+    ParsedTimeout[_timeout] =>
+      (!IsSet(_timeout) or (_timeout = "unset"))     ? ;
+                       KeyTable.Defaults.timeout     : ;
+            (!_timeout or this.timeout = "none") ? 0 : ;
+                              (_timeout = "max")     ? ;
+                                 this.maxtimeout     : ;
+                            (_timeout is Number)     ? ;
+                    (_timeout > this.maxtimeout)     ? ;
+                                 this.maxtimeout     : ;
+                            Abs(Round(_timeout)) : 0 ; ;
+
+    /**
+     * @param {Number|String|Boolean} [_timeout=False]
      */
     Activate(_timeout:=False, *) {
-        this._active := True
+        bmda := this.boundmeth.deactivate
+        ontrig := this.boundmeth.disableontrigger
         for _key, _action in this.keys
-            Hotkey _key, _action, "On"
-        if (_timeout = "none") or (not _timeout and (this.timeout = "none"))
-            return
-        _to := _timeout, _mxto := this.maxtimeout
-        SetTimer(
-            this.boundmeth.deactivate,
-            (_to = "max") ? _mxto :
-            (IsNumber(_to)) ? ((-1)*_to) : (_thto:=((-1)*this.timeout)) ? _thto : _mxto
-        )
+            Hotkey( _key, ((_action is KeyTable) ?
+                          ontrig.Bind(_action.boundmeth.activate) :
+                                                 (_action)) , "On")
+        if (_tmoparsed := this.ParsedTimeout[_timeout])
+            SetTimer bmda, (_tmoparsed * (-1))
+        this._active := True
     }
 
     /**
      */
     Deactivate(*) {
-        SetTimer this.boundmeth.deactivate, 0
-        this._active := False
+        bmda := this.boundmeth.deactivate
+        Try SetTimer(, 0)
         for _key, _action in this.keys
-            Hotkey _key, _action, "Off"
+            Hotkey _key, "Off"
+        this._active := False
     }
 
-    AutoOffCode(_action, *) {
-        bmde := this.boundmeth.deactivate
-        bmde()
-        _action()
+    DisableOnTrigger(_key_action, *) {
+        bmda := this.boundmeth.deactivate
+        bmda()
+        SetTimer _key_action, (-10)
     }
 
     /**
      * @param {String} _key_new
-     * @param {Func} _action_new
+     * @param {Func|KeyTable} _action_new
      * @param {Boolean} [_auto_off=False]
      */
     MapKey(_key_new, _action_new, _auto_off:=False, *) {
-        this.keys[_key_new] := _auto_off ?
-                ObjBindMethod(this, "AutoOffCode", _action_new) :
-                _action_new
-    }
-
-    /**
-     * @param {Array} _kpath
-     * @param {Func} _action
-     */
-    MapKeyPath(_kpath, _action, _timeout:=3000) {
-        _kpath := (_kpath is Array) ? _kpath : [_kpath]
-        kpathrev := _kpath.Reverse()
-        pathlen := _kpath.Length
-        kstart := _kpath[1]
-        kend := kpathrev[1]
-
-        /** @var {Array} ktblgrp */
-        ktblgrp := this.ktbls[_kpath] := []
-        ktblgrp.Push _action
-        Loop (pathlen-1)
-            ktblgrp.Push KeyTable(_timeout)
-        ktblgrp[pathlen].MapKey(kend, _action, True)
-        k1act := (pathlen > 1) ?
-                ; ktblgrp[2].Activate.Bind(_timeout) :
-                ObjBindMethod(ktblgrp[2], "Activate", _timeout) :
-                _action
-        this.MapKey(kstart, k1act, True)
-
-        Loop (pathlen - 2) {
-            i := A_Index + 1
-            ktblgrp[i].MapKey(
-                _kpath[i],
-                ; ktblgrp[i+1].Activate.Bind(_timeout),
-                ObjBindMethod(ktblgrp[i+1], "Activate", _timeout),
-                True
-            )
-        }
-    }
-
-    BindKey(_key_new, _action_new, _auto_off:=False, *) {
+        ontrig := this.boundmeth.disableontrigger
         if _auto_off
-            this.keys[_key_new] := (*)=>(
-                (this.Active := False),
-                _action_new()
-            )
+            this.keys[_key_new] := ontrig.Bind(_action_new)
         else this.keys[_key_new] := _action_new
     }
 
-    Active[
-        /** @var {Integer|Boolean} _timeout */
-            _timeout:=False ] {
-        Get => this._active
-        Set {
-            if !!Value and !this._active
-                this.Activate(_timeout)
-            else if !Value and !!this._active
-                this.Deactivate()
-            this._active := !!Value
+
+
+    /**
+     * @param {__Array} _kpath
+     * @param {Func} _action
+     * @param {String|Number|Boolean} [_timeout=3000]
+     */
+    MapKeyPath(_kpath, _action, _timeout:=3000) {
+        kp := (_kpath is Array) ? _kpath : [_kpath]
+        kplen := kp.Length
+        ktbls := [this]
+        if kplen > 1 {
+            for _k in kp {
+                curkeys := ktbls[ktbls.Length].keys
+                nexttbl := KeyTable(_timeout)
+                if !curkeys.Has(_k)
+                    curkeys[_k] := KeyTable(_timeout)
+                ktbls.Push(curkeys[_k])
+            } Until (A_Index+1) < kplen
         }
+        ktbls[kplen].MapKey(kp[kplen], _action, True)
+    }
+
+    /** @param {Integer|Boolean} [_timeout=False] */
+    Active[_timeout := False] {
+        Get => this._active
+        Set => (!!Value and !this._active) ? (this.Activate(_timeout)) :
+               (!Value and !!this._active) ? (this.Deactivate()) :  ("")
     }
 
     /**
      * @param {Integer|Boolean} [_timeout]
      */
-    Toggle(_timeout?) {
-        _timeout := IsSet(_timeout) ? _timeout : False
-        this.Active[_timeout] := not this.Active
+    ToggleKeyPaths(_timeout?, *) {
+        _timeout := this.ParsedTimeout[_timeout ?? this.timeout]
+        this.Active := !this.Active
     }
 }
 

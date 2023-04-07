@@ -1,8 +1,6 @@
 
 #SingleInstance Force
 
-
-
 wTitle := "System Properties"
 wTitleEnv := "Environment Variables"
 
@@ -23,6 +21,5 @@ if !WinExist(wTitle) {
        WinClose(wTitle)
    }
 }
-
 
 ExitApp()

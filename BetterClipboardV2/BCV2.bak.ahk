@@ -111,31 +111,6 @@ Class BCBConf {
     }
 }
 
-JKQuickToast(_msg, _title, _timeout_ms) {
-    HideTrayTip(*) {
-        TrayTip
-        if SubStr(A_OSVersion, 1, 3) = "10." {
-            A_IconHidden := True
-            SetTimer( (*) => (A_IconHidden := False), (-200) )
-        }
-    }
-    Try {
-        _msg_str         := String(_msg)
-        _title_str       := String(_title)
-        _timeout_ms_int  := Integer(_timeout_ms) * -1
-        _types_are_valid := True
-    } Catch Error as type_err {
-        _types_are_valid := False
-    }
-    if _types_are_valid {
-        TrayTip( _msg_str, _title_str )
-        SetTimer( (*) => HideTrayTip(), _timeout_ms_int )
-    } else {
-        TrayTip( "The passed parameters did not have the correct types",
-                 "Could not display specified toast message" )
-        SetTimer( (*) => HideTrayTip(), (-4000) )
-    }
-}
 
 ; A class to help manage the indicator gui for the currently shown index
 Class BCBIndexGui {
@@ -1316,24 +1291,27 @@ Class BCBApp {
     /**
      * Update the clipboard contents with the currently shown text in the control
      */
-    UpdateClipboardFromEdit(_hide:=False, *) {
+    UpdateClipboardFromEdit(*) {
         this.updatingClip := True
         A_Clipboard := this.edit.Text
-        if _hide
-            this.HideGui()
-        else this.idxGui.ShowGui(), this.idxGui.StartTimeout()
+        this.HideGui()
     }
 
     /**
      * Update the current clip's file with the currently shown text
      */
     SaveShownClip(*) {
-        current_text := this.edit.Text
+        ; if (FileExist(shownClip:=(BCB_CLIPS_DIR "\" this.curIndex ".clip")) ~= "A|N")
+        ;     FileDelete(shownClip), FileAppend(this.edit.Text, shownClip)
+        
+        currentText := this.edit.Text
+        ; MsgBox currentText
         shownClip:=(BCB_CLIPS_DIR "\" this.shownIndex ".clip")
         if (FileExist(shownClip) ~= "A|N") {
             FileDelete(shownClip)
-            FileAppend(current_text, shownClip, "UTF-8")
-            JKQuickToast(shownClip, "Updated " this.shownIndex ".clip ...", 1500)
+            FileAppend(currentText, shownClip, "UTF-8")
+            this.idxGui.ShowGui()
+            this.idxGui.StartTimeout()
         }
     }
 
@@ -1379,28 +1357,27 @@ Class BCBApp {
      */
     InitHotkeys() {
         HotIf (*) => this.active
-        Hotkey("!Enter"  , ObjBindMethod(this     , "UpdateClipboardFromEdit", True ))
-        Hotkey("^!Enter" , ObjBindMethod(this     , "UpdateClipboardFromEdit", False))
-        Hotkey("!+Enter" , ObjBindMethod(this     , "SaveShownClip"                 ))
-        Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"                  ))
-        Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"                  ))
-        Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"                       ))
-        Hotkey("PgDn"    , ObjBindMethod(this     , "PrevClip"                      ))
-        Hotkey("PgUp"    , ObjBindMethod(this     , "NextClip"                      ))
-        Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"               ))
-        Hotkey("^-"      , ObjBindMethod(this.edit, "ZoomOut"                       ))
-        Hotkey("^="      , ObjBindMethod(this.edit, "ZoomIn"                        ))
-        Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"                          ))
-        Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"                     ))
-        Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"                    ))
-        Hotkey("^+a"     , ObjBindMethod(this.edit, "SelectEach"                    ))
-        Hotkey("^c"      , ObjBindMethod(this.edit, "CopyAllowLine"                 ))
-        Hotkey("^+Up"    , ObjBindMethod(this.edit, "MoveLineUp"                    ))
-        Hotkey("^+Down"  , ObjBindMethod(this.edit, "MoveLineDown"                  ))
-        Hotkey("!Up"     , ObjBindMethod(this.edit, "AddCaretAbove"                 ))
-        Hotkey("!Down"   , ObjBindMethod(this.edit, "AddCaretBelow"                 ))
-        Hotkey("!Right"  , ObjBindMethod(this.edit, "RotateSelection"               ))
-        Hotkey("!Left"   , ObjBindMethod(this.edit, "RotateSelectionReverse"        ))
+        Hotkey("<#c"     , ObjBindMethod(this     , "HideGui"                ))
+        Hotkey("PgDn"    , ObjBindMethod(this     , "PrevClip"               ))
+        Hotkey("PgUp"    , ObjBindMethod(this     , "NextClip"               ))
+        Hotkey("!Enter"  , ObjBindMethod(this     , "UpdateClipboardFromEdit"))
+        Hotkey("!+Enter" , ObjBindMethod(this     , "SaveShownClip"          ))
+        Hotkey("^Enter"  , ObjBindMethod(this     , "NewLineBelow"           ))
+        Hotkey("^+Enter" , ObjBindMethod(this     , "NewLineAbove"           ))
+        Hotkey("!+Delete", ObjBindMethod(this     , "DeleteShownClip"        ))
+        Hotkey("^-"      , ObjBindMethod(this.edit, "ZoomOut"                ))
+        Hotkey("^="      , ObjBindMethod(this.edit, "ZoomIn"                 ))
+        Hotkey("^+z"     , ObjBindMethod(this.edit, "Redo"                   ))
+        Hotkey("^+d"     , ObjBindMethod(this.edit, "Duplicate"              ))
+        Hotkey("^d"      , ObjBindMethod(this.edit, "SelectNext"             ))
+        Hotkey("^+a"     , ObjBindMethod(this.edit, "SelectEach"             ))
+        Hotkey("^c"      , ObjBindMethod(this.edit, "CopyAllowLine"          ))
+        Hotkey("^+Up"    , ObjBindMethod(this.edit, "MoveLineUp"             ))
+        Hotkey("^+Down"  , ObjBindMethod(this.edit, "MoveLineDown"           ))
+        Hotkey("!Up"     , ObjBindMethod(this.edit, "AddCaretAbove"          ))
+        Hotkey("!Down"   , ObjBindMethod(this.edit, "AddCaretBelow"          ))
+        Hotkey("!Right"  , ObjBindMethod(this.edit, "RotateSelection"        ))
+        Hotkey("!Left"   , ObjBindMethod(this.edit, "RotateSelectionReverse" ))
         ; Hotkey("!+p"     , (*)=>(A_Clipboard:=this.edit.Chars.Punctuation))
         HotIf (*) => !(this.active)
         Hotkey("<#c", ObjBindMethod(this, "ShowGui"))

@@ -11,12 +11,15 @@
 ; Class WinUtil extends WinVector {
 Class WinUtil {
     Static _excluded_classes := Map(
-        "ApplicationManager_ImmersiveShellWindow", "ahk_class ",
-        "Internet Explorer_Hidden",                "ahk_class ",
-        "EdgeUiInputWndClass",                     "ahk_class ",
-        "Shell_TrayWnd",                           "ahk_class ",
-        "WorkerW",                                 "ahk_class ",
-        "Progman",                                 "ahk_class "
+        "ApplicationManager_ImmersiveShellWindow" , "ahk_class " ,
+                       "Internet Explorer_Hidden" , "ahk_class " ,
+                       "Internet_Explorer_Hidden" , "ahk_class " ,
+                            "EdgeUiInputWndClass" , "ahk_class " ,
+                                  "AutoHotkeyGUI" , "ahk_class " ,
+                                  "Shell_TrayWnd" , "ahk_class " ,
+                                    "SunAwtFrame" , "ahk_class " ,
+                                        "WorkerW" , "ahk_class " ,
+                                        "Progman" , "ahk_class "
     )
 
     __New() {
@@ -36,8 +39,13 @@ Class WinUtil {
     }
 
     /**
-     * @param {Integer[]} _list
-     * @return {Integer[]}
+     * @param {Array} _list
+     * ```AutoHotkey2
+     *      _list == { Integer[] }
+     *
+     * ```
+     * @return {Array}
+     *      retval == { Integer() }
      */
     Static FilteredWinList[_list:=""] {
         Get {
@@ -74,6 +82,16 @@ Class WinUtil {
         }
     }
 
+    Static WinUnderCursor[_title_type:="hwnd"] => (
+        MouseGetPos(,, &_hwnd),
+        (_title_type="hwnd")        ? (_hwnd)                            :
+        (_title_type="class")       ? WinGetClass("ahk_id " _hwnd)       :
+        (_title_type="title")       ? WinGetTitle("ahk_id " _hwnd)       :
+        (_title_type="process")     ? WinGetProcessName("ahk_id " _hwnd) :
+        (_title_type="processpath") ? WinGetProcessName("ahk_id " _hwnd) :
+        _hwnd
+    )
+
     Class Sizer {
 
         Static wvC := WinVector.Coordinates,
@@ -99,10 +117,10 @@ Class WinUtil {
             wTitle  := "ahk_id " wHwnd
             wWidth  := A_ScreenWidth - screengap.x*2
             wHeight := A_ScreenHeight - screengap.y*2
-            this.RlCoords(&wRect:=0, wHwnd, 
-                        screengap.x + windowoffset.x, 
-                        screengap.y + windowoffset.y, 
-                        wWidth, 
+            this.RlCoords(&wRect:=0, wHwnd,
+                        screengap.x + windowoffset.x,
+                        screengap.y + windowoffset.y,
+                        wWidth,
                         wHeight)
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }

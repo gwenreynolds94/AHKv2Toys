@@ -1,19 +1,9 @@
 #Requires AutoHotkey v2.0
-#Warn All, StdOut
+#Warn All, OutputDebug ; , StdOut
 #SingleInstance Force
 
-
-Array_Reverse(__this) {
-    new_array := []
-    Loop __this.Length
-        new_array.Push(__this[(__this.Length - A_Index) + 1])
-    return new_array
-}
-if not Array.Prototype.HasMethod("Reverse")
-    Array.Prototype.Reverse := Array_Reverse
-
-
 ; #Include <DEBUG\DBT>
+#Include <Utils\BuiltinsExtend>
 #Include <Utils\ConfTool>
 #Include <Utils\SearchV2Docs>
 #Include <Utils\VolumeChangeGUI>
@@ -22,7 +12,6 @@ if not Array.Prototype.HasMethod("Reverse")
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 #Include <Utils\BindUtil\BindUtil>
 #Include <Utils\WinUtil\WinUtil>
-
 
 TriggerReload(*)
 {
@@ -38,6 +27,7 @@ TriggerReload(*)
 }
 
 Hotkey( "#F12", (*)=>TriggerReload() )
+; Hotkey( "#Delete", (*)=>ExitApp() ),
 Hotkey( "#F7", (*)=>ExitApp() )
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -464,6 +454,8 @@ Class ScriptDOConf {
        "^!#",
        "+!#"
     ]
+    _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
+    _vsc_text_main_rgx := ".*Visual\sStudio\sCode"
 }
 
 Class GblDOConf extends ConfTool {
@@ -542,8 +534,12 @@ Class GblDOConf extends ConfTool {
 }
 
 
+/** @var {GblDOConf} _G */
 _G := GblDOConf()
+
+/** @var {ScriptDOConf} _S */
 _S := ScriptDOConf()
+
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
 _G.General.CloseCortanaInterval := 6666
@@ -632,8 +628,14 @@ ExitBCB(ExitReason, ExitCode) {
     if (ExitReason!="Reload") and !!ProcessExist("BCV2.exe")
         Run(_G.Paths.BCV2Exe " DoExit")
 }
-if !!_G.Enabled.BCV2
+RestartBCB(*) {
+    Run(_G.Paths.BCV2Exe)
+}
+if !!_G.Enabled.BCV2 {
     OnExit ExitBCB
+    Hotkey "#+c", RestartBCB, "On"
+    Hotkey "#!c", (*) => ExitBCB("ManualExit", 666)
+}
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -658,20 +660,18 @@ if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) 
 ;
 ;
 if !!iENABLED.FormatComment {
-    _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
-    _vsc_text_main_rgx := ".*Visual\sStudio\sCode"
     SetTitleMatchMode "Regex"
     SetTitleMatchMode "Slow"
-    HotIf (*) => (WinActive("i)\.ahk" _vsc_text_main_rgx)
+    HotIf (*) => (WinActive("i)\.ahk" _S._vsc_text_main_rgx)
         or WinActive("ahk_exe VSCodium.exe"))
     Hotkey "<^+p", (*) => FormatSingleLineComment()
     Hotkey "<^+o", (*) => FormatSingleLineComment(" ")
     Hotkey "<^+i", (*) => FormatSingleLineComment("-")
-    HotIf (*) => WinActive("i)\.sublime-syntax" _subl_text_main_rgx)
+    HotIf (*) => WinActive("i)\.sublime-syntax" _S._subl_text_main_rgx)
     Hotkey "<^+p", (*) => FormatSingleLineComment("#", "#", 0)
     Hotkey "<^+o", (*) => FormatSingleLineComment(":", "#", 0)
     Hotkey "<^+i", (*) => FormatSingleLineComment("-", "#", 0)
-    HotIf (*) => WinActive("i)\.ahk" _subl_text_main_rgx)
+    HotIf (*) => WinActive("i)\.ahk" _S._subl_text_main_rgx)
     Hotkey "<^+p", (*) => FormatSingleLineComment("#", "`;", 0)
     Hotkey "<^+o", (*) => FormatSingleLineComment("=", "`;", 0)
     Hotkey "<^+i", (*) => FormatSingleLineComment("|", "`;", 1)
@@ -837,9 +837,10 @@ if !!iENABLED.SearchV2
 ;
 (VolChangeGui)
 ;
+
 #MaxThreadsBuffer True
 if !!iENABLED.VolumeChange {
-    HotIf (*)=> !!((MouseGetPos(,, &_targetWin), WinGetClass("ahk_id " _targetWin))="Shell_TrayWnd")
+    HotIf (*)=> !!(WinUtil.WinUnderCursor["class"] = "Shell_TrayWnd")
     Hotkey "$WheelUp"   , (_THK)=>OnShellTrayScroll(_THK)
     Hotkey "$WheelDown" , (_THK)=>OnShellTrayScroll(_THK)
     Hotkey "$!WheelUp"  , (_THK)=>OnShellTrayAltScroll(_THK)
@@ -871,11 +872,11 @@ if !!iENABLED.VolumeChange {
 #MaxThreadsBuffer False
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 
 
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ; ; ; ;
+;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
+; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ;
 ;
 if !!iENABLED.AltShiftWinDrag
     (AltShiftDragWindowRect).InitHotkeys()
@@ -887,15 +888,20 @@ Class AltShiftDragWindowRect {
                      win:   { x: -1, y: -1, w: -1, h: -1 } }
          , sizeMin := { w: 100, h: 100 }
     Static InitHotkeys() {
-        HotIf (*)=> (!(this.isMoving) and !((A_PriorHotkey="!+LButton") and (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> (!(this.isMoving) and !((A_PriorHotkey="!+LButton") and
+                                            (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+LButton", ObjBindMethod(this, "StartMoving")
-        HotIf (*)=> (!(this.isMoving) and !!((A_PriorHotkey="!+LButton") and (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> (!(this.isMoving) and !!((A_PriorHotkey="!+LButton") and
+                                            (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+LButton", ObjBindMethod(this, "HalfWindow")
-        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+RButton") and (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+RButton") and
+                                            (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+RButton", ObjBindMethod(this, "StartSizing")
-        HotIf (*)=> (!(this.isSizing) and !!((A_PriorHotkey="!+RButton") and (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> (!(this.isSizing) and !!((A_PriorHotkey="!+RButton") and
+                                            (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+RButton", ObjBindMethod(this, "FitWindow")
-        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+MButton") and (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+MButton") and
+                                            (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+MButton", ObjBindMethod(this, "CenterWindow")
         HotIf
     }
@@ -929,15 +935,20 @@ Class AltShiftDragWindowRect {
         SetTimer SizingLoop, 1
         PostMessage(0x1666,1,,, "ahk_id " this.home.hwnd)
         SizingLoop() {
-            if !(GetKeyState("RButton", "P"))
-                SetTimer(,0), this.isSizing := False, PostMessage(0x1666,0,,, "ahk_id " this.home.hwnd)
+            if !(GetKeyState("RButton", "P")) {
+                SetTimer(,0)
+                this.isSizing := False
+                PostMessage(0x1666,0,,, "ahk_id " this.home.hwnd)
+            }
             else {
                 mouseNow := WinVector.DLLUtil.DllMouseGetPos()
                 mouseDelta := { x: mouseNow.x - this.home.mouse.x,
                                 y: mouseNow.y - this.home.mouse.y }
                 winSizeNew := {
-                    w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ? _w : this.sizeMin.w,
-                    h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ? _h : this.sizeMin.h
+                    w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ?
+                                                        _w : this.sizeMin.w,
+                    h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ?
+                                                        _h : this.sizeMin.h
                 }
                 WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winSizeNew)
             }
@@ -1107,25 +1118,27 @@ KillWindowClass(_class?, *) {
 }
 
 ;;TODO - Setup window management functions for  {WindowFairy} class
-Class WindowFairy extends KeyTable {
+Class WindowFairy extends LeaderKeys {
+; Class WindowFairy extends KeyTable {
 
-    increment := WinVector.Coordinates(20, 20, 30, 30),
+    increment := WinVector.Coord(20, 20, 30, 30),
     segment := {
         x: Round((A_ScreenWidth - 8*2) / 4),
         y: Round((A_ScreenHeight - 8*2) / 4)
     }
-    default_mult := WinVector.Coordinates(1, 1, 1, 1),
-    _coords := WinVector.Coordinates(),
+    default_mult := WinVector.Coord(1, 1, 1, 1),
+    _coords := WinVector.Coord(),
     _coords_ready := False
 
     /**
      *
-     * @param {string} _timeout
-     * @param {any} default_increment
+     * @param {String} [_leader="Alt & Space"]
+     * @param {String} [_timeout="none"]
+     * @param {Any} [default_increment] - Useless atm
      * @returns {WindowFairy}
      */
-    __New(_timeout := "none", default_increment?) {
-        super.__New(_timeout)
+    __New(_leader := "Alt & Space", _timeout := "none", default_increment?) {
+        super.__New(_leader, _timeout)
     }
 
     Cycle(count:=1) {
@@ -1149,6 +1162,14 @@ Class WindowFairy extends KeyTable {
         ; _aPos.w += delta.w
         ; _aPos.h += delta.h
         WinMove _aPos.x, _aPos.y, _aPos.w, _aPos.h, "ahk_id " hwnd
+    }
+
+    ClipWindow() {
+
+    }
+
+    FenceWindow() {
+
     }
 }
 
@@ -1174,7 +1195,11 @@ Class LaunchFairy {
         Loop (pathlen - 1) {
             P_Index := pathlen - A_Index
             ktbls[P_Index] := KeyTable(this.main.timeout)
-            ktbls[P_Index].MapKey(_key_path[P_Index], (*)=>(ktbls[(P_Index+1)].Activate()), True)
+            ktbls[P_Index].MapKey(
+                    _key_path[P_Index],
+                    (*)=>(ktbls[(P_Index+1)].Activate()),
+                    True
+                )
         }
 
         this.main.MapKey( _key_path[1], (*)=>(ktbls[2].Activate()), True)
@@ -1182,6 +1207,7 @@ Class LaunchFairy {
 }
 
 wFairy := WindowFairy()
+wFairy.Enabled := True
 
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Up )>-
     "Up",
@@ -1196,40 +1222,36 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
     "Right",
     (*) => wFairy.Nudge(WinVector.Coord.Right.Mul(wFairy.segment.x)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
-    "[",
+    "Home",
     (*) => wFairy.Nudge(WinVector.Coord.Thin.Mul(wFairy.segment.x)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
-    "]",
+    "End",
     (*) => wFairy.Nudge(WinVector.Coord.Wide.Mul(wFairy.segment.x)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
-    "-",
+    "PgUp",
     (*) => wFairy.Nudge(WinVector.Coord.Short.Mul(wFairy.segment.y)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
-    "=",
+    "PgDn",
     (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
-    ",",
+    "^Left",
     (*) => wFairy.Cycle())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    ".",
+    "^Right",
     (*) => wFairy.Cycle(2))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( k )>-
-    "k",
-    (*) => WinUtil.WinCloseClass())
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( k )>-
+    ; "k",
+    ; (*) => WinUtil.WinCloseClass())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
     "F12",
     (*) => TriggerReload())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
     "BackSpace",
-    (*) => wFairy.Deactivate())
+    (*)=>wFairy.Deactivate())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
     "^/",
-    (*) => wFairy.Deactivate())
+    (*)=>wFairy.Deactivate())
 ; RAlt & AppsKey::
-Alt & Space::
-{
-    wFairy.Active := !wFairy.Active
-}
 wFairy.MapKeyPath(["p", "p"], (*)=> (
     mv := {
         x : wFairy.segment.x // 6,
@@ -1243,34 +1265,53 @@ wFairy.MapKeyPath(["p", "p"], (*)=> (
         WinVector.Coord.Thin.Mul(mv.w)).Add(
         WinVector.Coord.Short.Mul(mv.h))
     )
-))
+), "max")
 
-LaunchPath(_path) {
-    Run _path
-}
-
-wFairy.MapKeyPath(["l", "v"], LaunchPath.Bind("VSCodium.exe"))
-wFairy.MapKeyPath(["l", "m"], LaunchPath.Bind("Maxthon.exe"))
-wFairy.MapKeyPath(["l", "w"], LaunchPath.Bind("wezterm-gui.exe"))
-wFairy.MapKeyPath(["l", "e"], LaunchPath.Bind("explorer.exe"))
-
-; #.::lFairy.main.Activate()
+wFairy.MapKeyPath( ["k", "k"], (*)=>WinClose(WinExist("A")) )
+wFairy.MapKeyPath( ["k", "l"], (*)=>WinUtil.WinCloseClass() )
+wFairy.MapKeyPath( ["o", "v"], (*)=>Run("VSCodium.exe")     )
+wFairy.MapKeyPath( ["o", "m"], (*)=>Run("Maxthon.exe")      )
+wFairy.MapKeyPath( ["o", "w"], (*)=>Run("wezterm-gui.exe")  )
+wFairy.MapKeyPath( ["o", "e"], (*)=>Run("explorer.exe")     )
 
 weblinks := LinkTable()
-weblinks.Link["emmylua", "e"] := "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
 
-weblinks.link["textnow", "t"] := "https://www.textnow.com/"
+link_emmylua := "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
+link_thqbygithub := "https://github.com/thqby/vscode-autohotkey2-lsp"
+weblinks.Link[ "emmylua"     , "e"  ] := link_emmylua
+weblinks.Link[ "thqbygithub" , "a"  ] := link_thqbygithub
+weblinks.link[ "textnow"     , "t"  ] := "https://www.textnow.com/"
+weblinks.Link[ "reddit"      , "r"  ] := "https://www.reddit.com"
+weblinks.Link[ "fancyconvert", "!f" ] := "https://www.textfancy.com/font-converter/"
+weblinks.Link[ "fancyedit"   , "+f" ] := "https://www.textpaint.net/"
+weblinks.Link[ "paypal"      , "p"  ] := "https://www.paypal.com/"
 
-weblinks.Link["reddit", "r"] := "https://www.reddit.com"
+_link_cache_dir := ("C:\Users\" A_UserName "\.cache\AutoHotkey2\")
 
-weblinks.Link["fancyconvert", "!f"] := "https://textfancy.com/font-converter/"
+_ph_path:=_link_cache_dir ".default-on.link.ph"
+link_ph := !!FileExist(_ph_path) ? FileRead(_ph_path) : "https://www.duckduckgo.com"
+weblinks.Link["ph", "^p"] := link_ph
 
-weblinks.Link["fancyedit", "+f"] := "https://textpaint.net/"
+_han_path:=_link_cache_dir ".default-on.link.han"
+link_han := !!FileExist(_han_path) ? FileRead(_han_path) : "https://www.duckduckgo.com"
+weblinks.Link["han", "^h"] := link_han
 
 weblinks.Link["ddg", "d"] := "https://duckduckgo.com"
 
-Hotkey "RAlt & CapsLock", (*)=>( weblinks.Activate(3000) )
+wFairy.MapKey("l", (*)=>( weblinks.Activate(2000) ), True)
 
+
+
+/**
+ * @param {__Array}  aa
+ * @param {Array}    bb
+ * @param {__String} cc
+ */
+asd(aa,bb,cc) {
+    Return aa.Reverse()[1] . bb.Capacity . cc.Sub(2, 6)
+}
+
+dbgo asd([1,2,3], [4,5,6,7,8], "forwards")
 
 
 ; RAlt_Apps_leader := LeaderKeys("RAlt & AppsKey")
@@ -1293,7 +1334,6 @@ Hotkey "RAlt & CapsLock", (*)=>( weblinks.Activate(3000) )
 ; )
 ;
 ; RAlt_Apps_leader.Enabled := True
-
 
 #F10::
 {

@@ -72,36 +72,40 @@ stdo(_msg*) {
             Else out_string := TryStringOut("<" out_item.__Class ">")
             indent_str := indent_str_pre
 
-            if (out_item.__Class="Enumerator") {
+            if (out_item.__Class = "Enumerator") {
                 nest_level++
                 for _key, _value in out_item {
                     out_string .= TryStringOut(_key)
                     nest_level++
-                    out_string .=  TryStringOut(_value)
+                    out_string .= TryStringOut(_value)
                     nest_level--
                 }
                 nest_level--
-            } else For item in ObjGetBase(out_item).OwnProps() {
-                nest_level++
-                if (item="OwnProps") {
-                    out_string .= TryStringOut(item)
-                    for _itm in out_item.OwnProps() {
-                        nest_level++
-                        out_string .= TryStringOut(_itm)
-                        nest_level++
-                        Try {
-                            out_string .= TryStringOut(out_item.%_itm%)
-                        }
-                        nest_level--, nest_level--
-                    }
-                } else 
-                    Try {
-                        out_string .= TryStringOut(item ": " out_item.%item%)
-                    } Catch {
+            } else {
+                For item in ObjGetBase(out_item).OwnProps() {
+                    nest_level++
+                    if (item = "OwnProps") {
                         out_string .= TryStringOut(item)
+                        for _itm in out_item.OwnProps() {
+                            nest_level++
+                            out_string .= TryStringOut(_itm)
+                            nest_level++
+                            Try {
+                                out_string .= TryStringOut(out_item.%_itm%)
+                            }
+                            nest_level--, nest_level--
+                        }
+                    } else {
+                        Try {
+                            out_string .= TryStringOut(item ": " out_item.%item%)
+                        } Catch {
+                            out_string .= TryStringOut(item)
+                        }
                     }
-                nest_level--
+                    nest_level--
+                }
             }
+
             ; indent_str := indent_default
             Return out_string
         } Else {
@@ -181,7 +185,7 @@ dbgo(_msg*) {
             ; indent_str := "|- "
             indent_str_pre := indent_str
             indent_str := "=|="
-            
+
             If out_string := ComObjType(out_item, "Name")
                 Return TryStringOut(out_string)
 
@@ -196,7 +200,7 @@ dbgo(_msg*) {
                 for _key, _value in out_item {
                     if (_key="__Class") {
                         Try out_string .= TryStringOut(_key ": <" _value ">")
-                     } else 
+                     } else
                         out_string .= TryStringOut(_key),
                         nest_level++,
                         out_string .=  TryStringOut(_value),
@@ -216,7 +220,7 @@ dbgo(_msg*) {
             } else if (Type(out_item)="Map_Prototype") {
                 nest_level++
                 out_string .= TryStringOut(out_item)
-                nest_level--  
+                nest_level--
             } else if !!_baseHasOwnProps {
                 For item in ObjGetBase(out_item).OwnProps() {
                     nest_level++
@@ -227,7 +231,7 @@ dbgo(_msg*) {
                         out_string .= TryStringOut(out_item.OwnProps())
                         nest_level--
                     }
-                    else 
+                    else
                         Try {
                             out_string .= TryStringOut(item ((item="__Class") ? (": <" String(out_item.%item%) ">") : (": " String(out_item.%item%))))
                         } Catch {
@@ -315,7 +319,6 @@ _TryInt(_AsInt) {
     }
 }
 
-
 stdoplain(_msg*) {
     for _m in _msg
         FileAppend _m, "*"
@@ -323,14 +326,14 @@ stdoplain(_msg*) {
 
 /**
  * Upon initialization of a new instance, the tick frequency is fetched and stored -- so that the
- *      tick count can be divided by it upon retrieval and multiplied by 1000, resulting in 
+ *      tick count can be divided by it upon retrieval and multiplied by 1000, resulting in
  *      a return value calculated in milliseconds.
- * 
- * The counter will not start until *`this.Start()`* is called and will not stop until 
+ *
+ * The counter will not start until *`this.Start()`* is called and will not stop until
  *      *`this.Stop()`* is called, which will return the tick count in ms.
- * 
+ *
  * Calling *`this.Lap()`* will push the current tick count to *`this._laps[]`*.
- * 
+ *
  * Lastly, the current tick count can be retrieved at any time using *`this.GetCurrentCounter()`*.
  *      By default, this value is passed through *`this.ToMilliseconds(&ms)`* before being returned,
  *      but you can set *`this.ms`* to ***False*** to change this behaviour.

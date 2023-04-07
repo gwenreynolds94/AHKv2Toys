@@ -3,6 +3,35 @@
 	[
 		{
 			"path": "C:\\Users\\jonat\\Documents\\gitrepos\\AHKv2Toys",
+			// "folder_exclude_patterns": ["Resources"],
+			// "folder_exclude_patterns": ["//Resources/**/**"],
+			"folder_include_patterns": [
+				"//Lib**",
+				"//DOsrc**",
+				".***",
+				"BetterClipboardV2**",
+				"ScinScratch**",
+			],
+			// "file_exclude_patterns": [
+				// "//Resources/**/**",
+				// "//Scripts/**",
+			// ],
+			"index_include_patterns": [
+				"//Lib/**",
+				"//DOsrc/**",
+				"//.**",
+				"//BetterClipboardV2/**",
+				"//ScinScratch/**",
+			],
+			// "index_exclude_patterns": [
+				// "//Resources/**",
+				// "//Scripts/**"
+			// ],
+		},
+		{
+			"path": "C:/Users/jonat/Portables/sublime_text_4/Data/Packages/ahk2-lsp-9.6/syntaxes",
+			"folder_exclude_patterns": ["//**"],
+			"file_exclude_patterns": ["//**"],
 		}
 	],
 	"settings":

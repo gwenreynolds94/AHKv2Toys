@@ -2,6 +2,9 @@
 #Warn All, StdOut
 #SingleInstance Force
 
+if A_LineFile = A_ScriptFullPath {
+    MsgBox "A_LineFile = A_ScriptFullPath"
+}
 
 ;     /**
 ;      * @typedef {Object} RawCoords
@@ -180,10 +183,19 @@ Class WinVector {
 
     Class Coord {
 
-        x := 0,
-        y := 0,
-        w := 0,
-        h := 0
+        Class Min extends WinVector.Coord {
+            ; ...
+        }
+        Class Max extends WinVector.Coord {
+            ; ...
+        }
+
+        x   := 0,
+        y   := 0,
+        w   := 0,
+        h   := 0,
+        min := {x:0,y:0,w:0,h:0},
+        max := {x:0,y:0,w:0,h:0}
 
         __New(x:=0, y:=0, w:=0, h:=0) {
             this.x := x
@@ -191,6 +203,7 @@ Class WinVector {
             this.w := w
             this.h := h
         }
+
 
         Static Left  => WinVector.Coord((-1), 0, 0, 0)
         Static Right => WinVector.Coord(1, 0, 0, 0)
@@ -201,6 +214,16 @@ Class WinVector {
         Static Short => WinVector.Coord(0, 0, 0, (-1))
         Static Tall  => WinVector.Coord(0, 0, 0, 1)
 
+        Static Add(&_xywh_target, _xywh_mod) {
+            _t := _xywh_target
+            if IsNumber(_xywh_mod)
+                _m := { x:_xywh_mod, y:_xywh_mod, w:_xywh_mod, h:_xywh_mod }
+            _t.x := _m.x
+            _t.y := _m.y
+            _t.w := _m.w
+            _t.h := _m.h
+            return _t
+        }
 
         Add(xywh) {
             if IsNumber(xywh)
@@ -376,9 +399,9 @@ Class WinVector {
          * @param {Integer} [_wH]
          */
         Static DllWinSetRect(_wHwnd, _wRECT?, _wX?, _wY?, _wW?, _wH?) {
-            Static SWP_NOZORDER     := 0x0004
-                ,  SWP_NOMOVE       := 0x0002
-                ,  SWP_NOSIZE       := 0x0001
+            Static SWP_NOZORDER := 0x0004
+                ,  SWP_NOMOVE   := 0x0002
+                ,  SWP_NOSIZE   := 0x0001
             _flags := SWP_NOZORDER
             if (IsSet(_wRECT)) {
                 _x := !!(_hasX:=_wRECT.HasOwnProp("x")) ? _wRECT.x : 0

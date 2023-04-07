@@ -1,5 +1,5 @@
 {
-    "editor.lineHeight": 1.1,
+    "editor.lineHeight": 1.2,
     "files.exclude": {
         "**/{Scripts,Resources}/**": true,
         "**/Documents/AutoHotkey/**": true
@@ -70,21 +70,4 @@
     "editor.suggestSelection": "first",
     "files.trimTrailingWhitespace": true,
     "emmet.triggerExpansionOnTab": true,
-    "Lua.codeLens.enable": true,
-    "Lua.completion.displayContext": 50,
-    "Lua.hint.enable": true,
-    "Lua.hint.setType": true,
-    "Lua.runtime.pathStrict": false,
-    "Lua.hint.arrayIndex": "Enable",
-    "Lua.runtime.version": "Lua 5.1",
-    "Lua.typeFormat.config": {
-        "auto_complete_end": "true",
-        "auto_complete_table_sep": "true",
-        "format_line": "true"
-    }, "Lua.workspace.library": [
-        "C:/Users/jonat/.config/nvim",
-        "C:/Users/jonat/Portables/Neovim/lib/nvim",
-        "C:/Users/jonat/Portables/Neovim/share/nvim/runtime",
-        "C:/Users/jonat/Portables/Neovim/share/nvim/runtime/pack/dist/opt/matchit"
-    ]
 }
