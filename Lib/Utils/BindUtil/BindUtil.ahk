@@ -44,8 +44,6 @@ Class LeaderKeys extends KeyTable {
     ToggleLeader(_timeout?, *) {
         _timeout := _timeout ?? this.timeout
         this.Enabled[_timeout] := !this.Enabled
-        ; if !this.Enabled
-            ; this.Active[_timeout] := False
     }
 
     __Noop[_placeholder?] => (*)=>""
@@ -54,12 +52,6 @@ Class LeaderKeys extends KeyTable {
         Get => this._enabled
         Set {
             _timeout := _timeout ?? this.timeout
-            ; (   (!!Value and !this._enabled) ?
-            ;                this.EnableLeader :
-            ;     (!Value and !!this._enabled) ?
-            ;               this.DisableLeader :
-            ;                      this.__Noop
-            ; )(_timeout)
             if !!Value and !this._enabled
                 this.EnableLeader(_timeout)
             else if !Value and !!this._enabled
@@ -69,7 +61,9 @@ Class LeaderKeys extends KeyTable {
 }
 
 Class LinkTable extends KeyTable {
-    Static BrowserExe := "Maxthon.exe"
+    Static BrowserExe := (A_ComputerName = "DESKTOP-HJ4S4Q2") ?
+                                                "firefox.exe" :
+                                                "Maxthon.exe"
 
     _links := Map()
 

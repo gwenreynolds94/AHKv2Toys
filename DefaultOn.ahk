@@ -1,5 +1,5 @@
 #Requires AutoHotkey v2.0
-#Warn All, OutputDebug ; , StdOut
+#Warn All, StdOut
 #SingleInstance Force
 
 ; #Include <DEBUG\DBT>
@@ -545,6 +545,9 @@ Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 _G.General.CloseCortanaInterval := 6666
 _G.General.X1Delay := 325
 _G.General.X2Delay := 325
+
+
+TraySetIcon ".\DOsrc\DefaultOn-0-1.png"
 
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -1118,6 +1121,10 @@ KillWindowClass(_class?, *) {
 }
 
 ;;TODO - Setup window management functions for  {WindowFairy} class
+/**
+ * @class
+ * @extends LeaderKeys
+ */
 Class WindowFairy extends LeaderKeys {
 ; Class WindowFairy extends KeyTable {
 

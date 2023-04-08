@@ -82,7 +82,7 @@ Class ScritchGui {
         this.sScritchWorkingDir := sScritchWorkingDir
         ; SET EVENTSINK GUI REFERENCE
         ;
-        ScritchEventSink.cGuiParentClass := this  ; Share static reference to 
+        ScritchEventSink.cGuiParentClass := this  ; Share static reference to
         ;                                           instance with event sink
         ; ----------------------------------------------------------------------
         ; SET NOTE MANAGER AND CONF MANAGER
@@ -99,10 +99,10 @@ Class ScritchGui {
                    , this.sWindowName ;
                    , ScritchEventSink )
         ;          :=============|==='
-        gGui.OnEvent "Close"     ; <Close>   
-                   , "Gui_Close" ; registration 
+        gGui.OnEvent "Close"     ; <Close>
+                   , "Gui_Close" ; registration
         ;          '-|-----------\______
-        gGui.SetFont( this.sGuiFontOpts ; Set main gui font 
+        gGui.SetFont( this.sGuiFontOpts ; Set main gui font
                     , this.sGuiFontName )
         ;           '------------------'
         gGui.MarginX := gGui.MarginY := 0  ; Set Gui X and Y margins
@@ -118,17 +118,17 @@ Class ScritchGui {
                             , this.sBGPicOpts
                             , sScritchWorkingDir "\bg.png")
         ; ----------------------------------------------------------------------
-        ;   TREEVIEW      
+        ;   TREEVIEW
         ;                 .===============.
         gTree := gGui.Add( "TreeView"     ;   Saves notes in edit and pushes
                          , this.sTreeOpts ) ; notes to edit based on selection
         ;            .---|===============/    events
         gTree.OnEvent "ItemSelect"      ; <ItemSelect>
                     , "Tree_ItemSelect" ; registration
-        ;           '+-----------------'                 
+        ;           '+-----------------'
         ; ----------------------------------------------------------------------
         ;   TREEVIEW ITEMS
-        ; 
+        ;
         mTreeItems := Map()                      ; Add items to Treeview
         if !this.oConf.Config["Groups"]
             this.oConf.Config["Groups"] := "General"
@@ -259,7 +259,7 @@ Class ScritchGui {
         }
     }
 
-    ; Create new note from TreeView Menu 
+    ; Create new note from TreeView Menu
     MenuNewNote(sItem, iItem, oMenu)     {  ; Create Note if selection in group
         sItemID     := this.sTreeCtxMenuTargetItem
         sItemName   := this.gTree.GetText(sItemID)
@@ -273,9 +273,9 @@ Class ScritchGui {
                 this.gTree.Add(
                     oNewNote.sTimestamp
                   , this.mTreeItems[oNewNote.sGroup]["Head"])
-                    
+
     }
-    ; Delete note from TreeView Menu 
+    ; Delete note from TreeView Menu
     MenuDeleteNote(sItem, iItem, oMenu)  {  ; Delete Note if note selected
         sItemID := this.sTreeCtxMenuTargetItem
         sItemName := this.gTree.GetText(sItemID)
@@ -292,7 +292,7 @@ Class ScritchGui {
         sNewGroupInput := InputBox("Enter New Group Name: ", "New Group"
                                  , "w" 200 " h" 100, "New Group")
         this.gGui.Opt("+AlwaysOnTop")
-        if sNewGroupInput.Result = "OK" 
+        if sNewGroupInput.Result = "OK"
                 and (sNewGroupInput.Value ~= "^[a-zA-Z0-9_\-\s]+$") {
             sGroup := sNewGroupInput.Value
             this.oConf.Config["Groups"] .= "|" sGroup
@@ -322,7 +322,7 @@ Class ScritchGui {
         this.gTree.Delete(sGroupID)
         for sItemName, sItemID in this.mTreeItems[sGroupName]
             if sItemName != "Head"
-                this.mTreeItems["General"][sItemName] := 
+                this.mTreeItems["General"][sItemName] :=
                     this.gTree.Add(ParseTimestampFromFileName(sItemName)
                                  , this.mTreeItems["General"]["Head"])
         this.mTreeItems.Delete(sGroupName)
@@ -366,18 +366,18 @@ Class ScritchEventSink {
         selectedText := gCtrl.GetText(sItem)
         recentlySelectedText := cGui.sTreeRecentlySelectedText
         cGui := this.cGuiParentClass
-        ; if recently selected item is a timestamp, 
+        ; if recently selected item is a timestamp,
         ;       i.e. starts with 2 digits and a backslash
         if recentlySelectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if recentlySelectedText = oNote.sTimestamp
                     cGui.SaveEditToNote oNote
-        ; if selected item is a timestamp, 
+        ; if selected item is a timestamp,
         ;       i.e. starts with 2 digits and a backslash
         if selectedText ~= "^\d\d/.*"
             for oNote in cGui.oNotes.aNotes
                 if selectedText = oNote.sTimestamp
-                    cGui.gEdit.Value := 
+                    cGui.gEdit.Value :=
                             FileRead(cGui.oNotes.sNotesDir "\" oNote.sFileName)
         ; sets recently selected item
         cGui.sTreeRecentlySelected := selectedText
@@ -416,7 +416,7 @@ Class ScritchNotes {
     sNotesDir := "\scritches"
     sNotesConf := "\notes.conf"
     aNotes := []
-    
+
     __New(sScritchWorkingDir) {
         this.sNotesConf := sScritchWorkingDir this.sNotesConf
         this.sNotesDir  := sScritchWorkingDir this.sNotesDir
@@ -507,7 +507,7 @@ Class ScritchNotes {
                 if StrLen(oTimestamp.%sName%) = 1
                     oTimestamp.%sName% := "0" oTimestamp.%sName%
             }
-            this.sTimestamp := oTimestamp.sYear "/" 
+            this.sTimestamp := oTimestamp.sYear "/"
                              . oTimestamp.sMonth "/"
                              . oTimestamp.sDay
                              . " "
@@ -562,7 +562,7 @@ ParseTimestampFromFileName(sFileName) {
     Loop 7 {
         aFN.Push SubStr(sFileName, (A_Index*2 - 1), 2)
     }
-    Return aFN[1] "/" aFN[2] "/" aFN[3] 
+    Return aFN[1] "/" aFN[2] "/" aFN[3]
          . " "
          . aFN[4] ":" aFN[5] ":" aFN[6] "." aFN[7]
 }
@@ -584,7 +584,7 @@ GetLocalTime() {
 }
 
 IsFile(sFilePath) {
-    if (sExists := FileExist(sFilePath)) and (InStr(sExists, "A") 
+    if (sExists := FileExist(sFilePath)) and (InStr(sExists, "A")
                                            or InStr(sExists, "N"))
         Return True
     else Return False
