@@ -4,9 +4,6 @@
         "**/{Scripts,Resources}/**": true,
         "**/Documents/AutoHotkey/**": true
     },
-    "search.exclude": {
-        "": true
-    },
     "scm.alwaysShowActions": true,
     "scm.defaultViewMode": "tree",
     "scm.inputFontFamily": "editor",

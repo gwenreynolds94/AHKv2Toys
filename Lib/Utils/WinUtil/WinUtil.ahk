@@ -92,6 +92,52 @@ Class WinUtil {
         _hwnd
     )
 
+    Class Region {
+        Class Default {
+            Static  title_height := 26,
+                    border := 1
+        }
+        Static DisableDWM(_hwnd?) {
+            DllCall("dwmapi\DwmSetWindowAttribute",
+                    "ptr", _hwnd ?? WinExist("A"),
+                    "uint", DWMWA_NCRENDERING_POLICY := 2,
+                    "int*", DWMNCRP_DISABLED := 1,
+                    "uint", 4)
+        }
+        Static EnableDWM(_hwnd?) {
+            DllCall("dwmapi\DwmSetWindowAttribute",
+                    "ptr", _hwnd ?? WinExist("A"),
+                    "uint", DWMWA_NCRENDERING_POLICY := 2,
+                    "int*", DWMNCRP_DISABLED := 2,
+                    "uint", 4)
+        }
+        Static RemoveTitleBar(_hwnd?, _title_height?, _border?) {
+            _hwnd := _hwnd ?? WinExist("A")
+            _title_height := _title_height ?? WinUtil.Region.Default.title_height
+            _border := _border ?? WinUtil.Region.Default.border
+            wTitle := "ahk_id " _hwnd
+            WinGetPos(,,&_wW, &_wH, wTitle)
+            _x := _border
+            _y := _border + _title_height
+            _w := _wW - _border*2
+            _h := _wH - _border*2 - _title_height
+            _region := _x "-" _y " W" _w " H" _h
+            WinSetRegion(_region, wTitle)
+        }
+        Static RemoveWindowCaption(_hwnd?) {
+            wTitle := "ahk_id " (_hwnd ?? WinExist("A"))
+            WinSetStyle "-0xC00000", wTitle
+        }
+        Static RestoreWindowCaption(_hwnd?) {
+            wTitle := "ahk_id " (_hwnd ?? WinExist("A"))
+            WinSetStyle "+0xC00000", wTitle
+        }
+        Static RestoreRegion(_hwnd?) {
+            wTitle := "ahk_id " (_hwnd ?? WinExist("A"))
+            WinSetRegion(, wTitle)
+        }
+    }
+
     Class Sizer {
 
         Static wvC := WinVector.Coordinates,

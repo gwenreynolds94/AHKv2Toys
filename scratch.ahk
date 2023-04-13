@@ -504,6 +504,6 @@ F10:: {
 
 }
 
-SetTimer ( ( * ) => ExitApp() ), -20000
+SetTimer ( ( * ) => ExitApp() ), -7500
 
 F8:: ExitApp

@@ -3,8 +3,8 @@
 #SingleInstance Force
 
 ; #Include <DEBUG\DBT>
-#Include <Utils\BuiltinsExtend>
 #Include <Utils\ConfTool>
+#Include <Utils\BuiltinsExtend>
 #Include <Utils\SearchV2Docs>
 #Include <Utils\VolumeChangeGUI>
 #Include <Utils\WinTransparency>
@@ -458,6 +458,7 @@ Class ScriptDOConf {
     _vsc_text_main_rgx := ".*Visual\sStudio\sCode"
 }
 
+
 Class GblDOConf extends ConfTool {
     /** @prop {ConfTool.SectionEdit} _enabled_edit */
     _enabled_edit := {}
@@ -525,11 +526,11 @@ Class GblDOConf extends ConfTool {
     Enabled => this.Ini.Enabled
     General => this.Ini.General
     Paths   => this.Ini.Paths
-    /** @prop {DOConf.InstallProp} BCV2 */
+    /** @prop {GblDOConf.InstallProp} BCV2 */
     BCV2 => this.Ini.BCV2
-    /** @prop {DOConf.InstallProp} OpenEnvVars */
+    /** @prop {GblDOConf.InstallProp} OpenEnvVars */
     OpenEnvVars => this.Ini.OpenEnvVars
-    /** @prop {DOConf.InstallProp} UIA64 */
+    /** @prop {GblDOConf.InstallProp} UIA64 */
     UIA64 => this.Ini.UIA64
 }
 
@@ -542,13 +543,7 @@ _S := ScriptDOConf()
 
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
-_G.General.CloseCortanaInterval := 6666
-_G.General.X1Delay := 325
-_G.General.X2Delay := 325
-
-
 TraySetIcon ".\DOsrc\DefaultOn-0-1.png"
-
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -768,7 +763,7 @@ SearchBrowserFromClipboard(*) {
     SetTitleMatchMode "RegEx"
     if !((wTitle := WinExist("ahk_exe \w+fox.exe$")) and brsr := "fire")
         if !((wTitle := WinExist("ahk_exe i).+maxthon.*")) and brsr := "max")
-            Return 0
+            Return False
     SetTitleMatchMode 2
     wIDstr := ("ahk_id " wTitle)
     WinGetPos , , &wWidth
@@ -799,7 +794,8 @@ if !!iENABLED.MouseHotkeys {
     HotKey "$XButton2", (*)=>OnX2Down()
     Hotkey "$XButton2 Up", (*)=>(iGENERAL.X2IsDown:=False)
     ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-    HotIf (*) => !!(InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < iGENERAL.X2Delay))
+    HotIf (*) => !!(InStr(A_PriorHotkey, "XButton2") and
+                 (A_TimeSincePriorHotkey < iGENERAL.X2Delay))
     Hotkey("LButton", ActivateZIndex3)
     Hotkey("RButton", ActivateZIndex4)
     HotIf
@@ -1246,9 +1242,6 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
     "^Right",
     (*) => wFairy.Cycle(2))
-; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( k )>-
-    ; "k",
-    ; (*) => WinUtil.WinCloseClass())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
     "F12",
     (*) => TriggerReload())
@@ -1258,7 +1251,25 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
     "^/",
     (*)=>wFairy.Deactivate())
-; RAlt & AppsKey::
+
+
+; wFairy.MapKey(
+;     "^Home",
+;     (*)=>WinUtil.Region.DisableDWM()
+; )
+; wFairy.MapKey(
+;     "^End",
+;     (*)=>WinUtil.Region.EnableDWM()
+; )
+; wFairy.MapKey(
+;     "!Home",
+;     (*)=>WinUtil.Region.RemoveTitleBar()
+; )
+; wFairy.MapKey(
+;     "!End",
+;     (*)=>WinUtil.Region.RestoreRegion()
+; )
+
 wFairy.MapKeyPath(["p", "p"], (*)=> (
     mv := {
         x : wFairy.segment.x // 6,
@@ -1267,10 +1278,10 @@ wFairy.MapKeyPath(["p", "p"], (*)=> (
         h : wFairy.segment.y // 3,
     },
     wFairy.Nudge(
-        WinVector.Coord.Down.Mul(mv.y).Add(
-        WinVector.Coord.Right.Mul(mv.x)).Add(
-        WinVector.Coord.Thin.Mul(mv.w)).Add(
-        WinVector.Coord.Short.Mul(mv.h))
+        WinVector.Coord.Down.Mul(mv.y)
+            .Add(WinVector.Coord.Right.Mul(mv.x))
+            .Add(WinVector.Coord.Thin.Mul(mv.w))
+            .Add(WinVector.Coord.Short.Mul(mv.h))
     )
 ), "max")
 
@@ -1281,10 +1292,25 @@ wFairy.MapKeyPath( ["o", "m"], (*)=>Run("Maxthon.exe")      )
 wFairy.MapKeyPath( ["o", "w"], (*)=>Run("wezterm-gui.exe")  )
 wFairy.MapKeyPath( ["o", "e"], (*)=>Run("explorer.exe")     )
 
+_ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
+
+_ph_run_path := _ahk_cache_dir ".default-on.run.ph"
+run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
+
+wFairy.MapKeyPath( ["o", "p", "h"],
+    (*) => Run(run_ph)
+)
+
 weblinks := LinkTable()
 
-link_emmylua := "https://github.com/LuaLS/lua-language-server/wiki/Annotations"
-link_thqbygithub := "https://github.com/thqby/vscode-autohotkey2-lsp"
+_ph_link_path  := _ahk_cache_dir ".default-on.link.ph"
+_han_link_path := _ahk_cache_dir ".default-on.link.han"
+
+link_ph  := !!FileExist(_ph_link_path)  ? FileRead(_ph_link_path)  : "https://www.duckduckgo.com"
+link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : "https://www.duckduckgo.com"
+link_emmylua     := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
+link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
+
 weblinks.Link[ "emmylua"     , "e"  ] := link_emmylua
 weblinks.Link[ "thqbygithub" , "a"  ] := link_thqbygithub
 weblinks.link[ "textnow"     , "t"  ] := "https://www.textnow.com/"
@@ -1292,55 +1318,11 @@ weblinks.Link[ "reddit"      , "r"  ] := "https://www.reddit.com"
 weblinks.Link[ "fancyconvert", "!f" ] := "https://www.textfancy.com/font-converter/"
 weblinks.Link[ "fancyedit"   , "+f" ] := "https://www.textpaint.net/"
 weblinks.Link[ "paypal"      , "p"  ] := "https://www.paypal.com/"
-
-_link_cache_dir := ("C:\Users\" A_UserName "\.cache\AutoHotkey2\")
-
-_ph_path:=_link_cache_dir ".default-on.link.ph"
-link_ph := !!FileExist(_ph_path) ? FileRead(_ph_path) : "https://www.duckduckgo.com"
-weblinks.Link["ph", "^p"] := link_ph
-
-_han_path:=_link_cache_dir ".default-on.link.han"
-link_han := !!FileExist(_han_path) ? FileRead(_han_path) : "https://www.duckduckgo.com"
+weblinks.Link["ddg", "d" ] := "https://www.duckduckgo.com"
+weblinks.Link["ph" , "^p"] := link_ph
 weblinks.Link["han", "^h"] := link_han
 
-weblinks.Link["ddg", "d"] := "https://duckduckgo.com"
-
 wFairy.MapKey("l", (*)=>( weblinks.Activate(2000) ), True)
-
-
-
-/**
- * @param {__Array}  aa
- * @param {Array}    bb
- * @param {__String} cc
- */
-asd(aa,bb,cc) {
-    Return aa.Reverse()[1] . bb.Capacity . cc.Sub(2, 6)
-}
-
-dbgo asd([1,2,3], [4,5,6,7,8], "forwards")
-
-
-; RAlt_Apps_leader := LeaderKeys("RAlt & AppsKey")
-;
-; RAlt_Apps_leader.MapKey(
-;     "m", (*) => (Msgbox("Testing!"))
-; )
-;
-; RAlt_Apps_leader.MapKey("h", (*) => ( KillHelpWindows() ))
-; RAlt_Apps_leader.MapKey("k", (*) => ( KillWindowClass() ))
-;
-; RAlt_Apps_leader.MapKey(
-;     "Right", (*) => (WinActivate(
-;         "ahk_id " WinGetList(
-;             "ahk_class " WinGetClass(
-;                 "ahk_id " WinExist("A")
-;             )
-;         )[2]
-;     ))
-; )
-;
-; RAlt_Apps_leader.Enabled := True
 
 #F10::
 {

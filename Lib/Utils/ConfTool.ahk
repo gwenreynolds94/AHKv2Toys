@@ -1,4 +1,19 @@
 
+/**
+ * This class implements an object-oriented interface for loading and saving
+ * configuration files using the IniRead and IniWrite functions.
+ *
+ * The constructor (__New) can be used to set a custom filepath for the
+ * configuration file, as well as a set of default values. The Validate method
+ * can be used to check if a configuration file already exists and either create
+ * a new file or just return "exists". The Sett method provides accessor methods
+ * for each section and key in the file. The Ini method provides access to the
+ * entire file in one call. The Setting and SettingSection classes provide static
+ * methods to access sections and keys from the configuration file.
+ *
+ * Finally, the SectionEdit class provides a graphical interface for editing
+ * a particular section of the file.
+ */
 Class ConfTool {
 
     fpath := ".\.ahkonf"
@@ -84,14 +99,14 @@ Class ConfTool {
         _section := "",
 
         /** @prop {"bool"|"string"} */
-        _value_type := ""
+        _value_type := {}
 
         _content := Map()
 
         /** @prop {Gui} _gui */
         _gui := {}
 
-        /** @prop {Map<String, Gui.Control>} _guictrls */
+        /** @prop {Map} _guictrls <String, Gui.Control> */
         _guictrls := Map()
 
         /** @prop {Gui.Control} _gui_exit_btn */
@@ -104,7 +119,7 @@ Class ConfTool {
         /**
          * @param {ConfTool} _conftool
          * @param {String} _section
-         * @param {"bool" | "string"} _value_type
+         * @param {"bool"|"string"} _value_type
          */
         __New(_conftool, _section, _value_type:="bool") {
             this._conftool := _conftool
@@ -121,7 +136,7 @@ Class ConfTool {
             ; this._gui.AddText("x0 y0 w" this._item_width, "Edit " this._section)
             for _key, _value in this._content {
                 ; this._gui.AddText("xp+0 y+10 w" this._item_width, _key)
-                if this._value_type = "bool" {
+                if this._value_type ~= "bool" {
                     this._guictrls[_key] :=
                         this._gui.AddCheckbox("xp+0 y+10 w" this._item_width, _key)
                     this._guictrls[_key].Value := _value
@@ -150,9 +165,9 @@ Class ConfTool {
             this.Hide()
         }
 
+        /** @param {Gui.Control} _guictrl */
         CheckBox_OnClick(_guictrl, *) {
-            Tooltip _guictrl.Value
-            SetTimer (*)=>Tooltip(), -2000
+            this._conftool.Ini.%(this._section)%.%(_guictrl.Text)% := _guictrl.Value
         }
 
         Show(*) {
@@ -166,130 +181,4 @@ Class ConfTool {
     }
 
 }
-
-; Class ConfTool {
-;
-;     ; _confpath := ""
-;     ; _confcache := ""
-;     fpath := ".\.ahkonf"
-;     defaults := Map()
-;
-;     __New(_confpath:="", _defaults:="") {
-;         ; this.ConfPath := _confpath ? _confpath : ConfTool.Default.ConfPath
-;         this.fpath := _confpath ? _confpath : this.fpath
-;         this.defaults := _defaults ? _defaults : this.defaults
-;         ; this.cache := ConfTool.ConfCache()
-;         ; ConfTool.ConfCache.ValidateInstance(this)
-;
-;     }
-;
-;     Validate() {
-;         CreateDefaultFile() {
-;             for _sectname, _sect in this.defaults
-;                 for _keyname, _keyvalue in _sect
-;                     this.Sett[_sectname, _keyname] := _keyvalue
-;         }
-;         if FileExist(this.fpath)
-;             return "exists"
-;         SplitPath this.fpath, &_fname, &_fdir
-;         _fdir := _fdir ? _fdir : "."
-;         if DirExist(_fdir) {
-;             CreateDefaultFile()
-;             return "file"
-;         } else {
-;             SplitPath _fdir, &_dname, &_ddir
-;             _ddir := _ddir ? _ddir : "."
-;             if DirExist(_ddir) {
-;                 DirCreate(_fdir)
-;                 CreateDefaultFile()
-;                 return "dir"
-;             } else return ""
-;         }
-;     }
-;
-;     ; ConfPath {
-;     ;     Get => this._confpath
-;     ;     Set => this._confpath := Value
-;     ; }
-;
-; ;     cache {
-; ;         Get => this._confcache
-; ;         Set => this._confcache := Value
-; ;     }
-; ;
-; ;     Cfg[_section, _key] {
-; ;         Get => this.cache.%_section%[this, _key]
-; ;         Set => this.cache.%_section%[this, _key] := Value
-; ;     }
-;
-;     Sett[_section, _key] {
-;         Get => IniRead(this.fpath, _section, _key, "")
-;         Set => IniWrite(Value, this.fpath, _section, _key)
-;     }
-;
-; ;     Class ConfCache {
-; ;
-; ;         /** @param {ConfTool} _instance */
-; ;         Static ValidateInstance(_instance) {
-; ;             I := _instance
-; ;             if FileExist(I.ConfPath)
-; ;                 return "exists"
-; ;             SplitPath I.ConfPath, &_fname, &_fdir
-; ;             _fdir := _fdir ? _fdir : "."
-; ;             if DirExist(_fdir) {
-; ;                 this.CreateConfig(I)
-; ;                 return "newfile"
-; ;             } else {
-; ;                 SplitPath(_fdir, &_dname, &_ddir)
-; ;                 _ddir := _ddir ? _ddir : "."
-; ;                 if DirExist(_ddir) {
-; ;                     DirCreate(_fdir)
-; ;                     this.CreateConfig(I)
-; ;                     return "newdir"
-; ;                 } else return "baddir"
-; ;             }
-; ;         }
-; ;
-; ;         /** @param {ConfTool} _instance */
-; ;         Static CreateConfig(_instance) {
-; ;             I := _instance
-; ;             for _section, _items in ConfTool.Default.ConfSections
-; ;                 for _, _item in _items
-; ;                     I.cache.%_section%[I, _item[1]] := _item[2]
-; ;                     ; IniWrite(_item[2], I.ConfPath, _section, _item[1])
-; ;         }
-; ;
-; ;         __Get(Key, Params) {
-; ;             I := Params.Length ? Params[1] : false
-; ;             if not I
-; ;                 return "badinstance"
-; ;             if Params.Length < 2
-; ;                 return "nokey"
-; ;             return IniRead(I.ConfPath, Key, Params[2], "")
-; ;         }
-; ;         __Set(Key, Params, Value) {
-; ;             I := Params.Length ? Params[1] : false
-; ;             if not I or Params.Length < 2
-; ;                 return
-; ;             IniWrite(Value, I.ConfPath, Key, Params[2])
-; ;         }
-; ;     }
-;
-;     ; Class Default {
-;     ;     Static _ := ""
-;     ;     ,   ConfPath := ".\.ahkconf"
-;     ;     ,   Settings := Map(
-;     ;             "Enabled", Map(
-;     ;                 "All", 1
-;     ;             )
-;     ;         )
-;     ;     ; ,   ConfSections := Map(
-;     ;     ;         "Enabled", [
-;     ;     ;             ["All", 1]
-;     ;     ;         ]
-;     ;     ;     )
-;     ; }
-; }
-
-
 

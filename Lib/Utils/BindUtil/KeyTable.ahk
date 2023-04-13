@@ -166,11 +166,11 @@ Class KeyTable {
         if kplen > 1 {
             for _k in kp {
                 curkeys := ktbls[ktbls.Length].keys
-                nexttbl := KeyTable(_timeout)
+                ; nexttbl := KeyTable(_timeout)
                 if !curkeys.Has(_k)
                     curkeys[_k] := KeyTable(_timeout)
                 ktbls.Push(curkeys[_k])
-            } Until (A_Index+1) < kplen
+            } Until (A_Index+1) >= kplen
         }
         ktbls[kplen].MapKey(kp[kplen], _action, True)
     }
