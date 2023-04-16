@@ -1237,11 +1237,14 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
     "PgDn",
     (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
-    "^Left",
+    "Numpad1",
     (*) => wFairy.Cycle())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    "^Right",
+    "Numpad2",
     (*) => wFairy.Cycle(2))
+wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
+    "Numpad3",
+    (*) => wFairy.Cycle(3))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
     "F12",
     (*) => TriggerReload())

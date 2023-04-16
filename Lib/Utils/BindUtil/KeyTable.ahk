@@ -98,16 +98,33 @@ Class KeyTable {
      * @prop {Number|Boolean} ParsedTimeout
      * @param {String|Number|Boolean} _timeout
      */
-    ParsedTimeout[_timeout] =>
+    ParsedTimeout[_timeout?] =>
       (!IsSet(_timeout) or (_timeout = "unset"))     ? ;
                        KeyTable.Defaults.timeout     : ;
-            (!_timeout or this.timeout = "none") ? 0 : ;
+                                     (!_timeout)     ? (
+                         (this.timeout = "none") ? 0 : ;
+                                   this.timeout      ) :
                               (_timeout = "max")     ? ;
                                  this.maxtimeout     : ;
                             (_timeout is Number)     ? ;
                     (_timeout > this.maxtimeout)     ? ;
                                  this.maxtimeout     : ;
                             Abs(Round(_timeout)) : 0 ; ;
+
+    RealTimeout[_timeout?] {
+        Get {
+            _timeout := _timeout ?? "unset"
+            switch _timeout {
+                case "none", "unset":
+                    return 0
+                case "max":
+                    return this.maxtimeout
+            }
+            return IsNumber(_timeout) ? _timeout : 0
+        }
+    }
+
+    ParsedTimeout2[_timeout?] => this.RealTimeout[_timeout ?? this.timeout ?? unset]
 
     /**
      * @param {Number|String|Boolean} [_timeout=False]

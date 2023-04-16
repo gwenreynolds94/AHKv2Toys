@@ -204,7 +204,6 @@ Class WinVector {
             this.h := h
         }
 
-
         Static Left  => WinVector.Coord((-1), 0, 0, 0)
         Static Right => WinVector.Coord(1, 0, 0, 0)
         Static Up    => WinVector.Coord(0, (-1), 0, 0)
@@ -214,55 +213,71 @@ Class WinVector {
         Static Short => WinVector.Coord(0, 0, 0, (-1))
         Static Tall  => WinVector.Coord(0, 0, 0, 1)
 
+        /** @param {WinVector.Coord|Object} _xywh_target */
+        Static Contain(&_xywh_target, _xywh_min?, _xywh_max?) {
+            if not (IsSet(_xywh_min) and IsSet(_xywh_max))
+                if _xywh_target is WinVector.Coord
+                    _xywh_min := _xywh_target.min,
+                    _xywh_max := _xywh_target.max
+                else return _xywh_target
+            min := _xywh_min, max := _xywh_max
+
+        }
+
         Static Add(&_xywh_target, _xywh_mod) {
             _t := _xywh_target
-            if IsNumber(_xywh_mod)
-                _m := { x:_xywh_mod, y:_xywh_mod, w:_xywh_mod, h:_xywh_mod }
-            _t.x := _m.x
-            _t.y := _m.y
-            _t.w := _m.w
-            _t.h := _m.h
+            _m := _xywh_mod
+            if IsNumber(_m)
+                _m := { x:_m, y:_m, w:_m, h:_m }
+            _t.x += _m.x, _t.y += _m.y
+            _t.w += _m.w, _t.h += _m.h
+            return _t
+        }
+
+        Static Sub(&_xywh_target, _xywh_mod) {
+            _t := _xywh_target
+            _m := _xywh_mod
+            if IsNumber(_m)
+                _m := { x:_m, y:_m, w:_m, h:_m }
+            _t.x -= _m.x, _t.y -= _m.y
+            _t.w -= _m.w, _t.h -= _m.h
+            return _t
+        }
+
+        Static Mul(&_xywh_target, _xywh_mod) {
+            _t := _xywh_target
+            _m := _xywh_mod
+            if IsNumber(_m)
+                _m := { x:_m, y:_m, w:_m, h:_m }
+            _t.x *= _m.x, _t.y *= _m.y
+            _t.w *= _m.w, _t.h *= _m.h
+            return _t
+        }
+
+        Static Div(&_xywh_target, _xywh_mod) {
+            _t := _xywh_target
+            _m := _xywh_mod
+            if IsNumber(_m)
+                _m := { x:_m, y:_m, w:_m, h:_m }
+            _t.x /= _m.x, _t.y /= _m.y
+            _t.w /= _m.w, _t.h /= _m.h
             return _t
         }
 
         Add(xywh) {
-            if IsNumber(xywh)
-                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
-            this.x += xywh.x
-            this.y += xywh.y
-            this.w += xywh.w
-            this.h += xywh.h
-            return this
+            return WinVector.Coord.Add(&this, xywh)
         }
 
         Sub(xywh) {
-            if IsNumber(xywh)
-                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
-            this.x -= xywh.x
-            this.y -= xywh.y
-            this.w -= xywh.w
-            this.h -= xywh.h
-            return this
+            return WinVector.Coord.Sub(&this, xywh)
         }
 
         Div(xywh) {
-            if IsNumber(xywh)
-                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
-            this.x /= xywh.x
-            this.y /= xywh.y
-            this.w /= xywh.w
-            this.h /= xywh.h
-            return this
+            return WinVector.Coord.Div(&this, xywh)
         }
 
         Mul(xywh) {
-            if IsNumber(xywh)
-                xywh := { x:xywh, y:xywh, w:xywh, h:xywh }
-            this.x *= xywh.x
-            this.y *= xywh.y
-            this.w *= xywh.w
-            this.h *= xywh.h
-            return this
+            return WinVector.Coord.Mul(&this, xywh)
         }
 
     }

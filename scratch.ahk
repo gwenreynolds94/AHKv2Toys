@@ -465,10 +465,31 @@ For _prop in ObjOwnProps( __Array.Prototype )
 stdo [ 1, 2, 3, 4, 5 ].Reverse()
 
 
+Class asdqwe {
+    qwe[_timeout?] {
+        Get {
+            if !IsSet(_timeout)
+                return MsgBox("unset!")
+            return "SET!"
+        }
+    }
+    zxc(_timeout?) {
+        return this.qwe[_timeout ?? unset]
+    }
+}
+
+
+asdzxc := asdqwe()
+
+stdo A_AhkVersion
+
 F10:: {
-    boop := "boop"
-    stdo boop
-    stdo String.Base.Base
+    ; asdzxc.zxc()
+    ; MsgBox(unset)
+    Send "{LWin Down}" "P" "{LWin Up}"
+    ; boop := "boop"
+    ; stdo boop
+    ; stdo String.Base.Base
     ; tenb := IniRead(".\DOsrc\.ahkonf", "Enabled")
     ; tenbp := Map()
     ; Loop Parse, tenb, "`n", "`r" {
