@@ -830,7 +830,6 @@ if !!iENABLED.SearchV2
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
-
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ;
 ;
@@ -1224,36 +1223,41 @@ wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Left )>-
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
     "Right",
     (*) => wFairy.Nudge(WinVector.Coord.Right.Mul(wFairy.segment.x)))
+
+wFairyMovements := Map(
+    "Numpad1", (*) => Run('')
+)
+
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
-    "Home",
+    "[",
     (*) => wFairy.Nudge(WinVector.Coord.Thin.Mul(wFairy.segment.x)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
-    "End",
+    "]",
     (*) => wFairy.Nudge(WinVector.Coord.Wide.Mul(wFairy.segment.x)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
-    "PgUp",
+    "-",
     (*) => wFairy.Nudge(WinVector.Coord.Short.Mul(wFairy.segment.y)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
-    "PgDn",
+    "=",
     (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
-    "Numpad1",
+    ",",
     (*) => wFairy.Cycle())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    "Numpad2",
+    ".",
     (*) => wFairy.Cycle(2))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    "Numpad3",
+    "/",
     (*) => wFairy.Cycle(3))
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
     "F12",
     (*) => TriggerReload())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
     "BackSpace",
-    (*)=>wFairy.Deactivate())
+    (*) => wFairy.Deactivate())
 wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
     "^/",
-    (*)=>wFairy.Deactivate())
+    (*) => wFairy.Deactivate())
 
 
 ; wFairy.MapKey(
@@ -1294,6 +1298,8 @@ wFairy.MapKeyPath( ["o", "v"], (*)=>Run("VSCodium.exe")     )
 wFairy.MapKeyPath( ["o", "m"], (*)=>Run("Maxthon.exe")      )
 wFairy.MapKeyPath( ["o", "w"], (*)=>Run("wezterm-gui.exe")  )
 wFairy.MapKeyPath( ["o", "e"], (*)=>Run("explorer.exe")     )
+wFairy.MapKeyPath( ["o", "s", "m"], (*)=>Run("sublime_merge.exe") )
+wFairy.MapKeyPath( ["o", "s", "t"], (*)=>Run("sublime_text.exe") )
 
 _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
 

@@ -155,20 +155,33 @@ Class WinUtil {
         Static RlCoords => WinVector.DLLUtil.RealCoordsFromSuperficial
         Static SprCoords => WinVector.DLLUtil.SuperficialCoordsFromReal
 
-        Static WinFull(wHwnd:=0, screengap?, windowoffset?, *) {
+        Static WinFull(wHwnd?, screengap?, windowoffset?, *) {
+            Static lastwin := 0, lasttick := 0
             screengap := IsSet(screengap) ? screengap : this.ScreenGap
             windowoffset := IsSet(windowoffset) ? windowoffset : this.WindowOffset
-            if !wHwnd
-                wHwnd := WinExist("A")
-            wTitle  := "ahk_id " wHwnd
-            wWidth  := A_ScreenWidth - screengap.x*2
-            wHeight := A_ScreenHeight - screengap.y*2
+            wHwnd := wHwnd ?? WinExist("A")
+            wTitle := "ahk_id " wHwnd
+            WinGetPos(&aX,,&aW,, wTitle)
+            if aW > A_ScreenWidth {
+                MonitorGetWorkArea(1,,,&primarywidth)
+                MonitorGetWorkArea(2,&secondaryleft,,&secondaryright,&secondarybottom)
+                secondarywidth := secondaryright - secondaryleft
+                winoffx := windowoffset.x + primarywidth
+                wWidth := secondarywidth - screengap.x*2
+                wHeight := secondarybottom - screengap.y*2
+            } else {
+                wWidth  := A_ScreenWidth - screengap.x*2
+                wHeight := A_ScreenHeight - screengap.y*2
+                winoffx := windowoffset.x
+            }
             this.RlCoords(&wRect:=0, wHwnd,
-                        screengap.x + windowoffset.x,
+                        screengap.x + winoffx,
                         screengap.y + windowoffset.y,
                         wWidth,
                         wHeight)
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
+            lastwin := wHwnd
+            lasttick := A_TickCount
         }
 
         Static WinHalf(wHwnd:=0, screengap?, windowoffset?, side:=0, *) {

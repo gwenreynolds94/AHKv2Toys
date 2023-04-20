@@ -52,7 +52,7 @@ Class VolChangeGui {
             this.hidden := False
         }
         ; SetTimer(this.BFHide, -1000)
-        SetTimer(this.BFHide, -1000)
+        SetTimer(this.BFHide, -2000)
     }
     Static Hide(*) {
         this.gui.Hide()

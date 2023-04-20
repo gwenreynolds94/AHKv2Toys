@@ -63,6 +63,8 @@ Class WinVector {
         WinVector.Coord(_x, _y, _w, _h)
     )
 
+    Static MonitorWithMouse => ((MouseGetPos(&_x), _x) > A_ScreenWidth) ? 2 : 1
+
     Class Coordinates {
 
         Class Vectors {
@@ -197,11 +199,15 @@ Class WinVector {
         min := {x:0,y:0,w:0,h:0},
         max := {x:0,y:0,w:0,h:0}
 
-        __New(x:=0, y:=0, w:=0, h:=0) {
+        __New(x:=0, y?, w?, h?, _min?, _max?) {
+            if String((y ?? 'f') (w ?? 'f') (h ?? 'f')) ~= 'f'
+                y := w := h := x
             this.x := x
             this.y := y
             this.w := w
             this.h := h
+            this.min := _min ?? {x:(-666666), y:(-666666), w:(-666666), h:(-666666)}
+            this.max := _max ?? {x:666666, y:666666, w:666666, h:666666}
         }
 
         Static Left  => WinVector.Coord((-1), 0, 0, 0)
@@ -220,7 +226,7 @@ Class WinVector {
                     _xywh_min := _xywh_target.min,
                     _xywh_max := _xywh_target.max
                 else return _xywh_target
-            min := _xywh_min, max := _xywh_max
+            _min := _xywh_min, _max := _xywh_max
 
         }
 
@@ -339,7 +345,7 @@ Class WinVector {
             return outCoords
         }
 
-        /**
+        /*e
          *      ReturnObj := {
          *          x: 666,
          *          y: 666
@@ -348,11 +354,6 @@ Class WinVector {
         Static DllMouseGetPos() {
             cPOINT := Buffer(8)
             DllCall "GetCursorPos", "Ptr", cPOINT
-            /**
-             * @typedef {{}.<String,Integer>} MPoint
-             * @property {Integer} MPoint.x
-             * @property {Integer} MPoint.y
-             */
             return {
                 x: NumGet(cPOINT, 0, "Int"),
                 y: NumGet(cPOINT, 4, "Int")

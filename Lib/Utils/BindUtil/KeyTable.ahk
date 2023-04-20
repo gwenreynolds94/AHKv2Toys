@@ -124,7 +124,7 @@ Class KeyTable {
         }
     }
 
-    ParsedTimeout2[_timeout?] => this.RealTimeout[_timeout ?? this.timeout ?? unset]
+    ; ParsedTimeout2[_timeout?] => this.RealTimeout[_timeout ?? this.timeout ?? unset]
 
     /**
      * @param {Number|String|Boolean} [_timeout=False]

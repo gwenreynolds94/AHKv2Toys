@@ -483,10 +483,30 @@ asdzxc := asdqwe()
 
 stdo A_AhkVersion
 
+if false
+    if true
+        MsgBox("F")
+    else MsgBox("A")
+
 F10:: {
     ; asdzxc.zxc()
     ; MsgBox(unset)
-    Send "{LWin Down}" "P" "{LWin Up}"
+    MouseGetPos(&_x, &_y)
+    stdo _x, _y, "----------------------"
+    MonitorGet(2, &_l, &_t, &_r, &_b)
+    stdo "_l: ", "`t" _l,
+         "_t: ", "`t" _t,
+         "_r: ", "`t" _r,
+         "_b: ", "`t" _b,
+         "mon: ", "`t" MonitorGetCount()
+    ; switch {
+    ;     case false:
+    ;         stdo "asd"
+    ;     case true:
+    ;         stdo "qwe"
+    ;     default:
+    ;         stdo "zxc"
+    ; }
     ; boop := "boop"
     ; stdo boop
     ; stdo String.Base.Base
@@ -525,6 +545,6 @@ F10:: {
 
 }
 
-SetTimer ( ( * ) => ExitApp() ), -7500
+SetTimer ( ( * ) => ExitApp() ), -6666
 
 F8:: ExitApp
