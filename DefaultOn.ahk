@@ -13,6 +13,7 @@
 #Include <Utils\BindUtil\BindUtil>
 #Include <Utils\WinUtil\WinUtil>
 
+
 TriggerReload(*)
 {
     JKQuickToast(
@@ -435,27 +436,34 @@ iENABLED := DefaultOnConfiguration.Conf.LiteralIniEnabled()
 iINSTALLS := DefaultOnConfiguration.Conf.LiteralIniInstalls()
 
 Class ScriptDOConf {
-    IsCapsDown := False
-    CurrentCapsMod := ""
+    IsCapsDown         := False
+    CurrentCapsMod     := ""
     CapsUpLeftHandKeys := [
-          "",
-         "+",
-         "^",
-         "#",
-         "!",
-        "+^",
-        "+!",
-        "+#",
-        "^!",
-        "^#",
-        "!#",
-       "+^!",
-       "+^#",
-       "^!#",
-       "+!#"
+          ""    ,
+          "+"   ,
+          "^"   ,
+          "#"   ,
+          "!"   ,
+          "+^"  ,
+          "+!"  ,
+          "+#"  ,
+          "^!"  ,
+          "^#"  ,
+          "!#"  ,
+          "+^!" ,
+          "+^#" ,
+          "^!#" ,
+          "+!#" ,
     ]
     _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
-    _vsc_text_main_rgx := ".*Visual\sStudio\sCode"
+    _vsc_text_main_rgx  := ".*Visual\sStudio\sCode"
+    X1NoCopy := False
+    X2IsDown := False
+    X1Delay  := 325
+    X2Delay  := 325
+    ThisPC   := (A_ComputerName ~= 'B2B2M4F') ? 'primary'   :
+                (A_ComputerName ~= 'JJTV8BS') ? 'secondary' :
+                (A_ComputerName ~= 'HJ4S4Q2') ? 'laptop'    : 'unknown'
 }
 
 
@@ -540,6 +548,8 @@ _G := GblDOConf()
 
 /** @var {ScriptDOConf} _S */
 _S := ScriptDOConf()
+_S.X1Delay := _G.General.X1Delay
+_S.X2Delay := _G.General.X2Delay
 
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
@@ -643,10 +653,23 @@ if !!_G.Enabled.BCV2 {
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; SCRITCH NOTES ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 ;
-if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) {
-    ScritchResourcePath := A_ScriptDir "\ScinSkratch"
-    NotesApp := ScritchGui(ScritchResourcePath, startHidden := True)
-    Hotkey "<#v", (*) => NotesApp.ToggleGui()
+ToggleNotesApp() {
+    Static ScritchResourcePath := A_ScriptDir "\ScinSkratch",
+            /** @type {ScritchGui} NotesApp */
+           NotesApp := False
+    if !!NotesApp {
+        NotesApp.ToggleGui()
+    }
+    else {
+        NotesApp := ScritchGui(ScritchResourcePath, startHidden := True)
+        NotesApp.ToggleGui
+        NotesAppIsSet := True
+    }
+}
+if !!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk"){
+    HotIf (*) => !!_G.Enabled.Scritch
+    Hotkey "<#v", (*)=>ToggleNotesApp()
+    HotIf
 }
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
@@ -657,24 +680,22 @@ if (!!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk") and !!iENABLED.Scritch) 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 ;
-if !!iENABLED.FormatComment {
-    SetTitleMatchMode "Regex"
-    SetTitleMatchMode "Slow"
-    HotIf (*) => (WinActive("i)\.ahk" _S._vsc_text_main_rgx)
-        or WinActive("ahk_exe VSCodium.exe"))
-    Hotkey "<^+p", (*) => FormatSingleLineComment()
-    Hotkey "<^+o", (*) => FormatSingleLineComment(" ")
-    Hotkey "<^+i", (*) => FormatSingleLineComment("-")
-    HotIf (*) => WinActive("i)\.sublime-syntax" _S._subl_text_main_rgx)
-    Hotkey "<^+p", (*) => FormatSingleLineComment("#", "#", 0)
-    Hotkey "<^+o", (*) => FormatSingleLineComment(":", "#", 0)
-    Hotkey "<^+i", (*) => FormatSingleLineComment("-", "#", 0)
-    HotIf (*) => WinActive("i)\.ahk" _S._subl_text_main_rgx)
-    Hotkey "<^+p", (*) => FormatSingleLineComment("#", "`;", 0)
-    Hotkey "<^+o", (*) => FormatSingleLineComment("=", "`;", 0)
-    Hotkey "<^+i", (*) => FormatSingleLineComment("|", "`;", 1)
-    HotIf
-}
+SetTitleMatchMode "Regex"
+SetTitleMatchMode "Slow"
+HotIf (*) => _G.Enabled.FormatComment and ((WinActive("i)\.ahk" _S._vsc_text_main_rgx)
+    or WinActive("ahk_exe VSCodium.exe")))
+Hotkey "<^+p", (*) => FormatSingleLineComment()
+Hotkey "<^+o", (*) => FormatSingleLineComment(" ")
+Hotkey "<^+i", (*) => FormatSingleLineComment("-")
+HotIf (*) => _G.Enabled.FormatComment and WinActive("i)\.sublime-syntax" _S._subl_text_main_rgx)
+Hotkey "<^+p", (*) => FormatSingleLineComment("#", "#", 0)
+Hotkey "<^+o", (*) => FormatSingleLineComment(":", "#", 0)
+Hotkey "<^+i", (*) => FormatSingleLineComment("-", "#", 0)
+HotIf (*) => _G.Enabled.FormatComment and WinActive("i)\.ahk" _S._subl_text_main_rgx)
+Hotkey "<^+p", (*) => FormatSingleLineComment("#", "`;", 0)
+Hotkey "<^+o", (*) => FormatSingleLineComment("=", "`;", 0)
+Hotkey "<^+i", (*) => FormatSingleLineComment("|", "`;", 1)
+HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -683,25 +704,24 @@ if !!iENABLED.FormatComment {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  CLICK TO COPY|CUT|PASTE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-iGENERAL.X1NoCopy := False
 ; Kick it all off
 ; $XButton1::
 OnX1Down()
 {
     ; Two XButton1 Up or Downs in <iGENERAL.X1Delay> ms Sends <LCtrl+C>, cancels sending XButton1
-    if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < iGENERAL.X1Delay) and !iGENERAL.X1NoCopy {
-        iGENERAL.X1NoCopy := True
+    if InStr(A_PriorHotkey, "XButton1") and (A_TimeSincePriorHotkey < _S.X1Delay) and !_S.X1NoCopy {
+        _S.X1NoCopy := True
         Send("{LCtrl Down}c{LCtrl Up}")
         SetTimer(SendXButton1, 0)
         Return
     }
     ; XButton2->XButton1 Searches AutohHotkey V2 Docs
-    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < iGENERAL.X1Delay)
+    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < _S.X1Delay)
         Return SearchV2DocsFromClipboard() SetTimer(SendXButton1, 0)
 
     ; Otherwise set timer to send XButton1 after <iGENERAL.X1Delay> ms
-    SetTimer SendXButton1, -iGENERAL.X1Delay
-    iGENERAL.X1NoCopy := False
+    SetTimer SendXButton1, - _S.X1Delay
+    _S.X1NoCopy := False
 }
 ; Easier to activate when hand can move around mouse
 ; $XButton1 Up:: Return
@@ -720,17 +740,16 @@ SendPaste(*) {
     SetTimer(SendXButton1, 0)
     Send("{LCtrl Down}v{LCtrl Up}")
 }
-if !!iENABLED.MouseHotkeys {
-    Hotkey "$XButton1", (*)=>OnX1Down()
-    Hotkey "$XButton1 Up", (*)=>""
-    ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-    HotIf (*) => ( InStr(A_PriorHotkey, "XButton1")
-                        and (A_TimeSincePriorHotkey < iGENERAL.X1Delay)
-                        and !iGENERAL.X1NoCopy )
-    Hotkey("LButton", SendPaste)
-    Hotkey("RButton", SendCut)
-    HotIf
-}
+HotIf (*) => !!_G.Enabled.MouseHotkeys
+Hotkey "$XButton1", (*)=>OnX1Down()
+Hotkey "$XButton1 Up", (*)=>""
+; if right after XButton1 Up or Down ...SendPaste() | SendCut()
+HotIf (*) => !!_G.Enabled.MouseHotkeys and ( InStr(A_PriorHotkey, "XButton1")
+                    and (A_TimeSincePriorHotkey < _S.X1Delay)
+                    and !_S.X1NoCopy )
+Hotkey("LButton", SendPaste)
+Hotkey("RButton", SendCut)
+HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -739,14 +758,14 @@ if !!iENABLED.MouseHotkeys {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; XBUTTON2 ALT-TAB-ESQUE ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-iGENERAL.X2IsDown := False
+_S.X2IsDown := False
 ; $XButton2::
 OnX2Down(*)
 {
-    iGENERAL.X2IsDown := True
-    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < iGENERAL.X2Delay)
+    _S.X2IsDown := True
+    if InStr(A_PriorHotkey, "XButton2") and (A_TimeSincePriorHotkey < _S.X2Delay)
         Return SearchBrowserFromClipboard() . SetTimer(SendXButton2, 0)
-    SetTimer(SendXButton2, -iGENERAL.X2Delay)
+    SetTimer(SendXButton2, -_S.X2Delay)
 }
 ; $XButton2 Up::
 ; {
@@ -756,7 +775,7 @@ SendXButton2(*) {
     SetTimer(,0)
     Return Send("{XButton2}")
 }
-if !!iENABLED.SearchFirefox
+if !!_G.Enabled.SearchFirefox
     Hotkey "LWin & AppsKey", (*)=>SearchBrowserFromClipboard()
 SearchBrowserFromClipboard(*) {
     SetTimer(SendXButton2, 0)
@@ -790,16 +809,15 @@ ActivateZIndex4(*) {
     ; WinActivate WinGetList()[4+3]
     ; DetectHiddenWindows True
 }
-if !!iENABLED.MouseHotkeys {
-    HotKey "$XButton2", (*)=>OnX2Down()
-    Hotkey "$XButton2 Up", (*)=>(iGENERAL.X2IsDown:=False)
-    ; if right after XButton1 Up or Down ...SendPaste() | SendCut()
-    HotIf (*) => !!(InStr(A_PriorHotkey, "XButton2") and
-                 (A_TimeSincePriorHotkey < iGENERAL.X2Delay))
-    Hotkey("LButton", ActivateZIndex3)
-    Hotkey("RButton", ActivateZIndex4)
-    HotIf
-}
+HotIf (*) => !!_G.Enabled.MouseHotkeys
+HotKey "$XButton2", (*)=>OnX2Down()
+Hotkey "$XButton2 Up", (*)=>(_S.X2IsDown:=False)
+; if right after XButton1 Up or Down ...SendPaste() | SendCut()
+HotIf (*) => !!_G.Enabled.MouseHotkeys and !!(InStr(A_PriorHotkey, "XButton2") and
+              (A_TimeSincePriorHotkey < _S.X2Delay))
+Hotkey("LButton", ActivateZIndex3)
+Hotkey("RButton", ActivateZIndex4)
+HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -809,12 +827,12 @@ if !!iENABLED.MouseHotkeys {
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
 ;
-if !!iENABLED.WinSizePos {
-    Hotkey "#b", (*)=> WinUtil.Sizer.WinFull()
-    Hotkey "#s", (*)=> WinUtil.Sizer.WinHalf()
-    ; Hotkey "#b", (*)=> SizeWindow()
-    ; Hotkey "#s", (*)=> SizeWindowHalf()
-}
+HotIf (*)=> !!_G.Enabled.WinSizePos
+Hotkey "#b", (*)=> WinUtil.Sizer.WinFull()
+Hotkey "#s", (*)=> WinUtil.Sizer.WinHalf()
+HotIf
+; Hotkey "#b", (*)=> SizeWindow()
+; Hotkey "#s", (*)=> SizeWindowHalf()
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -824,8 +842,9 @@ if !!iENABLED.WinSizePos {
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ;
 ;
 ;
-if !!iENABLED.SearchV2
-    Hotkey "#z", (*)=> SearchV2DocsFromClipboard()
+HotIf (*)=> !!_G.Enabled.SearchV2
+Hotkey "#z", (*)=> SearchV2DocsFromClipboard()
+HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -836,38 +855,38 @@ if !!iENABLED.SearchV2
 (VolChangeGui)
 ;
 
+HotIf (*) => !!_G.Enabled.VolumeChange
 #MaxThreadsBuffer True
-if !!iENABLED.VolumeChange {
-    HotIf (*)=> !!(WinUtil.WinUnderCursor["class"] = "Shell_TrayWnd")
-    Hotkey "$WheelUp"   , (_THK)=>OnShellTrayScroll(_THK)
-    Hotkey "$WheelDown" , (_THK)=>OnShellTrayScroll(_THK)
-    Hotkey "$!WheelUp"  , (_THK)=>OnShellTrayAltScroll(_THK)
-    Hotkey "$!WheelDown", (_THK)=>OnShellTrayAltScroll(_THK)
-    Hotkey "MButton"    , (*)=>SetTimer(ToggleMuteOnMButtonHold, -500)
-    Hotkey "MButton Up" , (*)=>SetTimer(ToggleMuteOnMButtonHold, 0)
-    HotIf
-    OnShellTrayScroll(_ThisHotkey)
-    {
-        _volMag := !!(SubStr(_ThisHotkey, 7)="Up") ? 1 : -1
-        _volNew := Round(SoundGetVolume())+(4*_volMag)
-        SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
-        VolChangeGui.AnimateShow()
-    }
-    OnShellTrayAltScroll(_ThisHotkey)
-    {
-        _volMag := !!(SubStr(_ThisHotkey, 8)="Up") ? 1 : -1
-        _volNew := Round(SoundGetVolume())+(10*_volMag)
+HotIf (*)=> !!(WinUtil.WinUnderCursor["class"] ~= "Shell_(Secondary)?TrayWnd")
+Hotkey "$WheelUp"   , (_THK)=>OnShellTrayScroll(_THK)
+Hotkey "$WheelDown" , (_THK)=>OnShellTrayScroll(_THK)
+Hotkey "$!WheelUp"  , (_THK)=>OnShellTrayAltScroll(_THK)
+Hotkey "$!WheelDown", (_THK)=>OnShellTrayAltScroll(_THK)
+Hotkey "MButton"    , (*)=>SetTimer(ToggleMuteOnMButtonHold, -500)
+Hotkey "MButton Up" , (*)=>SetTimer(ToggleMuteOnMButtonHold, 0)
+HotIf
+OnShellTrayScroll(_ThisHotkey)
+{
+    _volMag := !!(SubStr(_ThisHotkey, 7)="Up") ? 1 : -1
+    _volNew := Round(SoundGetVolume())+(4*_volMag)
     SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
-        VolChangeGui.AnimateShow()
-    }
-    ToggleMuteOnMButtonHold(*) {
-        SoundSetMute(!SoundGetMute())
-        VolChangeGui.UpdateMuteStatus()
-        Tooltip (SoundGetMute())?("Muted"):("Unmuted")
-        SetTimer (*)=>Tooltip(), -1000
-    }
+    VolChangeGui.AnimateShow()
+}
+OnShellTrayAltScroll(_ThisHotkey)
+{
+    _volMag := !!(SubStr(_ThisHotkey, 8)="Up") ? 1 : -1
+    _volNew := Round(SoundGetVolume())+(10*_volMag)
+SoundSetVolume(_volFinal:=((_volNew > 100) ? 100 : (_volNew < 0) ? 0 : _volNew))
+    VolChangeGui.AnimateShow()
+}
+ToggleMuteOnMButtonHold(*) {
+    SoundSetMute(!SoundGetMute())
+    VolChangeGui.UpdateMuteStatus()
+    Tooltip (SoundGetMute())?("Muted"):("Unmuted")
+    SetTimer (*)=>Tooltip(), -1000
 }
 #MaxThreadsBuffer False
+HotIf
 ;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
@@ -876,7 +895,7 @@ if !!iENABLED.VolumeChange {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ;
 ;
-if !!iENABLED.AltShiftWinDrag
+if !!_G.Enabled.AltShiftWinDrag
     (AltShiftDragWindowRect).InitHotkeys()
 Class AltShiftDragWindowRect {
     Static isMoving := False
@@ -886,20 +905,30 @@ Class AltShiftDragWindowRect {
                      win:   { x: -1, y: -1, w: -1, h: -1 } }
          , sizeMin := { w: 100, h: 100 }
     Static InitHotkeys() {
-        HotIf (*)=> (!(this.isMoving) and !((A_PriorHotkey="!+LButton") and
-                                            (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> _G.Enabled.AltShiftWinDrag     and
+                    (!(this.isMoving)              and
+                    !((A_PriorHotkey="!+LButton")  and
+                    (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+LButton", ObjBindMethod(this, "StartMoving")
-        HotIf (*)=> (!(this.isMoving) and !!((A_PriorHotkey="!+LButton") and
-                                            (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> _G.Enabled.AltShiftWinDrag     and
+                    (!(this.isMoving)              and
+                    !!((A_PriorHotkey="!+LButton") and
+                    (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+LButton", ObjBindMethod(this, "HalfWindow")
-        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+RButton") and
-                                            (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> _G.Enabled.AltShiftWinDrag     and
+                    (!(this.isSizing)              and
+                    !((A_PriorHotkey="!+RButton")  and
+                    (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+RButton", ObjBindMethod(this, "StartSizing")
-        HotIf (*)=> (!(this.isSizing) and !!((A_PriorHotkey="!+RButton") and
-                                            (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> _G.Enabled.AltShiftWinDrag     and
+                    (!(this.isSizing)              and
+                    !!((A_PriorHotkey="!+RButton") and
+                    (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+RButton", ObjBindMethod(this, "FitWindow")
-        HotIf (*)=> (!(this.isSizing) and !((A_PriorHotkey="!+MButton") and
-                                            (A_TimeSincePriorHotkey < 300)))
+        HotIf (*)=> _G.Enabled.AltShiftWinDrag     and
+                    (!(this.isSizing)              and
+                    !((A_PriorHotkey="!+MButton")  and
+                    (A_TimeSincePriorHotkey < 300)))
         Hotkey "!+MButton", ObjBindMethod(this, "CenterWindow")
         HotIf
     }
@@ -982,9 +1011,9 @@ Class AltShiftDragWindowRect {
 ;
 (WinTransparency)
 ;
-if !!iENABLED.Transparency {
+if !!_G.Enabled.Transparency {
     Hotkey "#t" , (*)=>WinTransparency.StepActive("Up")
-    Hotkey "#g" , (*)=>WinTransparency.StepActive("Down")
+    Hotkey "#f" , (*)=>WinTransparency.StepActive("Down")
     Hotkey "!#g", (*)=>WinTransparency.ToggleActive()
     Hotkey "!#b", (*)=>WinTransparency.PromptSetActive()
     Hotkey "!#r", (*)=>WinTransparency.ResetActive()
@@ -997,7 +1026,7 @@ if !!iENABLED.Transparency {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Shift+Delete Sans Cutting ; ; ; ; ; ; ; ; ; ; ; ;
 ;
-if !!iENABLED.ShiftDelete
+if !!_G.Enabled.ShiftDelete
     Hotkey "$+Delete", (*)=> OnShiftDelete()
 OnShiftDelete(*)
 {
@@ -1020,7 +1049,7 @@ OnWinRight(*)
 {
     Send "{LAlt Down}{RAlt}{LShift Down}{Tab}{LShift Up}{LAlt Up}"
 }
-if !!iENABLED.TabSwitcher {
+if !!_G.Enabled.TabSwitcher {
     Hotkey "#Left", (*)=>OnWinLeft()
     Hotkey "#Right", (*)=>OnWinRight()
 }
@@ -1039,11 +1068,12 @@ if !!iENABLED.TabSwitcher {
 {
     SendInput FormatTime(, "HH:mm")
 }
+:*:p3p3::P3t3rP@n
 
 Hotkey "^#e", (*)=> OpenEnvironmentVars()
 OpenEnvironmentVars(){
     Try
-        Run "`"" iPATHS.AhkUIA "`"" A_Space "`"" iPATHS.OpenEnvVars "`""
+        Run "`"" _G.Paths.AhkUIA "`"" A_Space "`"" _G.Paths.OpenEnvVars "`""
     Catch Error as err
         MsgBox A_ThisFunc "::`n" err.Extra
 }
@@ -1141,6 +1171,110 @@ Class WindowFairy extends LeaderKeys {
      */
     __New(_leader := "Alt & Space", _timeout := "none", default_increment?) {
         super.__New(_leader, _timeout)
+        this.MapKey( ;>>-->>-->>-->>-->>-<( Up )>-
+            "Up",
+            (*) => this.Nudge(WinVector.Coord.Up.Mul(this.segment.y)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( Down )>-
+            "Down",
+            (*) => this.Nudge(WinVector.Coord.Down.Mul(this.segment.y)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( Left )>-
+            "Left",
+            (*) => this.Nudge(WinVector.Coord.Left.Mul(this.segment.x)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
+            "Right",
+            (*) => this.Nudge(WinVector.Coord.Right.Mul(this.segment.x)))
+
+        wFairyMovements := Map(
+            "Numpad1", (*) => Run('')
+        )
+
+        this.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
+            "[",
+            (*) => this.Nudge(WinVector.Coord.Thin.Mul(this.segment.x)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
+            "]",
+            (*) => this.Nudge(WinVector.Coord.Wide.Mul(this.segment.x)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
+            "-",
+            (*) => this.Nudge(WinVector.Coord.Short.Mul(this.segment.y)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
+            "=",
+            (*) => this.Nudge(WinVector.Coord.Tall.Mul(this.segment.y)))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
+            ",",
+            (*) => this.Cycle())
+        this.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
+            ".",
+            (*) => this.Cycle(2))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
+            "/",
+            (*) => this.Cycle(3))
+        this.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
+            "F12",
+            (*) => TriggerReload())
+        this.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
+            "BackSpace",
+            (*) => this.Deactivate())
+        this.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
+            "^/",
+            (*) => this.Deactivate())
+
+
+        this.MapKeyPath(["p", "p"], (*) => (
+            mv := {
+                x: this.segment.x // 6,
+                y: this.segment.y // 6,
+                w: this.segment.x // 3,
+                h: this.segment.y // 3,
+            },
+            this.Nudge(
+                WinVector.Coord.Down.Mul(mv.y)
+                .Add(WinVector.Coord.Right.Mul(mv.x))
+                .Add(WinVector.Coord.Thin.Mul(mv.w))
+                .Add(WinVector.Coord.Short.Mul(mv.h))
+            )), "max")
+
+        this.MapKeyPath(["k", "k"], (*) => WinClose(WinExist("A")))
+        this.MapKeyPath(["k", "l"], (*) => WinUtil.WinCloseClass())
+        this.MapKeyPath(["o", "v"], (*) => Run("VSCodium.exe"))
+        this.MapKeyPath(["o", "m"], (*) => Run("Maxthon.exe"))
+        this.MapKeyPath(["o", "w"], (*) => Run("wezterm-gui.exe"))
+        this.MapKeyPath(["o", "e"], (*) => Run("explorer.exe"))
+        this.MapKeyPath(["o", "s", "m"], (*) => Run("sublime_merge.exe"))
+        this.MapKeyPath(["o", "s", "t"], (*) => Run("sublime_text.exe"))
+
+        _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
+
+        _ph_run_path := _ahk_cache_dir ".default-on.run.ph"
+        run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
+
+        this.MapKeyPath(["o", "p", "h"],
+            (*) => Run(run_ph)
+        )
+
+        weblinks := LinkTable()
+
+        _ph_link_path := _ahk_cache_dir ".default-on.link.ph"
+        _han_link_path := _ahk_cache_dir ".default-on.link.han"
+
+        link_ph := !!FileExist(_ph_link_path) ? FileRead(_ph_link_path) : "https://www.duckduckgo.com"
+        link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : "https://www.duckduckgo.com"
+        link_emmylua := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
+        link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
+
+        weblinks.Link["emmylua", "e"] := link_emmylua
+        weblinks.Link["thqbygithub", "a"] := link_thqbygithub
+        weblinks.link["textnow", "t"] := "https://www.textnow.com/"
+        weblinks.Link["reddit", "r"] := "https://www.reddit.com"
+        weblinks.Link["fancyconvert", "!f"] := "https://www.textfancy.com/font-converter/"
+        weblinks.Link["fancyedit", "+f"] := "https://www.textpaint.net/"
+        weblinks.Link["paypal", "p"] := "https://www.paypal.com/"
+        weblinks.Link["ddg", "d"] := "https://www.duckduckgo.com"
+        weblinks.Link["ph", "^p"] := link_ph
+        weblinks.Link["han", "^h"] := link_han
+
+        this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
+
     }
 
     Cycle(count:=1) {
@@ -1210,128 +1344,128 @@ Class LaunchFairy {
 
 wFairy := WindowFairy()
 wFairy.Enabled := True
-
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Up )>-
-    "Up",
-    (*) => wFairy.Nudge(WinVector.Coord.Up.Mul(wFairy.segment.y)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Down )>-
-    "Down",
-    (*) => wFairy.Nudge(WinVector.Coord.Down.Mul(wFairy.segment.y)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Left )>-
-    "Left",
-    (*) => wFairy.Nudge(WinVector.Coord.Left.Mul(wFairy.segment.x)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
-    "Right",
-    (*) => wFairy.Nudge(WinVector.Coord.Right.Mul(wFairy.segment.x)))
-
-wFairyMovements := Map(
-    "Numpad1", (*) => Run('')
-)
-
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
-    "[",
-    (*) => wFairy.Nudge(WinVector.Coord.Thin.Mul(wFairy.segment.x)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
-    "]",
-    (*) => wFairy.Nudge(WinVector.Coord.Wide.Mul(wFairy.segment.x)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
-    "-",
-    (*) => wFairy.Nudge(WinVector.Coord.Short.Mul(wFairy.segment.y)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
-    "=",
-    (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
-    ",",
-    (*) => wFairy.Cycle())
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    ".",
-    (*) => wFairy.Cycle(2))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-    "/",
-    (*) => wFairy.Cycle(3))
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
-    "F12",
-    (*) => TriggerReload())
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
-    "BackSpace",
-    (*) => wFairy.Deactivate())
-wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
-    "^/",
-    (*) => wFairy.Deactivate())
-
-
-; wFairy.MapKey(
-;     "^Home",
-;     (*)=>WinUtil.Region.DisableDWM()
+;
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Up )>-
+;     "Up",
+;     (*) => wFairy.Nudge(WinVector.Coord.Up.Mul(wFairy.segment.y)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Down )>-
+;     "Down",
+;     (*) => wFairy.Nudge(WinVector.Coord.Down.Mul(wFairy.segment.y)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Left )>-
+;     "Left",
+;     (*) => wFairy.Nudge(WinVector.Coord.Left.Mul(wFairy.segment.x)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
+;     "Right",
+;     (*) => wFairy.Nudge(WinVector.Coord.Right.Mul(wFairy.segment.x)))
+;
+; wFairyMovements := Map(
+;     "Numpad1", (*) => Run('')
 ; )
-; wFairy.MapKey(
-;     "^End",
-;     (*)=>WinUtil.Region.EnableDWM()
+;
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
+;     "[",
+;     (*) => wFairy.Nudge(WinVector.Coord.Thin.Mul(wFairy.segment.x)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
+;     "]",
+;     (*) => wFairy.Nudge(WinVector.Coord.Wide.Mul(wFairy.segment.x)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
+;     "-",
+;     (*) => wFairy.Nudge(WinVector.Coord.Short.Mul(wFairy.segment.y)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
+;     "=",
+;     (*) => wFairy.Nudge(WinVector.Coord.Tall.Mul(wFairy.segment.y)))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
+;     ",",
+;     (*) => wFairy.Cycle())
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
+;     ".",
+;     (*) => wFairy.Cycle(2))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
+;     "/",
+;     (*) => wFairy.Cycle(3))
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
+;     "F12",
+;     (*) => TriggerReload())
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
+;     "BackSpace",
+;     (*) => wFairy.Deactivate())
+; wFairy.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
+;     "^/",
+;     (*) => wFairy.Deactivate())
+;
+;
+; ; wFairy.MapKey(
+; ;     "^Home",
+; ;     (*)=>WinUtil.Region.DisableDWM()
+; ; )
+; ; wFairy.MapKey(
+; ;     "^End",
+; ;     (*)=>WinUtil.Region.EnableDWM()
+; ; )
+; ; wFairy.MapKey(
+; ;     "!Home",
+; ;     (*)=>WinUtil.Region.RemoveTitleBar()
+; ; )
+; ; wFairy.MapKey(
+; ;     "!End",
+; ;     (*)=>WinUtil.Region.RestoreRegion()
+; ; )
+;
+; wFairy.MapKeyPath(["p", "p"], (*)=> (
+;     mv := {
+;         x : wFairy.segment.x // 6,
+;         y : wFairy.segment.y // 6,
+;         w : wFairy.segment.x // 3,
+;         h : wFairy.segment.y // 3,
+;     },
+;     wFairy.Nudge(
+;         WinVector.Coord.Down.Mul(mv.y)
+;             .Add(WinVector.Coord.Right.Mul(mv.x))
+;             .Add(WinVector.Coord.Thin.Mul(mv.w))
+;             .Add(WinVector.Coord.Short.Mul(mv.h))
+;     )
+; ), "max")
+;
+; wFairy.MapKeyPath( ["k", "k"], (*)=>WinClose(WinExist("A")) )
+; wFairy.MapKeyPath( ["k", "l"], (*)=>WinUtil.WinCloseClass() )
+; wFairy.MapKeyPath( ["o", "v"], (*)=>Run("VSCodium.exe")     )
+; wFairy.MapKeyPath( ["o", "m"], (*)=>Run("Maxthon.exe")      )
+; wFairy.MapKeyPath( ["o", "w"], (*)=>Run("wezterm-gui.exe")  )
+; wFairy.MapKeyPath( ["o", "e"], (*)=>Run("explorer.exe")     )
+; wFairy.MapKeyPath( ["o", "s", "m"], (*)=>Run("sublime_merge.exe") )
+; wFairy.MapKeyPath( ["o", "s", "t"], (*)=>Run("sublime_text.exe") )
+;
+; _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
+;
+; _ph_run_path := _ahk_cache_dir ".default-on.run.ph"
+; run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
+;
+; wFairy.MapKeyPath( ["o", "p", "h"],
+;     (*) => Run(run_ph)
 ; )
-; wFairy.MapKey(
-;     "!Home",
-;     (*)=>WinUtil.Region.RemoveTitleBar()
-; )
-; wFairy.MapKey(
-;     "!End",
-;     (*)=>WinUtil.Region.RestoreRegion()
-; )
-
-wFairy.MapKeyPath(["p", "p"], (*)=> (
-    mv := {
-        x : wFairy.segment.x // 6,
-        y : wFairy.segment.y // 6,
-        w : wFairy.segment.x // 3,
-        h : wFairy.segment.y // 3,
-    },
-    wFairy.Nudge(
-        WinVector.Coord.Down.Mul(mv.y)
-            .Add(WinVector.Coord.Right.Mul(mv.x))
-            .Add(WinVector.Coord.Thin.Mul(mv.w))
-            .Add(WinVector.Coord.Short.Mul(mv.h))
-    )
-), "max")
-
-wFairy.MapKeyPath( ["k", "k"], (*)=>WinClose(WinExist("A")) )
-wFairy.MapKeyPath( ["k", "l"], (*)=>WinUtil.WinCloseClass() )
-wFairy.MapKeyPath( ["o", "v"], (*)=>Run("VSCodium.exe")     )
-wFairy.MapKeyPath( ["o", "m"], (*)=>Run("Maxthon.exe")      )
-wFairy.MapKeyPath( ["o", "w"], (*)=>Run("wezterm-gui.exe")  )
-wFairy.MapKeyPath( ["o", "e"], (*)=>Run("explorer.exe")     )
-wFairy.MapKeyPath( ["o", "s", "m"], (*)=>Run("sublime_merge.exe") )
-wFairy.MapKeyPath( ["o", "s", "t"], (*)=>Run("sublime_text.exe") )
-
-_ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
-
-_ph_run_path := _ahk_cache_dir ".default-on.run.ph"
-run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
-
-wFairy.MapKeyPath( ["o", "p", "h"],
-    (*) => Run(run_ph)
-)
-
-weblinks := LinkTable()
-
-_ph_link_path  := _ahk_cache_dir ".default-on.link.ph"
-_han_link_path := _ahk_cache_dir ".default-on.link.han"
-
-link_ph  := !!FileExist(_ph_link_path)  ? FileRead(_ph_link_path)  : "https://www.duckduckgo.com"
-link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : "https://www.duckduckgo.com"
-link_emmylua     := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
-link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
-
-weblinks.Link[ "emmylua"     , "e"  ] := link_emmylua
-weblinks.Link[ "thqbygithub" , "a"  ] := link_thqbygithub
-weblinks.link[ "textnow"     , "t"  ] := "https://www.textnow.com/"
-weblinks.Link[ "reddit"      , "r"  ] := "https://www.reddit.com"
-weblinks.Link[ "fancyconvert", "!f" ] := "https://www.textfancy.com/font-converter/"
-weblinks.Link[ "fancyedit"   , "+f" ] := "https://www.textpaint.net/"
-weblinks.Link[ "paypal"      , "p"  ] := "https://www.paypal.com/"
-weblinks.Link["ddg", "d" ] := "https://www.duckduckgo.com"
-weblinks.Link["ph" , "^p"] := link_ph
-weblinks.Link["han", "^h"] := link_han
-
-wFairy.MapKey("l", (*)=>( weblinks.Activate(2000) ), True)
+;
+; weblinks := LinkTable()
+;
+; _ph_link_path  := _ahk_cache_dir ".default-on.link.ph"
+; _han_link_path := _ahk_cache_dir ".default-on.link.han"
+;
+; link_ph  := !!FileExist(_ph_link_path)  ? FileRead(_ph_link_path)  : "https://www.duckduckgo.com"
+; link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : "https://www.duckduckgo.com"
+; link_emmylua     := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
+; link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
+;
+; weblinks.Link[ "emmylua"     , "e"  ] := link_emmylua
+; weblinks.Link[ "thqbygithub" , "a"  ] := link_thqbygithub
+; weblinks.link[ "textnow"     , "t"  ] := "https://www.textnow.com/"
+; weblinks.Link[ "reddit"      , "r"  ] := "https://www.reddit.com"
+; weblinks.Link[ "fancyconvert", "!f" ] := "https://www.textfancy.com/font-converter/"
+; weblinks.Link[ "fancyedit"   , "+f" ] := "https://www.textpaint.net/"
+; weblinks.Link[ "paypal"      , "p"  ] := "https://www.paypal.com/"
+; weblinks.Link["ddg", "d" ] := "https://www.duckduckgo.com"
+; weblinks.Link["ph" , "^p"] := link_ph
+; weblinks.Link["han", "^h"] := link_han
+;
+; wFairy.MapKey("l", (*)=>( weblinks.Activate(2000) ), True)
 
 #F10::
 {

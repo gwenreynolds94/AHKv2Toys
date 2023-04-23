@@ -30,7 +30,6 @@
     "editor.formatOnType": false,
     "editor.find.seedSearchStringFromSelection": "selection",
     "editor.find.autoFindInSelection": "multiline",
-    "editor.cursorStyle": "block-outline",
     "editor.cursorSmoothCaretAnimation": "off",
     "editor.cursorBlinking": "phase",
     "editor.unfoldOnClickAfterEndOfLine": true,

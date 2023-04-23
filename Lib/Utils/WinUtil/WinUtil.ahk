@@ -143,6 +143,7 @@ Class WinUtil {
         Static wvC := WinVector.Coordinates,
                wvD := WinVector.DLLUtil,
                ext := {},
+               toggletimeout := 1250,
                ScreenGap := { x: 8, y: 8 },
                WindowOffset := { x: 0, y: 0 }
 
@@ -161,21 +162,13 @@ Class WinUtil {
             windowoffset := IsSet(windowoffset) ? windowoffset : this.WindowOffset
             wHwnd := wHwnd ?? WinExist("A")
             wTitle := "ahk_id " wHwnd
-            WinGetPos(&aX,,&aW,, wTitle)
-            if aW > A_ScreenWidth {
-                MonitorGetWorkArea(1,,,&primarywidth)
-                MonitorGetWorkArea(2,&secondaryleft,,&secondaryright,&secondarybottom)
-                secondarywidth := secondaryright - secondaryleft
-                winoffx := windowoffset.x + primarywidth
-                wWidth := secondarywidth - screengap.x*2
-                wHeight := secondarybottom - screengap.y*2
-            } else {
-                wWidth  := A_ScreenWidth - screengap.x*2
-                wHeight := A_ScreenHeight - screengap.y*2
-                winoffx := windowoffset.x
-            }
+            tMon := WinVector.MonitorWithWindow[wHwnd]
+            if (lastwin = wHwnd) and (A_TickCount - lasttick < this.toggletimeout)
+                tMon := !(tMon - 1) + 1
+            wWidth := WinVector.ScrWidth(tMon) - screengap.x*2
+            wHeight := WinVector.ScrHeight(tMon) - screengap.y*2
             this.RlCoords(&wRect:=0, wHwnd,
-                        screengap.x + winoffx,
+                        screengap.x + windowoffset.x + ((tMon > 1 ) ? A_ScreenWidth : 0),
                         screengap.y + windowoffset.y,
                         wWidth,
                         wHeight)

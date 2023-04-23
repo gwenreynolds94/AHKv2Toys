@@ -63,7 +63,25 @@ Class WinVector {
         WinVector.Coord(_x, _y, _w, _h)
     )
 
-    Static MonitorWithMouse => ((MouseGetPos(&_x), _x) > A_ScreenWidth) ? 2 : 1
+    Static MonitorWithWindow[_wHwnd?] => (WinGetPos(&_wX,,&_wW,,"ahk_id" (_wHwnd ?? WinExist("A"))), (_wX + _wW > A_ScreenWidth)) ? 2 : 1
+
+;     Static ScrWidth[_monitor := 1] => (_monitor = 1) ? (A_ScreenWidth) : (MonitorGetWorkArea(_monitor, &_wX, , &_wR), (_wR - _wX))
+;
+;     Static ScrHeight[_monitor := 1] => (_monitor = 1) ? (A_ScreenHeight) : (MonitorGetWorkArea(_monitor, , &_wT , &_wB), (_wB - _wT))
+
+    Static ScrWidth(_monitor := 1) {
+        if (_monitor = 1)
+            return (A_ScreenWidth)
+        MonitorGetWorkArea(_monitor, &_wX, , &_wR)
+        return (_wR - _wX)
+    }
+
+    Static ScrHeight(_monitor := 1) {
+        if (_monitor = 1)
+            return (A_ScreenHeight)
+        MonitorGetWorkArea(_monitor, , &_wT, , &_wB)
+        return (_wB - _wT)
+    }
 
     Class Coordinates {
 
@@ -317,7 +335,7 @@ Class WinVector {
         }
 
         Static SuperficialCoordsFromReal(&outCoords, wHwnd) {
-            WinGetPos &wX, &wY, &wW, &wH, "ahk_id " wHwnd
+            WinGetPos(&wX, &wY, &wW, &wH, "ahk_id " wHwnd)
             WinVector._MgnWinRect( &win , wHwnd )
             WinVector._VisWinRect( &frame, wHwnd )
             offSetLeft   := frame.x - win.x

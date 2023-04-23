@@ -3,6 +3,9 @@
 #SingleInstance Force
 
 
+/**
+ * @class ScritchGui
+ */
 Class ScritchGui {
     ;
     ;* General Instance Variables
