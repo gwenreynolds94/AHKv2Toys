@@ -494,7 +494,6 @@ Class GblDOConf extends ConfTool {
                 "MouseHotkeys"   , 1 ,
                 "Scritch"        , 1 ,
                 "SearchV2"       , 1 ,
-                "TabSwitcher"    , 1 ,
                 "Transparency"   , 1 ,
                 "VolumeChange"   , 1 ,
                 "WinSizePos"     , 1 ,
@@ -543,17 +542,20 @@ Class GblDOConf extends ConfTool {
 }
 
 
-/** @var {GblDOConf} _G */
+/** @var {GblDOConf} _G `GLOBAL` Config */
 _G := GblDOConf()
 
-/** @var {ScriptDOConf} _S */
+/** @var {ScriptDOConf} _S `SCRIPT` Config */
 _S := ScriptDOConf()
 _S.X1Delay := _G.General.X1Delay
 _S.X2Delay := _G.General.X2Delay
 
+/** @var {Map} _T `TEMP` Config */
+_T := Map()
+
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
-TraySetIcon ".\DOsrc\DefaultOn-0-1.png"
+TraySetIcon ".\DOsrc\DefaultOn-1-1.png"
 
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
@@ -1038,24 +1040,6 @@ OnShiftDelete(*)
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 
-
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Tab Switching ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-OnWinLeft(*)
-{
-    Send "{LAlt Down}{RAlt}{Tab}{LAlt Up}"
-}
-OnWinRight(*)
-{
-    Send "{LAlt Down}{RAlt}{LShift Down}{Tab}{LShift Up}{LAlt Up}"
-}
-if !!_G.Enabled.TabSwitcher {
-    Hotkey "#Left", (*)=>OnWinLeft()
-    Hotkey "#Right", (*)=>OnWinRight()
-}
-; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
-;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
-
 :*:iidt::
 {
     SendInput FormatTime(, "M/d/yyyy HH:mm")
@@ -1082,21 +1066,23 @@ OpenEnvironmentVars(){
 ; -----------------------------------------------------------------------------
 
 OnCapsDownGlobal(*) {
+    global _S
     _S.IsCapsDown := True
     if GetKeyState("LWin")
-        _S.CurrentCapsMod := "LWin", Click("Middle Down")
-    else _S.CurrentCapsMod := "other", Click("Left Down")
+        _S.CurrentCapsMod := "Middle"
+    else if GetKeyState("LAlt") and GetKeyState("LShift")
+        _S.CurrentCapsMod := "Right"
+    else _S.CurrentCapsMod := "Left"
+    Click(_S.CurrentCapsMod " Down")
 }
 
 OnCapsUpGlobal(*) {
+    global _S
     _S.IsCapsDown := False
-    if _S.CurrentCapsMod = "LWin"
-        Click("Middle Up")
-    else Click("Left Up")
+    Click _S.CurrentCapsMod " Up"
 }
 
-#HotIf WinActive("ahk_exe wezterm-gui.exe")
-*CapsLock::
+OnCapsDownWezterm(*)
 {
     if GetKeyState("Shift", "P")
         SetStoreCapsLockMode(False) ,
@@ -1110,14 +1096,22 @@ OnCapsUpGlobal(*) {
                     "{LAlt Up}"     .
                     "{LCtrl Up}"    )
 }
-*CapsLock Up::Return
-#HotIf (not WinActive("ahk_exe wezterm-gui.exe")) and (not _S.IsCapsDown)
-*CapsLock::OnCapsDownGlobal()
-#HotIf
-HotIf (*)=>((not WinActive("ahk_exe wezterm-gui.exe")) and (_S.IsCapsDown))
-for _, lfk in _S.CapsUpLeftHandKeys
-    Hotkey lfk . "CapsLock Up", OnCapsUpGlobal
+
+SetupCapsLock(*) {
+    global _S
+    HotIf (*) => (( not WinActive("ahk_exe wezterm-gui.exe")) and (_S.IsCapsDown))
+    for _, lfk in _S.CapsUpLeftHandKeys
+        Hotkey lfk "CapsLock Up", OnCapsUpGlobal
+    HotIf
+}
+
+HotIf (*)=> WinActive("ahk_exe wezterm-gui.exe")
+Hotkey "*CapsLock", OnCapsDownWezterm
+Hotkey "*CapsLock Up", (*)=>0
+HotIf (*)=> ((not WinActive("ahk_exe wezterm-gui.exe")) and (not _S.IsCapsDown))
+Hotkey "*CapsLock", OnCapsDownGlobal
 HotIf
+SetupCapsLock
 
 
 KillHelpWindows()
@@ -1145,7 +1139,6 @@ KillWindowClass(_class?, *) {
     )
 }
 
-;;TODO - Setup window management functions for  {WindowFairy} class
 /**
  * @class
  * @extends LeaderKeys
