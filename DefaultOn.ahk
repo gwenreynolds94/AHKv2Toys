@@ -435,6 +435,9 @@ iENABLED := DefaultOnConfiguration.Conf.LiteralIniEnabled()
  */
 iINSTALLS := DefaultOnConfiguration.Conf.LiteralIniInstalls()
 
+
+;; Script Config Class
+
 Class ScriptDOConf {
     IsCapsDown         := False
     CurrentCapsMod     := ""
@@ -466,6 +469,7 @@ Class ScriptDOConf {
                 (A_ComputerName ~= 'HJ4S4Q2') ? 'laptop'    : 'unknown'
 }
 
+;; Global Config Class
 
 Class GblDOConf extends ConfTool {
     /** @prop {ConfTool.SectionEdit} _enabled_edit */
@@ -681,6 +685,7 @@ if !!FileExist(A_ScriptDir "\ScinSkratch\Scritch.ahk"){
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  COMMENTS FORMATTING ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+;; Format Comment Hotkeys
 ;
 SetTitleMatchMode "Regex"
 SetTitleMatchMode "Slow"
@@ -777,8 +782,10 @@ SendXButton2(*) {
     SetTimer(,0)
     Return Send("{XButton2}")
 }
-if !!_G.Enabled.SearchFirefox
+if !!_G.Enabled.SearchFirefox {
     Hotkey "LWin & AppsKey", (*)=>SearchBrowserFromClipboard()
+    Hotkey "LWin & RWin", (*)=>SearchBrowserFromClipboard()
+}
 SearchBrowserFromClipboard(*) {
     SetTimer(SendXButton2, 0)
     SetTitleMatchMode "RegEx"
@@ -828,6 +835,7 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;  MOVE & SIZE WINDOWS ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+;; WinSizePos Hotkeys
 ;
 HotIf (*)=> !!_G.Enabled.WinSizePos
 Hotkey "#b", (*)=> WinUtil.Sizer.WinFull()
@@ -843,6 +851,7 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ;  SEARCH AHKV2 DOCS FROM CLIPBOARD ; ; ; ; ; ; ; ; ; ;
 ;
+;; Search AHKv2 Hotkeys
 ;
 HotIf (*)=> !!_G.Enabled.SearchV2
 Hotkey "#z", (*)=> SearchV2DocsFromClipboard()
@@ -854,9 +863,11 @@ HotIf
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; Volume Change On Shell Tray Scroll ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+;; Volume Change Gui
+;
 (VolChangeGui)
 ;
-
+;
 HotIf (*) => !!_G.Enabled.VolumeChange
 #MaxThreadsBuffer True
 HotIf (*)=> !!(WinUtil.WinUnderCursor["class"] ~= "Shell_(Secondary)?TrayWnd")
@@ -896,6 +907,8 @@ HotIf
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Alt+Shift+Drag Window Rect ; ; ; ; ; ; ; ; ; ; ;
+;
+;; AltShiftWinDrag
 ;
 if !!_G.Enabled.AltShiftWinDrag
     (AltShiftDragWindowRect).InitHotkeys()
@@ -1010,12 +1023,20 @@ Class AltShiftDragWindowRect {
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:
 ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; Adjust Window Transparency ; ; ; ; ; ; ; ; ; ; ; ; ; ;
 ;
+;; WinTransparency
 ;
 (WinTransparency)
 ;
+StepTransparencyAll(_direction) {
+    clean_list := WinUtil.FilteredWinList[WinGetList()]
+    for _hwnd in clean_list
+        WinTransparency.StepWindow(_direction, "ahk_id " _hwnd)
+}
 if !!_G.Enabled.Transparency {
-    Hotkey "#t" , (*)=>WinTransparency.StepActive("Up")
-    Hotkey "#f" , (*)=>WinTransparency.StepActive("Down")
+    Hotkey "#f" , (*)=>WinTransparency.StepActive("Up")
+    Hotkey "!#f", (*)=>WinTransparency.StepActive("Down")
+    Hotkey "#t" , (*)=>WinTransparency.StepAllWindows("Up")
+    Hotkey "!#t", (*)=>WinTransparency.StepAllWindows("Down")
     Hotkey "!#g", (*)=>WinTransparency.ToggleActive()
     Hotkey "!#b", (*)=>WinTransparency.PromptSetActive()
     Hotkey "!#r", (*)=>WinTransparency.ResetActive()

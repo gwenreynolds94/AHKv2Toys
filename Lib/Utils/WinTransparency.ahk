@@ -1,3 +1,4 @@
+#Include WinUtil\WinUtil.ahk
 
 Tooltip.On := {
     Call: (_this, _daddy, _msg:="", _dur:=False) => (
@@ -14,12 +15,12 @@ Class WinTransparency {
 
     /**
      * @param {String | Number} _direction
-     * 
+     *
      *      ( ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ;
      *        ; "Up" | "Down" | (-)n | (+)n ;
-     *             _direction ~= "i)up"   | ; +1 step  
-     *             _direction ~= "i)down" | ; -1 step  
-     *             _direction ~= "-?[0-9]+" ; +1 step <- positive, 
+     *             _direction ~= "i)up"   | ; +1 step
+     *             _direction ~= "i)down" | ; -1 step
+     *             _direction ~= "-?[0-9]+" ; +1 step <- positive,
      *      ) ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; ; -1 step <- negative
      */
     Static StepActive(_direction:="Down") {
@@ -35,13 +36,20 @@ Class WinTransparency {
         if (!activeWinItem.enabled)
             Return
         activeWinItem.Step(_direction)
-        ToolTip.On(activeWinItem.CurrentStep ": " activeWinItem.Transparency, 1000)
+        ToolTip.On(activeWinItem.CurrentStep ": " activeWinItem.Transparency, -1000)
+    }
+
+    Static StepAllWindows(_direction) {
+        /** @var {WinTransparency.WinItem} wItem */
+        wItem := WinTransparency.WinItemFromHwnd()
+        wItem.Step(_direction)
+        WinTransparency.SetAllWindows(wItem.Transparency)
     }
 
     /**
      * @param {Float} _transparency
-     * 
-     *          Integer(_transparency) >=   0 
+     *
+     *          Integer(_transparency) >=   0
      *      and Integer(_transparency) <= 255
      */
     Static SetActive(_transparency:=255) {
@@ -61,13 +69,21 @@ Class WinTransparency {
         if (!activeWinItem.enabled)
             Return
         nearest := activeWinItem.NearestStep[_transparency]
-        newStepOffset := (nearest.dist>0) ? (1) : 
+        newStepOffset := (nearest.dist>0) ? (1) :
                          (nearest.dist<0) ? (0) : (-1)
         newStep := nearest.step + newStepOffset
         if nearest.dist
             activeWinItem.AddStep(newStep, _transparency)
         else newStep++
         activeWinItem.CurrentStep := newStep
+    }
+
+    Static SetAllWindows(_transparency) {
+        clean_list := WinUtil.FilteredWinList["all"]
+        for _hwnd in clean_list
+            WinTransparency.SetWindow(_transparency, "ahk_id " _hwnd)
+        wItem := WinTransparency.WinItemFromHwnd(WinExist("A"))
+        ToolTip.On(wItem.CurrentStep ": " wItem.Transparency, -1000)
     }
 
     Static ToggleActive() {
@@ -112,12 +128,25 @@ Class WinTransparency {
         activeWinItem.ResetTransparencyValues()
     }
 
+    Static ResetAllWindows() {
+        for _hwnd, _winitem in WinTransparency.activeWindows
+            _winitem.ResetTransparencyValues()
+    }
+
+    Static WinItemFromHwnd(_hwnd?) {
+        if !(IsSet(_hwnd) and WinExist("ahk_id " _hwnd))
+            _hwnd := WinExist("A")
+        if not WinTransparency.activeWindows.Has(_hwnd)
+            WinTransparency.activeWindows[_hwnd] := WinTransparency.WinItem(_hwnd)
+        return WinTransparency.activeWindows[_hwnd]
+    }
+
     Class WinItem {
         Static DefaultTransparencyValues := Map(
-            1, 100, 
-            2, 170, 
-            3, 210, 
-            4, 245, 
+            1, 100,
+            2, 170,
+            3, 210,
+            4, 245,
             5, 255
         )
         hwnd := 0x00000
@@ -126,10 +155,10 @@ Class WinTransparency {
         title := ""
         /* @prop {Map} transparencyValues */
         transparencyValues := Map(
-            1, 100, 
-            2, 170, 
-            3, 210, 
-            4, 245, 
+            1, 100,
+            2, 170,
+            3, 210,
+            4, 245,
             5, 255
         )
         _CurrentStep := this.transparencyValues.Count
@@ -150,11 +179,11 @@ Class WinTransparency {
         StepCount => this.transparencyValues.Count
         CurrentStep {
             Get => this._CurrentStep
-            Set { 
+            Set {
                 if (!!IsInteger(Value) and (Value>=1) and (Value<=this.StepCount)) {
                     this._CurrentStep:=Value
                     this.Transparency := this.transparencyValues[this._CurrentStep]
-                } else Tooltip.On(Value " is not a valid transparency step", 1000)
+                } else Tooltip.On(Value " is not a valid transparency step", -1000)
             }
         }
         NearestStep[_transparency] {
@@ -193,24 +222,24 @@ Class WinTransparency {
 
         /**
          * @param {String | Number} _direction
-         * 
+         *
          *      _direction := "Up"
          *      _direction := "Down"
          *      _direction := -1
          *      _direction := 1
-         * 
-         *      ; _direction can be a String that reads "Up" or "Down" --- or it can be 
-         *      ; an positive/negative Number raising/lowering transparency respectively. 
+         *
+         *      ; _direction can be a String that reads "Up" or "Down" --- or it can be
+         *      ; an positive/negative Number raising/lowering transparency respectively.
          *  ----
-         * 
+         *
          *  ### If ***`WinItem().cycleSteps`*** equates to ***`True`***...
-         * 
-         * When a step **`down`** is called while the 
-         *      **`lowest`** level is active, the **`highest`** level will be set 
+         *
+         * When a step **`down`** is called while the
+         *      **`lowest`** level is active, the **`highest`** level will be set
          *      as the **`current`** level
-         * 
-         * Likewise a step **`up`** from the 
-         *      **`highest`** level set the **`current`** level to the 
+         *
+         * Likewise a step **`up`** from the
+         *      **`highest`** level set the **`current`** level to the
          *      **`lowest`** level
          */
         Step(_direction:="Down") {
@@ -228,7 +257,7 @@ Class WinTransparency {
         }
         /**
          * @param {String | Number} _force
-         * 
+         *
          *      _force := "On"  ;     "On" >-< On
          *      _force := "Off" ;    "Off" >-< Off
          *      _force := 1     ; non-zero >-< On
@@ -238,15 +267,15 @@ Class WinTransparency {
             wasEnabled := this.enabled
             this.enabled := !this.enabled
             if (!!_force and !!IsAlpha(_force) and (_force~="i)^force\s*\w+$"))
-                this.enabled := (_force~="i)\son$") ? (True) : 
+                this.enabled := (_force~="i)\son$") ? (True) :
                                 (_force~="i)\soff$") ? (False) : this.enabled
             else if (!!_force and !!IsNumber(_force))
                 this.enabled := (_force!=0) ? (True) : (False)
-            if (wasEnabled!=this.enabled) 
+            if (wasEnabled!=this.enabled)
                 this.Transparency := (!!this.enabled) ? this.transparencyValues[this._CurrentStep] : 255
         }
     }
-    
+
 }
 
 ; WinT:=WinTransparency

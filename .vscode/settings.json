@@ -1,9 +1,9 @@
 {
     "editor.lineHeight": 1.2,
-    "files.exclude": {
-        "**/{Scripts,Resources}/**": true,
-        "**/Documents/AutoHotkey/**": true
-    },
+    // "files.exclude": {
+    //     "**/{Scripts,Resources}/**": true,
+    //     "**/Documents/AutoHotkey/**": true
+    // },
     "scm.alwaysShowActions": true,
     "scm.defaultViewMode": "tree",
     "scm.inputFontFamily": "editor",
@@ -11,11 +11,11 @@
     "terminal.integrated.tabs.defaultColor": "terminal.ansiMagenta",
     "explorer.fileNesting.enabled": true,
     "workbench.startupEditor": "none",
-    "files.watcherExclude": {
-        "**/Documents/AutoHotkey/**": true,
-        "**/Resources/**": true,
-        "**/Scripts/**": true
-    },
+    // "files.watcherExclude": {
+    //     "**/Documents/AutoHotkey/**": true,
+    //     "**/Resources/**": true,
+    //     "**/Scripts/**": true
+    // },
     "editor.suggest.showStatusBar": true,
     "editor.suggest.preview": true,
     "editor.suggest.localityBonus": false,
@@ -33,9 +33,6 @@
     "editor.cursorSmoothCaretAnimation": "off",
     "editor.cursorBlinking": "phase",
     "editor.unfoldOnClickAfterEndOfLine": true,
-    "editor.stickyTabStops": true,
-    "editor.stickyScroll.maxLineCount": 3,
-    "editor.stickyScroll.enabled": true,
     "editor.showFoldingControls": "always",
     "editor.semanticHighlighting.enabled": true,
     "editor.scrollBeyondLastLine": false,
@@ -61,9 +58,7 @@
     "scm.showActionButton": true,
     "editor.snippets.codeActions.enabled": true,
     "editor.lightbulb.enabled": true,
-    "editor.tabCompletion": "on",
     "editor.formatOnSaveMode": "modifications",
     "editor.suggestSelection": "first",
     "files.trimTrailingWhitespace": true,
-    "emmet.triggerExpansionOnTab": true,
 }

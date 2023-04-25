@@ -9,17 +9,12 @@
 
 Persistent()
 
-
-someFunc := (*)=>("")
-
+dbgo !
 
 
-dbgo someFunc
-stdo someFunc
 
 
-if Butts ?? False
-    ToolTip("Butts Exists")
+False
 
 ; dbgo Map
 ; dbgo RegExReplace(mapres, "m)(^(.\|(.{3})))")

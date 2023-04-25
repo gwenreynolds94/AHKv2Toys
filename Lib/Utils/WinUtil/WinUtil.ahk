@@ -49,6 +49,8 @@ Class WinUtil {
      */
     Static FilteredWinList[_list:=""] {
         Get {
+            if _list = "all"
+                _list := WinGetList()
             _filtered := []
             for _i, _hwnd in _list {
                 _class := WinGetClass("ahk_id " _hwnd)

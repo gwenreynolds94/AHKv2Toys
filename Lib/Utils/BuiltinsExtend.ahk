@@ -15,10 +15,35 @@ Class __Array extends Array {
     }
 
     IndexOf(_value) {
-        _found := False
+        found := False
         for _i, _v in this
-            _found := (_v = _value) ? _i : _found
-        return _found
+            found := (_v = _value) ? _i : found
+        return found
+    }
+
+    FromRange(_index:=1, _index2?) {
+        if _index < 0
+            _index := this.Length + _index
+        if _index < 1
+            _index := 1
+        else if _index > this.Length
+            _index := this.Length
+
+        if IsSet(_index2) {
+            if _index2 < 0
+                _index2 := this.Length + _index2
+            if _index2 < _index
+                _index2 := _index
+            else if _index2 > this.Length
+                _index2 := this.Length
+        } else _index2 := this.Length
+
+        out_array := []
+
+        loop (_index2 - _index) + 1
+            out_array.Push(this[(_index + A_Index) - 1])
+
+        return out_array
     }
 
     PushPass(_values*) {
@@ -53,7 +78,6 @@ Class __String extends String {
 }
 
 
-; #Include C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\DEBUG\DBT.ahk
 
 
 ; Class __BuiltinClassExtension {
