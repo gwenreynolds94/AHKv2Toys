@@ -21,9 +21,21 @@ Class __Array extends Array {
         return found
     }
 
+    /**
+     * if an index is negative, it will be changed to
+     *
+     *      this.Length + index + 1
+     * which means `-1` would indicate the last item in array
+     *
+     * otherwise out-of-bound indexes are rounded to the nearest valid index
+     *
+     * @param {number} _index
+     * @param {number} [_index2]
+     * @returns {array}
+     */
     FromRange(_index:=1, _index2?) {
         if _index < 0
-            _index := this.Length + _index
+            _index := this.Length + _index + 1
         if _index < 1
             _index := 1
         else if _index > this.Length
@@ -31,7 +43,7 @@ Class __Array extends Array {
 
         if IsSet(_index2) {
             if _index2 < 0
-                _index2 := this.Length + _index2
+                _index2 := this.Length + _index2 + 1
             if _index2 < _index
                 _index2 := _index
             else if _index2 > this.Length
