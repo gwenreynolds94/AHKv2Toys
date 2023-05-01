@@ -2,8 +2,11 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\DEBUG\DBT.ahk
-#Include ..\GdipLib\Gdip_v2Ex.ahk
+#Include *i <DEBUG\DBT>
+#Include *i <GdipLib\Gdip_Custom>
+
+#Include *i ..\..\Lib\DEBUG\DBT.ahk
+#Include *i ..\..\Lib\GdipLib\Gdip_Custom.ahk
 
 if !_ptoken := Gdip_Startup()
 {
@@ -18,7 +21,7 @@ ExitFunc(exit_reason, exit_code) {
 }
 
 
-_
+
 Class ZoomView {
 
     _view_key := ""

@@ -4,6 +4,7 @@
 
 
 #Include <Utils\BindUtil\KeyTable>
+#Include <Utils\DetectComputer>
 
 
 /**
@@ -61,9 +62,12 @@ Class LeaderKeys extends KeyTable {
 }
 
 Class LinkTable extends KeyTable {
-    Static BrowserExe := (A_ComputerName = "DESKTOP-HJ4S4Q2") ?
-                                                "firefox.exe" :
-                                                "Maxthon.exe"
+    Static BrowserExe := ""
+
+    Static __New() {
+        this.BrowserExe := (__PC.name = "laptop")  ? "Maxthon.exe"  :
+                           (__PC.name = "primary") ? "waterfox.exe" : "firefox.exe"
+    }
 
     _links := Map()
 

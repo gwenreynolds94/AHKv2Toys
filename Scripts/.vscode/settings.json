@@ -1,0 +1,21 @@
+{
+    "workbench.colorCustomizations": {
+        "minimap.background": "#00000000",
+        "scrollbar.shadow": "#00000000"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/BetterClipboard.1,Gdip_[Av]*[lx],ass*test}.ahk": true
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.hg/store/**": true,
+        "**/{C*board.1,Gdip_[Av]*[lx],ass*test}.ahk": true
+    }
+}

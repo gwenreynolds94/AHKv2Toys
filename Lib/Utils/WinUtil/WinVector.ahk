@@ -83,105 +83,105 @@ Class WinVector {
         return (_wB - _wT)
     }
 
-    Class Coordinates {
-
-        Class Vectors {
-            Static xmin := { x: (-1), y: 0    },
-                   xadd := { x: 1   , y: 0    },
-                   ymin := { x: 0   , y: (-1) },
-                   yadd := { x: 0   , y: 1    },
-                   wmin := { w: (-1), h: 0    },
-                   wadd := { w: 1   , h: 0    },
-                   hmin := { w: 0   , h: (-1) },
-                   hadd := { w: 0   , h: 1    }
-        }
-
-        defaults := {
-            x:0,
-            y:0,
-            w:0,
-            h:0
-        }
-        x:=0, y:=0, w:=0, h:=0
-
-        __New(x:=0,y:=0,w:=0,h:=0) {
-            this.defaults.x := this.x := x
-            this.defaults.y := this.y := y
-            this.defaults.w := this.w := w
-            this.defaults.h := this.h := h
-        }
-
-        Reset(x:="_", y:="_", w:="_", h:="_") {
-            this.x := IsNumber(x) ? x : this.defaults.x
-            this.y := IsNumber(y) ? y : this.defaults.y
-            this.w := IsNumber(w) ? w : this.defaults.w
-            this.h := IsNumber(h) ? h : this.defaults.h
-            return this
-        }
-
-        Flat[append_args*] => [this.x, this.y, this.w, this.h, append_args*]
-
-        /**
-         * @param {wVector.Coordinates} coords1
-         * @param {wVector.Coordinates} coords2
-         * @param {"left"|"right"|"raw"|"new"} store_results
-         * @returns {wVector.Coordinates}
-         */
-        Static Mul(&coords1, &coords2, store_results:=False) {
-            /** @var {wVector.Coordinates} new_coords */
-            new_coords := (store_results ~= "left")  ? coords1 :
-                          (store_results ~= "right") ? coords2 :
-                          (store_results ~= "new")   ? WinVector.Coordinates() :
-                                                      { x: 0, y: 0, w: 0, h: 0 }
-            for _i, _v in (['x','y','w','h'])
-                new_coords.%_v% := coords1.%_v% * coords2.%_v%
-            return new_coords
-        }
-
-        /**
-         * @param {wVector.Coordinates} coords
-         * @param {True|False|"raw"|"new"}
-         * @returns {wVector.Coordinates}
-         */
-        Mul(&coords, store_results:=True) {
-            return WinVector.Coordinates.Mul(
-                    &this,
-                    &coords,
-                    (Type(store_results) = "string") ?
-                                       store_results :
-                                       store_results ?
-                                        "left" : "new"
-                )
-        }
-
-        /**
-         * @param {wVector.Coordinates} coords1
-         * @param {wVector.Coordinates} coords2
-         * @param {"left"|"right"|"raw"|"new"} store_results
-         * @returns {wVector.Coordinates}
-         */
-        Static Add(&coords1, &coords2, store_results:=False) {
-            new_coords := (store_results ~= "left")  ? coords1 :
-                          (store_results ~= "right") ? coords2 :
-                          (store_results ~= "new")   ? WinVector.Coordinates() :
-                                                      { x: 0, y: 0, w: 0, h: 0 }
-            for _i, _v in (['x','y','w','h'])
-                new_coords.%_v% := coords1.%_v% + coords2.%_v%
-            return new_coords
-        }
-
-        /**
-         * @param {wVector.Coordinates} coords
-         * @param {True|False|"raw"|"new"}
-         * @returns {wVector.Coordinates}
-         */
-        Add(&coords, store_results:=True) {
-            return WinVector.Coordinates.Add(
-                    &this, &coords, (Type(store_results) = "string") ? store_results :
-                                                    store_results ? "left" : "new"
-                )
-        }
-    }
+;     Class Coordinates {
+;
+;         Class Vectors {
+;             Static xmin := { x: (-1), y: 0    },
+;                    xadd := { x: 1   , y: 0    },
+;                    ymin := { x: 0   , y: (-1) },
+;                    yadd := { x: 0   , y: 1    },
+;                    wmin := { w: (-1), h: 0    },
+;                    wadd := { w: 1   , h: 0    },
+;                    hmin := { w: 0   , h: (-1) },
+;                    hadd := { w: 0   , h: 1    }
+;         }
+;
+;         defaults := {
+;             x:0,
+;             y:0,
+;             w:0,
+;             h:0
+;         }
+;         x:=0, y:=0, w:=0, h:=0
+;
+;         __New(x:=0,y:=0,w:=0,h:=0) {
+;             this.defaults.x := this.x := x
+;             this.defaults.y := this.y := y
+;             this.defaults.w := this.w := w
+;             this.defaults.h := this.h := h
+;         }
+;
+;         Reset(x:="_", y:="_", w:="_", h:="_") {
+;             this.x := IsNumber(x) ? x : this.defaults.x
+;             this.y := IsNumber(y) ? y : this.defaults.y
+;             this.w := IsNumber(w) ? w : this.defaults.w
+;             this.h := IsNumber(h) ? h : this.defaults.h
+;             return this
+;         }
+;
+;         Flat[append_args*] => [this.x, this.y, this.w, this.h, append_args*]
+;
+;         /**
+;          * @param {wVector.Coordinates} coords1
+;          * @param {wVector.Coordinates} coords2
+;          * @param {"left"|"right"|"raw"|"new"} store_results
+;          * @returns {wVector.Coordinates}
+;          */
+;         Static Mul(&coords1, &coords2, store_results:=False) {
+;             /** @var {wVector.Coordinates} new_coords */
+;             new_coords := (store_results ~= "left")  ? coords1 :
+;                           (store_results ~= "right") ? coords2 :
+;                           (store_results ~= "new")   ? WinVector.Coordinates() :
+;                                                       { x: 0, y: 0, w: 0, h: 0 }
+;             for _i, _v in (['x','y','w','h'])
+;                 new_coords.%_v% := coords1.%_v% * coords2.%_v%
+;             return new_coords
+;         }
+;
+;         /**
+;          * @param {wVector.Coordinates} coords
+;          * @param {True|False|"raw"|"new"}
+;          * @returns {wVector.Coordinates}
+;          */
+;         Mul(&coords, store_results:=True) {
+;             return WinVector.Coordinates.Mul(
+;                     &this,
+;                     &coords,
+;                     (Type(store_results) = "string") ?
+;                                        store_results :
+;                                        store_results ?
+;                                         "left" : "new"
+;                 )
+;         }
+;
+;         /**
+;          * @param {wVector.Coordinates} coords1
+;          * @param {wVector.Coordinates} coords2
+;          * @param {"left"|"right"|"raw"|"new"} store_results
+;          * @returns {wVector.Coordinates}
+;          */
+;         Static Add(&coords1, &coords2, store_results:=False) {
+;             new_coords := (store_results ~= "left")  ? coords1 :
+;                           (store_results ~= "right") ? coords2 :
+;                           (store_results ~= "new")   ? WinVector.Coordinates() :
+;                                                       { x: 0, y: 0, w: 0, h: 0 }
+;             for _i, _v in (['x','y','w','h'])
+;                 new_coords.%_v% := coords1.%_v% + coords2.%_v%
+;             return new_coords
+;         }
+;
+;         /**
+;          * @param {wVector.Coordinates} coords
+;          * @param {True|False|"raw"|"new"}
+;          * @returns {wVector.Coordinates}
+;          */
+;         Add(&coords, store_results:=True) {
+;             return WinVector.Coordinates.Add(
+;                     &this, &coords, (Type(store_results) = "string") ? store_results :
+;                                                     store_results ? "left" : "new"
+;                 )
+;         }
+;     }
 
     Class Directions {
                /** @prop {WinVector.Coord} Left */
@@ -409,53 +409,85 @@ Class WinVector {
                 h: NumGet(wRECT, 12, "Int")-_y
             }
         }
-        /**
-         * Parameter formats
-         *
-         *      ; -<_wRECT>-  takes precedence over -<_w[XYWH]>-
-         *      ; -<X>- is ignored if -<Y>- is not defined, and vice versa
-         *      ; -<W>- is ignored if -<H>- is not defined, and vice versa
-         *      _wHwnd := 0x666666   ; HWND
-         *      _wRECT := { x: 666,  ; client X  [Optional]
-         *                  y: 666,  ; client Y  [Optional]
-         *                  w: 666,  ; Width     [Optional]
-         *                  h: 666 } ; Height    [Optional]
-         *      _wX := 666  ; client X  [Optional]
-         *      _wY := 666  ; client Y  [Optional]
-         *      _wW := 666  ; Width     [Optional]
-         *      _wH := 666  ; Height    [Optional]
-         *
-         * @param {HWND} _wHwnd
-         * @param {Object} [_wRECT]
-         * @param {Integer} [_wX]
-         * @param {Integer} [_wY]
-         * @param {Integer} [_wW]
-         * @param {Integer} [_wH]
-         */
-        Static DllWinSetRect(_wHwnd, _wRECT?, _wX?, _wY?, _wW?, _wH?) {
+        ; /**
+        ;  * Parameter formats
+        ;  *
+        ;  *      ; -<_wRECT>-  takes precedence over -<_w[XYWH]>-
+        ;  *      ; -<X>- is ignored if -<Y>- is not defined, and vice versa
+        ;  *      ; -<W>- is ignored if -<H>- is not defined, and vice versa
+        ;  *      _wHwnd := 0x666666   ; HWND
+        ;  *      _wRECT := { x: 666,  ; client X  [Optional]
+        ;  *                  y: 666,  ; client Y  [Optional]
+        ;  *                  w: 666,  ; Width     [Optional]
+        ;  *                  h: 666 } ; Height    [Optional]
+        ;  *      _wX := 666  ; client X  [Optional]
+        ;  *      _wY := 666  ; client Y  [Optional]
+        ;  *      _wW := 666  ; Width     [Optional]
+        ;  *      _wH := 666  ; Height    [Optional]
+        ;  *
+        ;  * @param {HWND} _wHwnd
+        ;  * @param {Object} [_wRECT]
+        ;  * @param {Integer} [_wX]
+        ;  * @param {Integer} [_wY]
+        ;  * @param {Integer} [_wW]
+        ;  * @param {Integer} [_wH]
+        ;  */
+        ; Static DllWinSetRect(_wHwnd, _wRECT?, _wX?, _wY?, _wW?, _wH?) {
+        ;     Static SWP_NOZORDER := 0x0004
+        ;         ,  SWP_NOMOVE   := 0x0002
+        ;         ,  SWP_NOSIZE   := 0x0001
+        ;     _flags := SWP_NOZORDER
+        ;     if (IsSet(_wRECT)) {
+        ;         _x := !!(_hasX:=_wRECT.HasOwnProp("x")) ? _wRECT.x : 0
+        ;         _y := !!(_hasY:=_wRECT.HasOwnProp("y")) ? _wRECT.y : 0
+        ;         _w := !!(_hasW:=_wRECT.HasOwnProp("w")) ? _wRECT.w : 0
+        ;         _h := !!(_hasH:=_wRECT.HasOwnProp("h")) ? _wRECT.h : 0
+        ;         if !(_hasX and _hasY)
+        ;             _flags |= SWP_NOMOVE
+        ;         if !(_hasW and _hasH)
+        ;             _flags |= SWP_NOSIZE
+        ;     } else {
+        ;         _x := _wX ?? 0
+        ;         _y := _wY ?? 0
+        ;         _w := _wW ?? 0
+        ;         _h := _wH ?? 0
+        ;         if !(IsSet(_wX) and IsSet(_wY))
+        ;             _flags |= SWP_NOMOVE
+        ;         if !(IsSet(_wW) and IsSet(_wH))
+        ;             _flags |= SWP_NOSIZE
+        ;     }
+        ;     DllCall "SetWindowPos"
+        ;         ; target hwnd
+        ;             , "Ptr", _wHwnd
+        ;         ; preceeding hwnd
+        ;             , "Int", HWND_TOP:=0
+        ;         ; client x & y
+        ;             , "Int",_x, "Int",_y
+        ;         ; client w & h
+        ;             , "Int",_w, "Int",_h
+        ;         ; flags (Ignore w, h, and preceeding hwnd)
+        ;             , "UInt", _flags
+        ; }
+
+        Static DllWinSetRect(_wHwnd, _wRECT?) {
             Static SWP_NOZORDER := 0x0004
+                ,  SWP_NOACTIVATE := 0x0010
                 ,  SWP_NOMOVE   := 0x0002
                 ,  SWP_NOSIZE   := 0x0001
-            _flags := SWP_NOZORDER
-            if (IsSet(_wRECT)) {
-                _x := !!(_hasX:=_wRECT.HasOwnProp("x")) ? _wRECT.x : 0
-                _y := !!(_hasY:=_wRECT.HasOwnProp("y")) ? _wRECT.y : 0
-                _w := !!(_hasW:=_wRECT.HasOwnProp("w")) ? _wRECT.w : 0
-                _h := !!(_hasH:=_wRECT.HasOwnProp("h")) ? _wRECT.h : 0
+            _flags := SWP_NOZORDER | SWP_NOACTIVATE
+            WinGetClientPos(&_clx:=0, &_cly:=0, &_clw:=0, &_clh:=0, _wHwnd)
+
+            if (_wRECT ?? False) {
+                _x := !!(_hasX:=_wRECT.HasOwnProp("x")) ? _wRECT.x : _clx
+                _y := !!(_hasY:=_wRECT.HasOwnProp("y")) ? _wRECT.y : _cly
+                _w := !!(_hasW:=_wRECT.HasOwnProp("w")) ? _wRECT.w : _clw
+                _h := !!(_hasH:=_wRECT.HasOwnProp("h")) ? _wRECT.h : _clh
                 if !(_hasX and _hasY)
                     _flags |= SWP_NOMOVE
                 if !(_hasW and _hasH)
                     _flags |= SWP_NOSIZE
-            } else {
-                _x := _wX ?? 0
-                _y := _wY ?? 0
-                _w := _wW ?? 0
-                _h := _wH ?? 0
-                if !(IsSet(_wX) and IsSet(_wY))
-                    _flags |= SWP_NOMOVE
-                if !(IsSet(_wW) and IsSet(_wH))
-                    _flags |= SWP_NOSIZE
-            }
+            } else
+                _x := _clx, _y := _cly, _w := _clw, _h := _clh
             DllCall "SetWindowPos"
                 ; target hwnd
                     , "Ptr", _wHwnd

@@ -1,3 +1,21 @@
+#Include ..\DEBUG\DBT.ahk
+
+Class __Float extends Float {
+    static __New() {
+        this.Prototype.__Class := "Float"
+        for _prop in ObjOwnProps(this.Prototype)
+            Float.Prototype.%_prop% := this.Prototype.%_prop%
+    }
+
+    /**
+     *
+     * @param {number} [_N=0] Round to `_N` digits after decimal point
+     * @returns {number|string}
+     */
+    Round(_N:=0) {
+        return Round(this, _N)
+    }
+}
 
 Class __Array extends Array {
 
@@ -62,7 +80,61 @@ Class __Array extends Array {
         this.Push(_values*)
         Return this[this.Length]
     }
+
+    ForEach(_func) {
+        _parsed_list := []
+        for _index, _value in this
+            _parsed_list.Push _func(_value, _index, this)
+        return _parsed_list
+    }
+
+    Filter(_func) {
+        _filtered_list := []
+        for _value in this
+            if !!_func(_value)
+                _filtered_list.Push(_value)
+        return _filtered_list
+    }
+
+    /**
+     * ```autohotkey2
+     *
+     * ==< VARIADIC >==
+     *
+     * ```
+     * Pass a sequence of objects to be pushed to the original class instance.
+     *
+     * Where it differs from `{Array}.Push`is that any `{Array}` or
+     * descendent of `{Array}` included in the arguments will be
+     * iterated over and the individual values in said array are pushed
+     * to the original class instance.
+     *
+     * @param {any} [_added] Can be a sequence of anything, but if it's nothing, the method
+     *      will just return a clone of itself.
+     * @returns {array} A shiny new array with *all* the values
+     */
+    Extend(_added*) {
+        _new_array := this.CleanClone()
+        ; _extended_array := []
+        ; for _value in this
+        ;     _extended_array.Push _value
+        for _array in _added {
+            if not (_array is Array)
+                _new_array.Push _array
+            else for _value in _array
+                _new_array.Push _value
+        }
+        return _new_array
+    }
+
+    CleanClone() {
+        _clean_array := []
+        for _value in this
+            _clean_array.Push _value
+        return _clean_array
+    }
 }
+
 
 Class __String extends String {
 
@@ -87,8 +159,20 @@ Class __String extends String {
     EndsWith(_chars) {
         Return this.Sub((-1) * _chars.Length(), _chars.Length()) == _chars
     }
-}
 
+    Replace(_re_needle, _replacement:='', &_cnt:=(-1), _starting_pos?) {
+        repl_args := [
+            this,
+            _re_needle,
+            _replacement
+        ]
+        if _cnt >= 0
+            repl_args.Push(&_cnt)
+        if (_starting_pos ?? False)
+            repl_args.Push(_starting_pos)
+        return RegExReplace(repl_args*)
+    }
+}
 
 
 

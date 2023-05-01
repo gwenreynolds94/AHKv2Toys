@@ -38,25 +38,18 @@ BCB_CLIPS_DIR := A_AppData "\BetterClipboard\clips"
 */
 (BCBConf)
 ParseArgs(*) {
-    prev_state := !!Integer(BCBConf.Settings['State'])
-    arg1 := (args_len:=A_Args.Length) ? A_Args[1] : 'unset'
-
-    new_state := true
-    switch arg1 {
-        case 'On':
-            new_state := true
-        case 'Off':
-            new_state := false
-        default:
-            new_state := !prev_state
+    GetNewState(*) {
+        prev_state := BCBConf.Settings['State']
+        arg1 := (args_len:=A_Args.Length) ? A_Args[1] : 'unset'
+        MsgBox(prev_state ', ' arg1)
+        state := (arg1 = 'Toggle') ? !prev_state :
+                 (arg1 = 'Off')    ? false       :
+                 (arg1 = 'On')     ? true        : true
+        return state
     }
-    ; msgbox 'prev: ' prev_state '`n' .
-    ;        'arg: ' arg1 '`n' .
-    ;        'new: ' new_state
-    if new_state != prev_state
-        BCBConf.Settings['State'] := new_state
-    if !new_state
+    if not (BCBConf.Settings['State'] := GetNewState())
         ExitApp
+    else OnExit (*)=> (BCBConf.Settings['State'] := false)
 }
 ParseArgs()
 
@@ -107,20 +100,18 @@ App := BCBApp()
  *      existing and non-existing values.
  */
 Class BCBConf {
-    static ini_presets := Map(
-        'Index', Map(
-            'Current', 1,
-            'Max', 9999,
-        ),
-        'Settings', Map(
-            'State', false,
-            'ToastDuration', 3333
-        )
-    )
-
     static __New() {
         ValidateKeys(*){
-            for _sect_name, _sect_keys in this.ini_presets
+            static IniPresets := Map(
+                'Index', Map(
+                    'Current', 1,
+                    'Max', 9999,
+                ),
+                'Settings', Map(
+                    'State', true
+                )
+            )
+            for _sect_name, _sect_keys in IniPresets
                 for _key_name, _key_value in _sect_keys
                     if this.%_sect_name%[_key_name] = 'unset'
                         msgbox('new:`n' _key_name '`n' (this.%_sect_name%[_key_name] := _key_value))
@@ -146,28 +137,6 @@ Class BCBConf {
             ExitApp
     }
 
-    static HandleStartupArgs(*) {
-        prev_state := !!Integer(BCBConf.Settings['State'])
-        arg1 := (args_len:=A_Args.Length) ? A_Args[1] : 'unset'
-        new_state := !!(arg1 = 'On')  ? true  :
-                     !!(arg1 = 'Off') ? false : !prev_state
-        toast_msg := false
-        toast_title := false
-        if new_state != prev_state {
-            toast_msg := 'arg1: ' arg1 ', states: ' prev_state ' -> ' new_state
-            toast_title := !new_state ? 'Closing {BCV2.exe} process' :
-                                        'Starting {BCV2.exe} process'
-            for _sect_nm, _sect_keys in this.ini_presets
-                for _key_nm, _key_val in _sect_keys
-                    toast_msg .= ( '`n' _sect_nm '.' _key_nm ': ' .
-                                   this.%_sect_nm%[_key_nm]       )
-            JKQuickToast(toast_msg, toast_title)
-            BCBConf.Settings['State'] := new_state
-        }
-        if !new_state
-            ExitApp
-    }
-
     /**
      * @prop {Any} Index Get and set keys of the Index section in the configuration
      *                   file by passing the key name as the property parameter
@@ -183,45 +152,31 @@ Class BCBConf {
     }
 }
 
-JKQuickToast(_msg, _title, _timeout_ms?) {
-    _timeout_ms := _timeout_ms ?? Round( 1.5 * 1000 * (-1) )
+JKQuickToast(_msg, _title, _timeout_ms) {
+    HideTrayTip(*) {
+        TrayTip
+        if SubStr(A_OSVersion, 1, 3) = "10." {
+            A_IconHidden := True
+            SetTimer( (*) => (A_IconHidden := False), (-200) )
+        }
+    }
     Try {
-        _msg_str := String(_msg)
-        _title_str := String(_title)
-        _timeout_ms_int := Integer(_timeout_ms) * -1
-        TrayTip _msg_str, _title_str
-        SetTimer (*)=> TrayTip(), _timeout_ms_int
+        _msg_str         := String(_msg)
+        _title_str       := String(_title)
+        _timeout_ms_int  := Integer(_timeout_ms) * -1
+        _types_are_valid := True
     } Catch Error as type_err {
-        TrayTip "The passed parameters did not have the correct types",
-                "Could not display specified toast message"
-        SetTimer (*)=>TrayTip(), 4 * 1000 * (-1)
+        _types_are_valid := False
+    }
+    if _types_are_valid {
+        TrayTip( _msg_str, _title_str )
+        SetTimer( (*) => HideTrayTip(), _timeout_ms_int )
+    } else {
+        TrayTip( "The passed parameters did not have the correct types",
+                 "Could not display specified toast message" )
+        SetTimer( (*) => HideTrayTip(), (-4000) )
     }
 }
-; JKQuickToast(_msg, _title, _timeout_ms) {
-;     HideTrayTip(*) {
-;         TrayTip
-;         if SubStr(A_OSVersion, 1, 3) = "10." {
-;             A_IconHidden := True
-;             SetTimer( (*) => (A_IconHidden := False), (-200) )
-;         }
-;     }
-;     Try {
-;         _msg_str         := String(_msg)
-;         _title_str       := String(_title)
-;         _timeout_ms_int  := Integer(_timeout_ms) * -1
-;         _types_are_valid := True
-;     } Catch Error as type_err {
-;         _types_are_valid := False
-;     }
-;     if _types_are_valid {
-;         TrayTip( _msg_str, _title_str )
-;         SetTimer( (*) => HideTrayTip(), _timeout_ms_int )
-;     } else {
-;         TrayTip( "The passed parameters did not have the correct types",
-;                  "Could not display specified toast message" )
-;         SetTimer( (*) => HideTrayTip(), (-4000) )
-;     }
-; }
 
 ; A class to help manage the indicator gui for the currently shown index
 Class BCBIndexGui {
@@ -1297,8 +1252,6 @@ Class BCBApp {
         OnMessage(0x1667, (*)=>ExitApp())
         OnClipboardChange(ObjBindMethod(this, "ClipChange"))
     }
-
-
 
     /**
      * Upon receiving a message from my default-running script that is sent

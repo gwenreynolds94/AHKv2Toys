@@ -2,8 +2,12 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <DBT>
-#Include <Gdip_v2Ex>
+#Include *i <DBT>
+#Include *i <Gdip_v2Ex>
+
+#Include *i ..\..\Lib\
+#Include *i DEBUG\DBT.ahk
+#Include *i Gdip_v2Ex.ahk
 
 
 if A_ScriptName="BetterClipboard.1.ahk" {

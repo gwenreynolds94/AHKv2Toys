@@ -2,8 +2,8 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <Utils\WinUtil\WinVector>
-
+#Include WinVector.ahk
+#Include ..\DetectComputer.ahk
 
 
 
@@ -73,8 +73,8 @@ Class WinUtil {
         living_windows := WinGetList("ahk_class" _class)
         deaths := 0
         for live_hwnd in living_windows
-            if WinExist("ahk_id " live_hwnd)
-                WinClose(live_hwnd), deaths++
+            if WinExist(live_hwnd)
+                WinClose(), deaths++
         if IsSet(_callback) {
             _callback(_class, deaths)
         }
@@ -82,6 +82,21 @@ Class WinUtil {
             TrayTip("[ " _class " ]", "Deaths: " deaths)
             SetTimer(HideTrayTip, -4000)
         }
+    }
+
+    /**
+     * @param {String|Number} _re_proc_name regex used to match process names;
+     *
+     * **DO NOT** include "`i)`"
+     */
+    Static WinCloseProcesses(_re_proc_name) {
+        pre_title_match := A_TitleMatchMode
+        A_TitleMatchMode := 'RegEx'
+        windows := WinGetList("ahk_exe i)" _re_proc_name)
+        for _hwnd in windows
+            if WinExist(_hwnd)
+                WinKill()
+        A_TitleMatchMode := pre_title_match
     }
 
     Static WinUnderCursor[_title_type:="hwnd"] => (
@@ -142,17 +157,37 @@ Class WinUtil {
 
     Class Sizer {
 
-        Static wvC := WinVector.Coordinates,
-               wvD := WinVector.DLLUtil,
+        Static wvC := WinVector.Coord, ; hit da bricks
+               wvD := WinVector.DLLUtil, ; hit da bricks
                ext := {},
                toggletimeout := 1250,
                ScreenGap := { x: 8, y: 8 },
-               WindowOffset := { x: 0, y: 0 }
+               WindowOffset := { x: 0, y: 0 },
+               presets := Map(
+                    "primary", {
+                        screen_gap    : { x: 8, y: 8 },
+                        window_offset : { x: 0, y: 0 }
+                    },
+                    "secondary", {
+                        ; screen_gap    : { x: 10, y: 26 },
+                        ; window_offset : { x: 0, y: (-10) }
+                        screen_gap    : { x: 8, y: 8 },
+                        window_offset : { x: 0, y: 0 }
+                    },
+                    "laptop", {
+                        screen_gap    : { x: 8, y: 8 },
+                        window_offset : { x: 0, y: 0 }
+                    },
+                    "unknown", {
+                        screen_gap    : { x: 8, y: 8 },
+                        window_offset : { x: 0, y: 0 }
+                    }
+               )
 
         Static __New() {
-            if A_ComputerName = "DESKTOP-HJ4S4Q2"
-                this.ScreenGap := { x: 10, y: 26 },
-                this.WindowOffset := { x: 0, y: (-10) }
+            use_preset := this.presets[__PC.name]
+            this.ScreenGap := use_preset.screen_gap
+            this.WindowOffset := use_preset.window_offset
         }
 
         Static RlCoords => WinVector.DLLUtil.RealCoordsFromSuperficial

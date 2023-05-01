@@ -1,0 +1,4 @@
+- [ ] Merge `{WinTransparency}` into WinUtil
+- [ ] Make `- [alt +] shift + d` act like `d d`
+- [ ] Using iTunes COM API, love a song and/or add it to a playlist or my library
+- [X] Replace method for `{String}`

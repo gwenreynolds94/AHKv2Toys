@@ -20,64 +20,33 @@ BCBIcon := "HICON:" LoadPicture(A_ScriptDir "\BCV2.exe", "Icon6", &isIcon:=1)
 A_IconTip := "BetterClipboardV2"
 TraySetIcon(BCBIcon)
 
+/**
+ * Immediately exit script if run with the command argument **DoExit**; in combination with
+ * **`#SingleInstance Force`**, this allows for safely exiting the compiled script -- still
+ * catching `OnExit` registered functions -- by just running ".\BCV2.exe DoExit"
+ *
+ * Intended to be used with my main default-running script.
+ */
+__1 := (A_Args.Length) ? A_Args[1] : ""
+if (((A_Args.Length) ? A_Args[1] : "") = "DoExit")
+    ExitApp
+
+#Include ..\Lib
+#Include SciLib\SciConstants.ahk
+#Include SciLib\SciLoad.ahk
+
+; @prop {String} Path to Scintilla.dll
+SCI_DLL_PATH := "Scintilla.dll"
+if !(FileExist(SCI_DLL_PATH) ~= "A|N")
+    FileInstall "..\Lib\SciLib\Scintilla.dll", ".\Scintilla.dll"
+
+__PC_PATH := "DetectComputer.ahk"
 
 ; @prop {String} Path to BetterClipboard configuration file
 BCB_CONF_PATH := A_AppData "\BetterClipboard\BCB.ini"
 
 ; @prop {String} Path to directory storing clipboard entries
 BCB_CLIPS_DIR := A_AppData "\BetterClipboard\clips"
-
-
-
-/**
- * Immediately exit script if run with the command argument **Off**; in combination with
- * **`#SingleInstance Force`**, this allows for safely exiting the compiled script -- still
- * catching `OnExit` registered functions -- by just running ".\BCV2.exe Off"
-*
-* Intended to be used with my main default-running script.
-*/
-(BCBConf)
-ParseArgs(*) {
-    prev_state := !!Integer(BCBConf.Settings['State'])
-    arg1 := (args_len:=A_Args.Length) ? A_Args[1] : 'unset'
-
-    new_state := true
-    switch arg1 {
-        case 'On':
-            new_state := true
-        case 'Off':
-            new_state := false
-        default:
-            new_state := !prev_state
-    }
-    ; msgbox 'prev: ' prev_state '`n' .
-    ;        'arg: ' arg1 '`n' .
-    ;        'new: ' new_state
-    if new_state != prev_state
-        BCBConf.Settings['State'] := new_state
-    if !new_state
-        ExitApp
-}
-ParseArgs()
-
-#Include ..\Lib\SciLib\SciConstants.ahk
-#Include ..\Lib\SciLib\SciLoad.ahk
-
-/**
- *  @var {String} SCI_DLL_PATH Path to Scintilla.dll
- */
-SCI_DLL_PATH := "Lib\Scintilla.dll"
-if !FileExist(SCI_DLL_PATH)
-    FileInstall "..\Lib\SciLib\Scintilla.dll", SCI_DLL_PATH
-
-__PC_PATH := "Lib\DetectComputer.ahk"
-if !FileExist(__PC_PATH)
-    FileInstall "..\Lib\Utils\DetectComputer.ahk", __PC_PATH
-
-/*@Ahk2Exe-Keep
-#Include *i Lib\DetectComputer.ahk
-*/
-
 
 
 /**
@@ -98,6 +67,11 @@ OnExit (*) => SciFree(SciPtr)
  */
 App := BCBApp()
 
+;@Ahk2Exe-IgnoreBegin
+
+;@Ahk2Exe-IgnoreEnd
+
+
 
 /**
  * Helper class for setting/getting keys in configuration file as defined by
@@ -107,121 +81,65 @@ App := BCBApp()
  *      existing and non-existing values.
  */
 Class BCBConf {
-    static ini_presets := Map(
-        'Index', Map(
-            'Current', 1,
-            'Max', 9999,
-        ),
-        'Settings', Map(
-            'State', false,
-            'ToastDuration', 3333
-        )
-    )
-
     static __New() {
-        ValidateKeys(*){
-            for _sect_name, _sect_keys in this.ini_presets
-                for _key_name, _key_value in _sect_keys
-                    if this.%_sect_name%[_key_name] = 'unset'
-                        msgbox('new:`n' _key_name '`n' (this.%_sect_name%[_key_name] := _key_value))
-                    else msgbox('existing:`n' _key_name '`n' _key_value)
-        }
-        ValidateConf(*) {
-            if !!FileExist(BCB_CONF_PATH)
-                return 'exists'
-
+        ; Create configuration file as per BCB_CONF_PATH if the file does not exist and
+        ; the file's directory or the file's directory's parent does exist.
+        ; If neither exist, exit the application
+        if !(FileExist(BCB_CONF_PATH) ~= "A|N") {
             SplitPath BCB_CONF_PATH,, &conf_dir
-            if !!DirExist(conf_dir)
-                return (ValidateKeys(), 'newfile')
-
-            SplitPath conf_dir,, &conf_dir_parent
-            if !!DirExist(conf_dir_parent)
-                return (DirCreate(conf_dir), ValidateKeys(), 'newdir')
-
-            throw ValueError("Neither file or directory of given path to "
-                           . "configuration file could be found."          )
-            return False
+            if DirExist(conf_dir) {
+                IniWrite 1   , BCB_CONF_PATH, "Index", "Current"
+                IniWrite 9999, BCB_CONF_PATH, "Index", "Max"
+            } else {
+                SplitPath conf_dir,, &conf_dir_parent
+                if DirExist(conf_dir_parent) {
+                    DirCreate conf_dir
+                    IniWrite 1   , BCB_CONF_PATH, "Index", "Current"
+                    IniWrite 9999, BCB_CONF_PATH, "Index", "Max"
+                } else {
+                    MsgBox( "Neither file or directory of given path to "
+                          . "configuration file could be found."          )
+                    ExitApp
+                }
+            }
         }
-        if not ValidateConf()
-            ExitApp
-    }
-
-    static HandleStartupArgs(*) {
-        prev_state := !!Integer(BCBConf.Settings['State'])
-        arg1 := (args_len:=A_Args.Length) ? A_Args[1] : 'unset'
-        new_state := !!(arg1 = 'On')  ? true  :
-                     !!(arg1 = 'Off') ? false : !prev_state
-        toast_msg := false
-        toast_title := false
-        if new_state != prev_state {
-            toast_msg := 'arg1: ' arg1 ', states: ' prev_state ' -> ' new_state
-            toast_title := !new_state ? 'Closing {BCV2.exe} process' :
-                                        'Starting {BCV2.exe} process'
-            for _sect_nm, _sect_keys in this.ini_presets
-                for _key_nm, _key_val in _sect_keys
-                    toast_msg .= ( '`n' _sect_nm '.' _key_nm ': ' .
-                                   this.%_sect_nm%[_key_nm]       )
-            JKQuickToast(toast_msg, toast_title)
-            BCBConf.Settings['State'] := new_state
-        }
-        if !new_state
-            ExitApp
     }
 
     /**
      * @prop {Any} Index Get and set keys of the Index section in the configuration
      *                   file by passing the key name as the property parameter
      */
-    static Index[_key] {
-        Get => IniRead(BCB_CONF_PATH, "Index", _key, 'unset')
-        Set => IniWrite(Value, BCB_CONF_PATH, "Index", _key)
-    }
-
-    static Settings[_key] {
-        Get => IniRead(BCB_CONF_PATH, "Settings", _key, 'unset')
-        Set => IniWrite(Value, BCB_CONF_PATH, "Settings", _key)
+    static Index[Param] {
+        Get => IniRead(BCB_CONF_PATH, "Index", Param)
+        Set => IniWrite(Value, BCB_CONF_PATH, "Index", Param)
     }
 }
 
-JKQuickToast(_msg, _title, _timeout_ms?) {
-    _timeout_ms := _timeout_ms ?? Round( 1.5 * 1000 * (-1) )
+JKQuickToast(_msg, _title, _timeout_ms) {
+    HideTrayTip(*) {
+        TrayTip
+        if SubStr(A_OSVersion, 1, 3) = "10." {
+            A_IconHidden := True
+            SetTimer( (*) => (A_IconHidden := False), (-200) )
+        }
+    }
     Try {
-        _msg_str := String(_msg)
-        _title_str := String(_title)
-        _timeout_ms_int := Integer(_timeout_ms) * -1
-        TrayTip _msg_str, _title_str
-        SetTimer (*)=> TrayTip(), _timeout_ms_int
+        _msg_str         := String(_msg)
+        _title_str       := String(_title)
+        _timeout_ms_int  := Integer(_timeout_ms) * -1
+        _types_are_valid := True
     } Catch Error as type_err {
-        TrayTip "The passed parameters did not have the correct types",
-                "Could not display specified toast message"
-        SetTimer (*)=>TrayTip(), 4 * 1000 * (-1)
+        _types_are_valid := False
+    }
+    if _types_are_valid {
+        TrayTip( _msg_str, _title_str )
+        SetTimer( (*) => HideTrayTip(), _timeout_ms_int )
+    } else {
+        TrayTip( "The passed parameters did not have the correct types",
+                 "Could not display specified toast message" )
+        SetTimer( (*) => HideTrayTip(), (-4000) )
     }
 }
-; JKQuickToast(_msg, _title, _timeout_ms) {
-;     HideTrayTip(*) {
-;         TrayTip
-;         if SubStr(A_OSVersion, 1, 3) = "10." {
-;             A_IconHidden := True
-;             SetTimer( (*) => (A_IconHidden := False), (-200) )
-;         }
-;     }
-;     Try {
-;         _msg_str         := String(_msg)
-;         _title_str       := String(_title)
-;         _timeout_ms_int  := Integer(_timeout_ms) * -1
-;         _types_are_valid := True
-;     } Catch Error as type_err {
-;         _types_are_valid := False
-;     }
-;     if _types_are_valid {
-;         TrayTip( _msg_str, _title_str )
-;         SetTimer( (*) => HideTrayTip(), _timeout_ms_int )
-;     } else {
-;         TrayTip( "The passed parameters did not have the correct types",
-;                  "Could not display specified toast message" )
-;         SetTimer( (*) => HideTrayTip(), (-4000) )
-;     }
-; }
 
 ; A class to help manage the indicator gui for the currently shown index
 Class BCBIndexGui {
@@ -1294,11 +1212,8 @@ Class BCBApp {
         this.SetClip(this.shownIndex)
         this.InitHotkeys()
         OnMessage(0x1666, ObjBindMethod(this, "OnSizingStartEnd"))
-        OnMessage(0x1667, (*)=>ExitApp())
         OnClipboardChange(ObjBindMethod(this, "ClipChange"))
     }
-
-
 
     /**
      * Upon receiving a message from my default-running script that is sent
@@ -1311,11 +1226,10 @@ Class BCBApp {
      * @param {Integer} msg The code for the received message
      * @param {Integer} hwnd The handle of the receiving window
      */
-    OnSizingStartEnd(_wparam, _lparam, _msg, _hwnd) {
+    OnSizingStartEnd(wparam, lparam, msg, hwnd) {
         ; on sizing start -->
-        if (!!_wparam) {
-            ;; may need to set [20] back to [25]
-            SetTimer SizingLoop, 20
+        if (!!wparam) {
+            SetTimer SizingLoop, 25
             this.gui.BackColor := this.colors.bg
             this.edit.ctrl.Opt("-Redraw")
         ; on sizing end ---->
@@ -1326,9 +1240,9 @@ Class BCBApp {
         }
         SizingLoop(*) {
             this.gui.GetPos(,,&_w, &_h)
-            w_new := _w-(this.gui.MarginX*2)
-            h_new := _h-(this.gui.MarginY*2)
-            this.edit.ctrl.Move(,,w_new, h_new)
+            _newW := _w-(this.gui.MarginX*2)
+            _newH := _h-(this.gui.MarginY*2)
+            this.edit.ctrl.Move(,,_newW, _newH)
         }
     }
 

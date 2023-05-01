@@ -5,19 +5,10 @@
 
 #Include Lib\
 #Include DEBUG\DBT.ahk
-#Include Utils\DllCoords.ahk
-
-Persistent()
-
-dbgo !
 
 
 
-
-False
-
-; dbgo Map
-; dbgo RegExReplace(mapres, "m)(^(.\|(.{3})))")
+stdo Gui
 
 
 F8::ExitApp

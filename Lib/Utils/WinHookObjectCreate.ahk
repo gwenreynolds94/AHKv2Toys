@@ -2,7 +2,7 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include <DBT>
+#Include <DEBUG\DBT>
 Persistent
 
 Class HookObjectCreate {
@@ -10,7 +10,7 @@ Class HookObjectCreate {
             wTitles := Map( "ahk_exe Code.exe"            , "Full",
                             "ahk_class MozillaWindowClass", "Half",
                             "ahk_exe WindowsTerminal.exe" , "Half"  )
-        
+
     Static __New()
     {
         this.RegisterWinHook()
@@ -23,10 +23,8 @@ Class HookObjectCreate {
         Hotkey "#F9", ObjBindMethod(this, "UnRegisterWinHook")
     }
 
-    Static RegisterWinHook(*) 
+    Static RegisterWinHook(*)
     {
-        this.hook := 0
-    
         if (this.hook) {
             this.hook := DllCall("User32\UnhookWinEvent", "Ptr",this.hook)
         } else {
@@ -44,17 +42,17 @@ Class HookObjectCreate {
             Critical "Off"
             wClass := (bwClass:=WinExist("ahk_id" hWnd)) ? WinGetClass() : 0
             wTitle := (bwTitle:=WinExist("ahk_id" hWnd)) ? WinGetTitle() : 0
-            if (!!wClass or !!wTitle) 
+            if (!!wClass or !!wTitle)
                 this.OnObjectCreate(hWnd, wClass, wTitle)
         }
         return !!this.hook
     }
-    Static UnRegisterWinHook(*) 
+    Static UnRegisterWinHook(*)
     {
         this.hook := (this.hook) ? DllCall("User32\UnhookWinEvent", "Ptr", this.hook) : this.hook
     }
 
-    Static OnObjectCreate(hWnd, wClass, wTitle) 
+    Static OnObjectCreate(hWnd, wClass, wTitle)
     {
         if !(isWin := DllCall("IsWindow", "Ptr", hWnd))
             return
@@ -79,7 +77,7 @@ Class HookObjectCreate {
 
     Class WinSizePos {
 
-        Static SizeWindow(wHwnd:=0, wScrGap:=8, *) 
+        Static SizeWindow(wHwnd:=0, wScrGap:=8, *)
         {
             wHwnd   := (!wHwnd) ? WinExist("A") : (wHwnd)
             wTitle  := "ahk_id " wHwnd
@@ -89,7 +87,7 @@ Class HookObjectCreate {
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }
 
-        Static SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *) 
+        Static SizeWindowHalf(wHwnd:=0, wScrGap:=8, side:=0, *)
         {
             wHwnd   := (!wHwnd) ? WinExist("A") : (wHwnd)
             wWidth  := (A_ScreenWidth-wScrGap*2)//2
@@ -124,7 +122,7 @@ Class HookObjectCreate {
             WinMove(wRect.x, wRect.y, wRect.w, wRect.h, wTitle)
         }
 
-        Static GetWindowMarginsRect(&win, wHwnd) 
+        Static GetWindowMarginsRect(&win, wHwnd)
         {
             win := {}
             newWinRect := Buffer(16)
@@ -135,7 +133,7 @@ Class HookObjectCreate {
             win.h := NumGet(newWinRect, 12, "Int")
         }
 
-        Static GetWindowVisibleRect(&frame, wHwnd) 
+        Static GetWindowVisibleRect(&frame, wHwnd)
         {
             DWMWA_EXTENDED_FRAME_BOUNDS := 9
             newFrameRect := Buffer(16)
@@ -154,7 +152,7 @@ Class HookObjectCreate {
             frame.h := NumGet(newFrameRect, 12, "Int")
         }
 
-        Static SuperficialCoordsFromReal(&outCoords, wHwnd) 
+        Static SuperficialCoordsFromReal(&outCoords, wHwnd)
         {
             WinGetPos &wX, &wY, &wW, &wH, "ahk_id " wHwnd
             this.GetWindowMarginsRect( &win , wHwnd)
@@ -171,7 +169,7 @@ Class HookObjectCreate {
             outCoords.w  := wW - (offSetRight * 2)
         }
 
-        Static RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH) 
+        Static RealCoordsFromSuperficial(&outCoords, wHwnd, wX, wY, wW, wH)
         {
             this.GetWindowMarginsRect( &win , wHwnd)
             this.GetWindowVisibleRect(&frame, wHwnd)
