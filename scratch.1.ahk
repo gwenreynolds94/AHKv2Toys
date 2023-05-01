@@ -6,10 +6,9 @@
 #Include Lib\
 #Include DEBUG\DBT.ahk
 
-asd := {a:1,b:2,c:3,d:4}
-qwe := &asd
 
-stdo qwe, '--- --- --- ---', &qwe
+
+stdo Gui
 
 
 F8::ExitApp

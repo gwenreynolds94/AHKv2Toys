@@ -14,7 +14,7 @@ s2do(_msg*) {
         msglast := _msg[_msg.Length]
         if (msglast is Object) and ObjHasOwnProp(msglast, "__opts") {
             for _opt, _val in _opts
-                if ObjHasOwnProp(msglast.__opts, _opt)
+                if msglast.__opts.HasOwnProp(_opt)
                     _opts.%_opt% := msglast.%_opt%
             _msg.Pop()
         }
@@ -73,7 +73,7 @@ s2do(_msg*) {
                 Return TryStringOut(out_string)
             indent_str_pre := indstr
             indstr := "=|="
-            If ObjHasOwnProp(out_item, "Prototype")
+            If out_item.HasOwnProp("Prototype")
                 out_string := TryStringOut("<" out_item.Prototype.__Class ">")
             Else out_string := TryStringOut("<" out_item.__Class ">")
             indstr := indent_str_pre
@@ -92,7 +92,7 @@ s2do(_msg*) {
                     nestlvl++
                     if (item = "OwnProps") {
                         out_string .= TryStringOut(item)
-                        for _itm in ObjOwnProps(out_item) {
+                        for _itm in out_item.OwnProps() {
                             nestlvl++
                             out_string .= TryStringOut(_itm)
                             nestlvl++
@@ -138,10 +138,10 @@ stdo(_msg*) {
     indent_str := indent_default := " | "
     if _msg.Length {
         _last := _msg[_msg.Length]
-        if type(_last) == "Object" and ObjHasOwnProp(_last, "__opts") {
+        if type(_last) == "Object" and _last.HasOwnProp("__opts") {
             _new_opts := _last.__opts
             for _cfg, _setting in _def_opts {
-                if ObjHasOwnProp(_new_opts, _cfg)
+                if _new_opts.HasOwnProp(_cfg)
                     _def_opts[_cfg] := _new_opts.%_cfg%
             }
             _msg.Capacity := _msg.Length - 1
@@ -194,16 +194,11 @@ stdo(_msg*) {
         If IsObject(out_item) {
             ; indent_str_pre := indent_str
             ; indent_str := "|- "
-            ; is_varref := !!(out_item is VarRef)
-            ;     Return TryStringOut(%out_item%)
-
             If out_string := ComObjType(out_item, "Name")
                 Return TryStringOut(out_string)
             indent_str_pre := indent_str
             indent_str := "=|="
-            if (out_item is VarRef)
-                Return TryStringOut(%out_item%)
-            If ObjHasOwnProp(out_item, "Prototype")
+            If out_item.HasOwnProp("Prototype")
                 out_string := TryStringOut("<" out_item.Prototype.__Class ">")
             Else out_string := TryStringOut("<" out_item.__Class ">")
             indent_str := indent_str_pre
