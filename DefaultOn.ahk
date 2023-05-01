@@ -968,39 +968,42 @@ Class WindowFairy extends LeaderKeys {
 
         _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
 
-        _ph_run_path := _ahk_cache_dir ".default-on.run.ph"
-        run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
-
-        this.MapKeyPath(["o", "p", "h"],
-            (*) => Run(run_ph)
-        )
+;         _ph_run_path := _ahk_cache_dir ".default-on.run.ph"
+;         run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
+;
+;         this.MapKeyPath(["o", "p", "h"],
+;             (*) => Run(run_ph)
+;         )
 
         this.weblinks := weblinks := LinkTable()
 
         _ph_link_path  := _ahk_cache_dir "ph.linkpath"
         _han_link_path := _ahk_cache_dir "han.linkpath"
-        _tgw_link_path := _ahk_cache_dir "tgw.linkpath"
+        _fb_link_path  := _ahk_cache_dir "fb.linkpath"
+        _tph_link_path := _ahk_cache_dir "tph.linkpath"
 
         link_ph  := !!FileExist(_ph_link_path)  ? FileRead(_ph_link_path)  : "duckduckgo.com"
-        link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : link_ph
-        link_tgw := !!FileExist(_tgw_link_path) ? FileRead(_tgw_link_path) : link_han
-        link_emmylua := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
+        link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : "duckduckgo.com"
+        link_fb  := !!FileExist(_fb_link_path)  ? FileRead(_fb_link_path)  : "duckduckgo.com"
+        link_tph := !!FileExist(_tph_link_path) ? FileRead(_tph_link_path) : "duckduckgo.com"
+        link_emmylua     := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
         link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
 
-        weblinks.Link[           "ph" ,          ["^p"] ] := link_ph
-        weblinks.Link[          "han" ,          ["^h"] ] := link_han
-        weblinks.Link[          "tgw" , ['t', 'g', 'w'] ] := link_tgw
-        weblinks.Link[      "emmylua" ,           ["e"] ] := link_emmylua
-        weblinks.Link[  "thqbygithub" ,           ["a"] ] := link_thqbygithub
-        weblinks.Link[ "fancyconvert" ,          ["!f"] ] := "https://www.textfancy.com/font-converter/"
-        weblinks.Link[    "fancyedit" ,          ["+f"] ] := "https://www.textpaint.net/"
+        weblinks.Link[           "ph" ,      ["p", "h"] ] := link_ph
+        weblinks.Link[          "han" , ["h", "a", "n"] ] := link_han
+        weblinks.Link[           "fb" ,      ["f", "b"] ] := link_fb
+        weblinks.Link[          "tph" , ["t", "p", "h"] ] := link_tph
+        weblinks.Link[      "emmylua" , ["e", "m", "y"] ] := link_emmylua
+        weblinks.Link[  "thqbygithub" , ["t", "h", "q"] ] := link_thqbygithub
+        weblinks.Link[        "gmail" ,      ["g", "m"] ] := "https://www.gmail.com"
+        weblinks.Link[      "soundit" ,      ["s", "i"] ] := "http://192.168.1.3:9697/"
+        weblinks.Link[ "fancyconvert" ,      ["f", "c"] ] := "https://www.textfancy.com/font-converter"
+        weblinks.Link[    "fancyedit" ,      ["f", "p"] ] := "https://www.textpaint.net/"
         weblinks.link[      "textnow" ,      ["t", "n"] ] := "https://www.textnow.com/"
-        weblinks.Link[      "soundit" ,           ["s"] ] := "http://192.168.1.3:9697/"
-        weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
         weblinks.Link[       "paypal" , ["p", "a", "y"] ] := "https://www.paypal.com/"
-        weblinks.Link[        "gmail" ,           ["g"] ] := "https://www.gmail.com"
-        weblinks.Link[          "ddg" ,           ["d"] ] := "https://www.duckduckgo.com"
-        weblinks.Link[          "ora" , ['o', 'r', 'a'] ] := "https://www.ora.sh"
+        weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
+        weblinks.Link[          "ora" , ['o', 'r', 'a'] ] := "https://www.ora.sh/"
+        weblinks.Link[          "ddg" , ["d", "d", "g"] ] := "https://www.duckduckgo.com"
 
 
         this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
