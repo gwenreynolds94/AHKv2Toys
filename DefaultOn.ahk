@@ -951,20 +951,22 @@ Class WindowFairy extends LeaderKeys {
         )
 
         this.MapKeyPath(["k", "k"], (*)=> WinClose(WinExist("A")))
-        this.MapKeyPath(["k", "l"], (*)=> WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace('\.', '\.')))
         this.MapKeyPath(["o", "v"], (*)=> Run("VSCodium.exe"))
         this.MapKeyPath(["o", "m"], (*)=> Run("Maxthon.exe"))
-        this.MapKeyPath(["o", "w"], (*)=> Run("wezterm-gui.exe"))
         this.MapKeyPath(["o", "e"], (*)=> Run("explorer.exe"))
-        this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
+        this.MapKeyPath(["k", "l"], (*)=>
+            WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace('\.', '\.')))
+        this.MapKeyPath(['f', 'w', 'f'], (*)=> !!(WinExist('ahk_exe waterfox.exe')) ? (WinActivate()) :
+                        (JKQuickToast('There aren`'t any waterfox windows open at the moment', '', )) )
+        this.MapKeyPath(["o", "w", "z"], (*)=> Run("wezterm-gui.exe"))
         this.MapKeyPath(["o", "s", "t"], (*)=> Run("sublime_text.exe"))
+        this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
+        this.MapKeyPath(['c', 'c', 'b'], (*)=> Run(_G.Paths.BCV2Exe ' Toggle'))
         this.MapKeyPath(['a', 'o', 't'], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
         this.MapKeyPath(['n', 'o', 't'], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
-        this.MapKeyPath(['c', 'c', 'b'], (*)=> Run(_G.Paths.BCV2Exe ' Toggle'))
-        this.MapKeyPath(['f', 'w', 'f'], (*)=> !!(WinExist('ahk_exe waterfox.exe')) ? (WinActivate()) : (JKQuickToast('There aren`'t any waterfox windows open at the moment', '', )) )
 
 
-        _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\AutoHotkey2\"
+        _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
 
         _ph_run_path := _ahk_cache_dir ".default-on.run.ph"
         run_ph := !!FileExist(_ph_run_path) ? FileRead(_ph_run_path) : ""
@@ -975,26 +977,31 @@ Class WindowFairy extends LeaderKeys {
 
         this.weblinks := weblinks := LinkTable()
 
-        _ph_link_path := _ahk_cache_dir ".default-on.link.ph"
-        _han_link_path := _ahk_cache_dir ".default-on.link.han"
+        _ph_link_path  := _ahk_cache_dir "ph.linkpath"
+        _han_link_path := _ahk_cache_dir "han.linkpath"
+        _tgw_link_path := _ahk_cache_dir "tgw.linkpath"
 
-        link_ph := !!FileExist(_ph_link_path) ? FileRead(_ph_link_path) : "duckduckgo.com"
+        link_ph  := !!FileExist(_ph_link_path)  ? FileRead(_ph_link_path)  : "duckduckgo.com"
         link_han := !!FileExist(_han_link_path) ? FileRead(_han_link_path) : link_ph
+        link_tgw := !!FileExist(_tgw_link_path) ? FileRead(_tgw_link_path) : link_han
         link_emmylua := "https://www.github.com/LuaLS/lua-language-server/wiki/Annotations"
         link_thqbygithub := "https://www.github.com/thqby/vscode-autohotkey2-lsp"
 
-        weblinks.Link["ph", "^p"] := link_ph
-        weblinks.Link["han", "^h"] := link_han
-        weblinks.Link["emmylua", "e"] := link_emmylua
-        weblinks.Link["thqbygithub", "a"] := link_thqbygithub
-        weblinks.Link["fancyconvert", "!f"] := "https://www.textfancy.com/font-converter/"
-        weblinks.Link["fancyedit", "+f"] := "https://www.textpaint.net/"
-        weblinks.link["textnow", "t"] := "https://www.textnow.com/"
-        weblinks.Link["soundit", "s"] := "http://192.168.1.3:9697/"
-        weblinks.Link["reddit", "r"] := "https://www.reddit.com"
-        weblinks.Link["paypal", "p"] := "https://www.paypal.com/"
-        weblinks.Link["gmail", "g"] := "https://www.gmail.com"
-        weblinks.Link["ddg", "d"] := "https://www.duckduckgo.com"
+        weblinks.Link[           "ph" ,          ["^p"] ] := link_ph
+        weblinks.Link[          "han" ,          ["^h"] ] := link_han
+        weblinks.Link[          "tgw" , ['t', 'g', 'w'] ] := link_tgw
+        weblinks.Link[      "emmylua" ,           ["e"] ] := link_emmylua
+        weblinks.Link[  "thqbygithub" ,           ["a"] ] := link_thqbygithub
+        weblinks.Link[ "fancyconvert" ,          ["!f"] ] := "https://www.textfancy.com/font-converter/"
+        weblinks.Link[    "fancyedit" ,          ["+f"] ] := "https://www.textpaint.net/"
+        weblinks.link[      "textnow" ,      ["t", "n"] ] := "https://www.textnow.com/"
+        weblinks.Link[      "soundit" ,           ["s"] ] := "http://192.168.1.3:9697/"
+        weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
+        weblinks.Link[       "paypal" , ["p", "a", "y"] ] := "https://www.paypal.com/"
+        weblinks.Link[        "gmail" ,           ["g"] ] := "https://www.gmail.com"
+        weblinks.Link[          "ddg" ,           ["d"] ] := "https://www.duckduckgo.com"
+        weblinks.Link[          "ora" , ['o', 'r', 'a'] ] := "https://www.ora.sh"
+
 
         this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
 

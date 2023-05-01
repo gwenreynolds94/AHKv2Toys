@@ -12,15 +12,15 @@
  */
 Class LeaderKeys extends KeyTable {
 
-      /** @prop {String} leader */
-    leader := ""
-    , _enabled := False
+    /** @prop {String} leader */
+    leader   := ""
+    _enabled := False
 
     /**
      * @param {string} _leader
      * @param {number} _timeout
      */
-    __New(_leader := "#a", _timeout:=2000) {
+    __New(_leader := "#a", _timeout := 2000) {
         this.leader := _leader
         super.__New(_timeout)
         this.boundmeth.toggletable := ObjBindMethod(this, "ToggleLeader")
@@ -32,8 +32,8 @@ Class LeaderKeys extends KeyTable {
         this._enabled := True
         _timeout := _timeout ?? this.timeout
         Hotkey this.leader,
-               this.boundmeth.togglekeypaths.Bind(_timeout),
-               "On"
+            this.boundmeth.togglekeypaths.Bind(_timeout),
+            "On"
     }
 
     DisableLeader(_timeout?, *) {
@@ -47,11 +47,11 @@ Class LeaderKeys extends KeyTable {
         this.Enabled[_timeout] := !this.Enabled
     }
 
-    __Noop[_placeholder?] => (*)=>""
+    __Noop[_placeholder?] => (*) => ""
 
     Enabled[_timeout?] {
-        Get => this._enabled
-        Set {
+        get => this._enabled
+        set {
             _timeout := _timeout ?? this.timeout
             if !!Value and !this._enabled
                 this.EnableLeader(_timeout)
@@ -65,29 +65,34 @@ Class LinkTable extends KeyTable {
     Static BrowserExe := ""
 
     Static __New() {
-        this.BrowserExe := (__PC.name = "laptop")  ? "Maxthon.exe"  :
-                           (__PC.name = "primary") ? "waterfox.exe" : "firefox.exe"
+        this.BrowserExe := (__PC.name = "laptop") ? "Maxthon.exe" :
+            (__PC.name = "primary") ? "waterfox.exe" : "firefox.exe"
     }
 
     _links := Map()
 
-    __New(_timeout:=3000) {
+    __New(_timeout := 3000) {
         super.__New(_timeout)
     }
 
-    Link[_name, _key:=""] {
-        Get => this._links.Has(_name) ? this._links[_name] : false
-        Set {
+    /**
+     *
+     * @param {string} _name
+     * @param {string|array} _key
+     */
+    Link[_name, _key := ""] {
+        get => this._links.Has(_name) ? this._links[_name] : false
+        set {
             _link := LinkTable.LinkItem(_name, Value)
             this._links[_name] := _link
-            this.MapKey(_key, _link.bflaunch)
+            this.MapKeyPath(_key, _link.bflaunch)
         }
     }
 
     Class LinkItem {
         name := "",
-        address := "",
-        bflaunch := {}
+            address := "",
+            bflaunch := {}
 
         __New(_name, _addr) {
             this.name := _name
@@ -96,10 +101,10 @@ Class LinkTable extends KeyTable {
         }
 
         Launch(*) {
-            Run LinkTable.BrowserExe  " " . (
-                   (this.address ~= "`"")   ?
-                   (this.address)           :
-                   ("`"" this.address "`"") )
+            Run LinkTable.BrowserExe " " . (
+                (this.address ~= "`"") ?
+                (this.address) :
+                ("`"" this.address "`""))
         }
     }
 }
@@ -115,4 +120,3 @@ Class CountLeader extends KeyTable {
 
     }
 }
-

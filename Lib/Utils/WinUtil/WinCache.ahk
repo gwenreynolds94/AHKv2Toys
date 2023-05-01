@@ -2,9 +2,14 @@
 #Warn All, StdOut
 #SingleInstance Force
 
-#Include ..\..\DEBUG\DBT.ahk
-#Include WinVector.ahk
-#Include WinUtil.ahk
+#Include *i <DEBUG\DBT>
+#Include *i <Utils\WinUtil\WinUtil>
+#Include *i <Utils\DetectComputer>
+
+#Include *i ..\..\DEBUG\DBT.ahk
+#Include *i WinVector.ahk
+#Include *i WinUtil.ahk
+#Include *i ..\DetectComputer.ahk
 
 class WinCache {
     static _windows := Map()
@@ -37,6 +42,11 @@ class WinCache {
             this.process := WinGetProcessName()
             this.class := WinGetClass()
             this.title := WinGetTitle()
+        }
+
+        IsBrowser {
+            get => (0)
+            set => (0)
         }
 
         Size[_src:='wingetpos'] {
@@ -72,14 +82,12 @@ class WinCache {
                             &_super_size_pos:={}, this.hwnd)
                 _ahk_size_pos := {x: _x, y: _y, w: _w, h: _h}
                 if not _src
-                    throw ValueError('WinCache.WinItem.SizePos:: ' .
-                                     '_src must not be blank')
+                    throw ValueError('WinCache.WinItem.SizePos:: _src must not be blank')
                 else if _src ~= 'winget(pos)?|real'
                     return _ahk_size_pos
                 else if _src ~= 'super'
                     return _super_size_pos
-                else throw ValueError('WinCache.WinItem.SizePos:: ' .
-                                      '_src is not valid')
+                else throw ValueError('WinCache.WinItem.SizePos:: _src is not valid')
             }
             set {
             }

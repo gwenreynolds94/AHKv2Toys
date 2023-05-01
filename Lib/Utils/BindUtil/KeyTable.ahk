@@ -183,7 +183,6 @@ Class KeyTable {
         if kplen > 1 {
             for _k in kp {
                 curkeys := ktbls[ktbls.Length].keys
-                ; nexttbl := KeyTable(_timeout)
                 if !curkeys.Has(_k)
                     curkeys[_k] := KeyTable(_timeout)
                 ktbls.Push(curkeys[_k])
