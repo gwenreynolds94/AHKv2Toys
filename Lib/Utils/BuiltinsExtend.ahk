@@ -1,5 +1,18 @@
 #Include ..\DEBUG\DBT.ahk
 
+
+
+Class __Object extends Object {
+    static __New() {
+        this.Prototype.__Class := "Object"
+        for _prop in ObjOwnProps(this.Prototype)
+            Object.Prototype.%_prop% := this.Prototype.%_prop%
+    }
+
+    Ptr => ObjPtr(this)
+}
+
+
 Class __Float extends Float {
     static __New() {
         this.Prototype.__Class := "Float"

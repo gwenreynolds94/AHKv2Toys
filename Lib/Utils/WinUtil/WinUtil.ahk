@@ -61,6 +61,31 @@ Class WinUtil {
         }
     }
 
+    ; /**
+    ;  *
+    ;  * @param {any} _who_died preferrably something descriptive
+    ;  * @param {number} [_how_many=1]
+    ;  * @param {number} [_memorial_duration_in_ms=5000]
+    ;  */
+    ; Static WinFuneral(_who_died, _how_many:=1, _memorial_duration_in_ms:=5000) {
+    ;     casket := Map(), body_type := type(_who_died)
+    ;     if !!ObjHasOwnProp(_who_died, 'Count')
+    ;         death_count := _who_died.Count
+    ;     else if !!ObjHasOwnProp(_who_died, 'Length')
+    ;     Try
+    ;         death_count:=_who_died.Length
+    ;     Catch
+    ;         death_count:=_who_died.Count
+    ;     Else
+    ;         death_count:=1
+    ;     _msg   := ''
+    ;     _title := ''
+    ;         ; TrayTip("[ ...instance of {" (___:=_who_died).__Class "} ]", "Deaths: probably " caskets.Count)
+    ;     ; else for _i, _v in _who_died
+    ;     ;     caskets[_i] := _v
+    ; }
+
+
     Static WinCloseClass(_class?, _callback?, *) {
         HideTrayTip(*) {
             TrayTip()
