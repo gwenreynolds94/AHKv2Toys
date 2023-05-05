@@ -1,26 +1,56 @@
 
+#Include BuiltinsExtend.ahk
+
 Class __PC {
-    static name := ''
+    static name := 'unknown'
         , monitors := Map()
-        , default_browser := 'waterfox.exe'
+        , default_browser := 'msedge.exe'
+        , fallback_browsers := []
+        , default_fallback_browsers := [
+            'Maxthon.exe',
+            'waterfox.exe',
+            'firefox.exe',
+            'waterfox.exe'
+            'chrome.exe',
+            'msedge.exe'
+        ]
+        , browser_presets := Map(
+            'B2B2M4P', {
+                name: 'primary',
+                browser: 'waterfox.exe'
+            },
+            'HQ7DNU', {
+                name: 'primary',
+                browser: 'msedge.exe'
+            },
+            'JJTV8BS', {
+                name: 'secondary',
+                browser: 'waterfox.exe'
+            },
+            'HJ4S4Q2', {
+                name: 'laptop',
+                browser: 'Maxthon.exe'
+            },
+            'unknown', {
+                name: 'unknown',
+                browser: 'msedge.exe'
+            }
+        )
 
     static __New() {
-        if (A_ComputerName ~= 'DESKTOP-B2B2M4P') {
-            this.name := 'primary'
-            this.default_browser := 'waterfox.exe'
-        }
-        else if (A_ComputerName ~= 'DESKTOP-JJTV8BS') {
-            this.name := 'secondary'
-            this.default_browser := 'waterfox.exe'
-        }
-        else if (A_ComputerName ~= 'DESKTOP-HJ4S4Q2') {
-            this.name := 'laptop'
-            this.default_browser := 'Maxthon.exe'
-        }
-        else {
-            this.name := 'unknown'
-            this.default_browser := 'msedge.exe'
-        }
+        for _computer_name, _preset in this.browser_presets
+            if A_ComputerName ~= _computer_name
+                this.name := _preset.name,
+                this.default_browser := _preset.browser
+        this.fallback_browsers := this.default_fallback_browsers.Filter((_browser)=>
+                                                 !(_browser = this.default_browser))
+    }
+
+    static EnvPathHasFile(_file) {
+        for _path in StrSplit(EnvGet('PATH'), ';')
+            if FileExist(_try_path:=(RegExReplace(_path, '\\$') '\' _file))
+                return _try_path
+        return false
     }
 
     static RefreshMonitors(_force:=False) {
@@ -137,9 +167,9 @@ Class __PC {
                     static x := 0, y := 0, w := 0, h := 0, first_pass := true
                     if !!_force_update or !!first_pass
                         WinGetPos(&_wx, &_wy, &_ww, &_wh, WinExist('A')),
-                        x := _wx, y := _wy, w := _ww, h := _wh
-                    return {x: x, y: y, w: w, h: h}
+                                  x := _wx, y := _wy, w := _ww, h := _wh
                     first_pass := false
+                    return {x: x, y: y, w: w, h: h}
                 }
                 active_win_pos := GetWindowPosition(_force)
                 cx := active_win_pos.x + (active_win_pos.w // 2)

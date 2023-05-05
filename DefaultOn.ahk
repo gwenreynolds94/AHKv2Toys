@@ -10,6 +10,7 @@
 #Include <Utils\VolumeChangeGUI>
 #Include <Utils\WinTransparency>
 #Include <Utils\FormatComment>
+#Include <Utils\URLPuppy>
 #Include *i %A_ScriptDir%\ScinSkratch\Scritch.ahk
 #Include <Utils\BindUtil\BindUtil>
 #Include <Utils\WinUtil\WinUtil>
@@ -25,22 +26,7 @@ Class ScriptDOConf {
         '^', '^!', '^+', '^#' , '^!+', '^!#',
         '!', '!+', '!#', '!+#',
         '+', '+#',
-        '#',
-    ;   ""    ,
-    ;   "+"   ,
-    ;   "+^"  ,
-    ;   "+!"  ,
-    ;   "+#"  ,
-    ;   "+^!" ,
-    ;   "+^#" ,
-    ;   "+!#" ,
-    ;   "^"   ,
-    ;   "^!"  ,
-    ;   "^#"  ,
-    ;   "^!#" ,
-    ;   "!"   ,
-    ;   "!#"  ,
-    ;   "#"   ,
+        '#'
     ]
     _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
     _vsc_text_main_rgx  := ".*Visual\sStudio\sCode"
@@ -48,9 +34,8 @@ Class ScriptDOConf {
     X2IsDown := False
     X1Delay  := 325
     X2Delay  := 325
-    ThisPC   := (A_ComputerName ~= 'B2B2M4F') ? 'primary'   :
-                (A_ComputerName ~= 'JJTV8BS') ? 'secondary' :
-                (A_ComputerName ~= 'HJ4S4Q2') ? 'laptop'    : 'unknown'
+    ThisPC   := __PC.name
+    WindowCycleOffset := 1
     bcv2_exe := 'BCV2.exe'
 }
 
@@ -138,6 +123,10 @@ _G := GblDOConf()
 _S := ScriptDOConf()
 _S.X1Delay := _G.General.X1Delay
 _S.X2Delay := _G.General.X2Delay
+_S.WindowCycleOffset := _G.General.WindowCycleOffset
+
+if __PC.name = 'primary'
+    _S.WindowCycleOffset -= 1
 
 /** @var {Map} _T `TEMP` Config */
 _T := Map()
@@ -444,19 +433,49 @@ if !!_G.Enabled.SearchFirefox {
 }
 SearchBrowserFromClipboard(*) {
     SetTimer(SendXButton2, 0)
-    SetTitleMatchMode "RegEx"
-    if !((wTitle := WinExist("ahk_exe \w+fox.exe$")) and brsr := "fire")
-        if !((wTitle := WinExist("ahk_exe i).+maxthon.*")) and brsr := "max")
-            Return False
-    SetTitleMatchMode 2
-    wIDstr := ("ahk_id " wTitle)
-    WinGetPos , , &wWidth
-    if (wWidth < 701 and brsr == "fire")
-        WinMove , , 701, , wIDstr
-    WinActivate wIDstr
-    WinWait wIDstr
-    SetKeyDelay 25, 5
-    SendEvent "{LCtrl Down}tlv{LCtrl Up}{Enter}"
+    ; ddg_url := 'https://www.duckduckgo.com/?q=' .
+            ;    (A_Clipboard).Replace('\+', '%2B')
+                            ; .Replace('\,', '%2C')
+                            ; .Replace('\/', '%2F')
+                            ; .Replace('\\', '%5C')
+                            ; .Replace('\#', '%23')
+                            ; .Replace('\$', '%24')
+                            ; .Replace('\%', '%25')
+                            ; .Replace('\&', '%26')
+                            ; .Replace("\'", '%27')
+                            ; .Replace('\s', '+')
+    ; Run __PC.default_browser ' ' ddg_url
+
+    Run __PC.default_browser ' ' URLPuppy.BuildDDGSearch(A_Clipboard)
+
+    ; SetTitleMatchMode "RegEx"
+    ; SetTitleMatchMode 2
+    ; wIDstr := ("ahk_exe i)" __PC.default_browser.Replace('\.', '\.'))
+    ; if not WinExist(wIDstr) {
+    ;     Run(__PC.default_browser)
+    ;     new_win := WinUtil.WinWaitNewActive(wIDstr, 5)
+    ; } else WinActivate(wIDstr)
+
+    ; ; WinGetPos , , &wWidth
+    ; ; if (wWidth < 701 and brsr == "fire")
+    ; ;     WinMove , , 701, , wIDstr
+    ; ; WinActivate wIDstr
+    ; ; WinWaitActive wIDstr
+
+    ; _kdelay := A_KeyDelay, _kdur := A_KeyDuration
+    ; A_KeyDelay := 25
+    ; A_KeyDuration := 5
+
+    ; ; SetKeyDelay 25, 5
+
+    ; SendEvent("{LCtrl Down}") , Sleep(10)
+    ; SendEvent("t")            , Sleep(10)
+    ; SendEvent("l")            , Sleep(10)
+    ; SendEvent("v")            , Sleep(10)
+    ; SendEvent("{LCtrl Up}")   , Sleep(10)
+    ; SendEvent("{Enter}")
+    ; A_KeyDelay := _kdelay
+    ; A_KeyDuration := _kdur
 }
 ; Activate window below current in the z-order
 OnX2LButton(*) {
@@ -479,7 +498,7 @@ OnX2LButton(*) {
     if WinGetProcessName(_hwnd) ~= '^\s*(waterfox|Maxthon)\.exe\s*$'
         WhenMouseOverBrowser(_hwnd)
     else
-        WinActivate("ahk_id " WinUtil.PrevWindow[1 + _G.General.WindowCycleOffset])
+        WinActivate("ahk_id " WinUtil.PrevWindow[1 + _S.WindowCycleOffset])
     ; DetectHiddenWindows False
     ; WinActivate WinGetList()[3+3]
     ; DetectHiddenWindows True
@@ -505,7 +524,7 @@ OnX2RButton(*) {
     if WinGetProcessName(_hwnd) ~= '^\s*(waterfox|Maxthon)\.exe\s*$'
         WhenMouseOverBrowser(_hwnd)
     else
-        WinActivate("ahk_id " WinUtil.PrevWindow[2 + _G.General.WindowCycleOffset])
+        WinActivate("ahk_id " WinUtil.PrevWindow[2 + _S.WindowCycleOffset])
     ; DetectHiddenWindows False
     ; WinActivate WinGetList()[4+3]
     ; DetectHiddenWindows True
@@ -883,53 +902,29 @@ Class WindowFairy extends LeaderKeys {
      */
     __New(_leader := "Alt & Space", _timeout := "none", default_increment?) {
         super.__New(_leader, _timeout)
-        this.MapKey( ;>>-->>-->>-->>-->>-<( Up )>-
-            "Up",
+        this.MapKey("Up",
             (*) => this.Nudge(WinVector.Coord.Up.Mul(this.segment.y)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( Down )>-
-            "Down",
+        this.MapKey("Down",
             (*) => this.Nudge(WinVector.Coord.Down.Mul(this.segment.y)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( Left )>-
-            "Left",
+        this.MapKey("Left",
             (*) => this.Nudge(WinVector.Coord.Left.Mul(this.segment.x)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( Right )>-
-            "Right",
+        this.MapKey("Right",
             (*) => this.Nudge(WinVector.Coord.Right.Mul(this.segment.x)))
 
         wFairyMovements := Map(
             "Numpad1", (*) => Run('')
         )
 
-        this.MapKey( ;>>-->>-->>-->>-->>-<( [ )>-
-            "[",
-            (*) => this.Nudge(WinVector.Coord.Thin.Mul(this.segment.x)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( ] )>-
-            "]",
-            (*) => this.Nudge(WinVector.Coord.Wide.Mul(this.segment.x)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( - )>-
-            "-",
-            (*) => this.Nudge(WinVector.Coord.Short.Mul(this.segment.y)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( = )>-
-            "=",
-            (*) => this.Nudge(WinVector.Coord.Tall.Mul(this.segment.y)))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( , )>-
-            ",",
-            (*) => this.Cycle(1))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-            ".",
-            (*) => this.Cycle(2))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( . )>-
-            "/",
-            (*) => this.Cycle(3))
-        this.MapKey( ;>>-->>-->>-->>-->>-<( F12 )>-
-            "F12",
-            (*) => TriggerReload())
-        this.MapKey( ;>>-->>-->>-->>-->>-<( BackSpace )>-
-            "BackSpace",
-            (*) => this.Deactivate())
-        this.MapKey( ;>>-->>-->>-->>-->>-<( ^/ )>-
-            "^/",
-            (*) => this.Deactivate())
+        this.MapKey("[", (*) => this.Nudge(WinVector.Coord.Thin.Mul(this.segment.x)))
+        this.MapKey("]", (*) => this.Nudge(WinVector.Coord.Wide.Mul(this.segment.x)))
+        this.MapKey("-", (*) => this.Nudge(WinVector.Coord.Short.Mul(this.segment.y)))
+        this.MapKey("=", (*) => this.Nudge(WinVector.Coord.Tall.Mul(this.segment.y)))
+        this.MapKey(",", (*) => this.Cycle(1))
+        this.MapKey(".", (*) => this.Cycle(2))
+        this.MapKey("/", (*) => this.Cycle(3))
+        this.MapKey("F12", (*) => TriggerReload())
+        this.MapKey("BackSpace", (*) => this.Deactivate())
+        this.MapKey("^/", (*) => this.Deactivate())
 
 
         mv := {
@@ -951,19 +946,21 @@ Class WindowFairy extends LeaderKeys {
         )
 
         this.MapKeyPath(["k", "k"], (*)=> WinClose(WinExist("A")))
-        this.MapKeyPath(["o", "v"], (*)=> Run("VSCodium.exe"))
-        this.MapKeyPath(["o", "m"], (*)=> Run("Maxthon.exe"))
-        this.MapKeyPath(["o", "e"], (*)=> Run("explorer.exe"))
         this.MapKeyPath(["k", "l"], (*)=>
             WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace('\.', '\.')))
-        this.MapKeyPath(['f', 'w', 'f'], (*)=> !!(WinExist('ahk_exe waterfox.exe')) ? (WinActivate()) :
-                        (JKQuickToast('There aren`'t any waterfox windows open at the moment', '', )) )
+        this.MapKeyPath(['k', 'h', 'h'], (*)=> WinUtil.WinCloseProcesses('hh\.exe'))
+        this.MapKeyPath(["o", "v"], (*) => Run("VSCodium.exe"))
+        this.MapKeyPath(["o", "m"], (*) => Run("Maxthon.exe"))
+        this.MapKeyPath(["o", "e"], (*) => Run("explorer.exe"))
         this.MapKeyPath(["o", "w", "z"], (*)=> Run("wezterm-gui.exe"))
         this.MapKeyPath(["o", "s", "t"], (*)=> Run("sublime_text.exe"))
         this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
+        this.MapKeyPath(['o', 's', 'i'], (*)=> Run('C:\Users\' A_USERNAME '\Desktop\Soundit.lnk'))
         this.MapKeyPath(['c', 'c', 'b'], (*)=> Run(_G.Paths.BCV2Exe ' Toggle'))
         this.MapKeyPath(['a', 'o', 't'], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
         this.MapKeyPath(['n', 'o', 't'], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
+        this.MapKeyPath(['f', 'w', 'f'], (*) => !!(WinExist('ahk_exe waterfox.exe')) ? (WinActivate()) :
+            (JKQuickToast('There aren`'t any waterfox windows open at the moment', '',)))
 
 
         _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
@@ -996,14 +993,16 @@ Class WindowFairy extends LeaderKeys {
         weblinks.Link[      "emmylua" , ["e", "m", "y"] ] := link_emmylua
         weblinks.Link[  "thqbygithub" , ["t", "h", "q"] ] := link_thqbygithub
         weblinks.Link[        "gmail" ,      ["g", "m"] ] := "https://www.gmail.com"
-        weblinks.Link[      "soundit" ,      ["s", "i"] ] := "http://192.168.1.3:9697/"
-        weblinks.Link[ "fancyconvert" ,      ["f", "c"] ] := "https://www.textfancy.com/font-converter"
-        weblinks.Link[    "fancyedit" ,      ["f", "p"] ] := "https://www.textpaint.net/"
+        weblinks.Link[       "github" , ["g", "i", "t"] ] := "https://www.github.com"
+        ; weblinks.Link[      "soundit" ,      ["s", "i"] ] := "http://192.168.1.4:9697/"
         weblinks.link[      "textnow" ,      ["t", "n"] ] := "https://www.textnow.com/"
+        weblinks.Link[    "fancyedit" ,      ["f", "p"] ] := "https://www.textpaint.net/"
+        weblinks.Link[ "fancyconvert" ,      ["f", "c"] ] := "https://www.textfancy.com/font-converter"
+        weblinks.Link[ "vscodemarket" , ["v", "s", "m"] ] := "https://marketplace.visualstudio.com/VSCode"
+        weblinks.Link[          "ddg" , ["d", "d", "g"] ] := "https://www.duckduckgo.com"
         weblinks.Link[       "paypal" , ["p", "a", "y"] ] := "https://www.paypal.com/"
         weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
         weblinks.Link[          "ora" , ['o', 'r', 'a'] ] := "https://www.ora.sh/"
-        weblinks.Link[          "ddg" , ["d", "d", "g"] ] := "https://www.duckduckgo.com"
 
 
         this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
@@ -1011,7 +1010,7 @@ Class WindowFairy extends LeaderKeys {
     }
 
     Cycle(count:=1) {
-        target_window := WinUtil.PrevWindow[count + _G.General.WindowCycleOffset]
+        target_window := WinUtil.PrevWindow[count + _S.WindowCycleOffset]
         WinActivate("ahk_id " target_window)
     }
 

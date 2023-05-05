@@ -99,6 +99,20 @@ Class WinUtil {
         A_TitleMatchMode := pre_title_match
     }
 
+    static WinWaitNewActive(_win_title?, _timeout?) {
+        static win_list_og := [], win_title_og := ''
+        if IsSet(_win_title)
+            win_list_og := WinGetList(win_title_og := _win_title)
+        WinWaitActive win_title_og,, _timeout ?? unset
+        win_list_new := WinGetList(win_title_og)
+        for _hwnd in win_list_new
+            if not win_list_og.IndexOf(_hwnd)
+                return _hwnd
+        return WinUtil.WinWaitNewActive()
+    }
+
+    ; static RunWinWait() {}
+
     Static WinUnderCursor[_title_type:="hwnd"] => (
         MouseGetPos(,, &_hwnd),
         (_title_type="hwnd")        ? (_hwnd)                            :

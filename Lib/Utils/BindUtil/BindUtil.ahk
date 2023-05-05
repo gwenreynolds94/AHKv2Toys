@@ -65,8 +65,7 @@ Class LinkTable extends KeyTable {
     Static BrowserExe := ""
 
     Static __New() {
-        this.BrowserExe := (__PC.name = "laptop") ? "Maxthon.exe" :
-            (__PC.name = "primary") ? "waterfox.exe" : "firefox.exe"
+        this.BrowserExe := __PC.default_browser
     }
 
     _links := Map()

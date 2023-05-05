@@ -4,6 +4,8 @@
 
 
 s2do(_msg*) {
+    if not _msg.Length
+
     _opts := Map()
     _opts["noprint"] := False
     msgstr := ""
@@ -14,8 +16,7 @@ s2do(_msg*) {
         msglast := _msg[_msg.Length]
         if (msglast is Object) and ObjHasOwnProp(msglast, "__opts") {
             for _opt, _val in _opts
-                if msglast.__opts.HasOwnProp(_opt)
-                    _opts.%_opt% := msglast.%_opt%
+                _opts.%_opt% := msglast.%_opt%
             _msg.Pop()
         }
     }
@@ -123,9 +124,8 @@ s2do(_msg*) {
         indstr := ind_def
         msgstr .= TryStringOut(_itm)
     }
-    if _opts["noprint"]
-        return msgstr
-    FileAppend msgstr, "*"
+    if !_opts["noprint"]
+        FileAppend msgstr, "*"
     return msgstr
 }
 
