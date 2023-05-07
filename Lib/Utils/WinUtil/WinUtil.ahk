@@ -4,6 +4,7 @@
 
 #Include WinVector.ahk
 #Include ..\DetectComputer.ahk
+#Include ..\BuiltinsExtend.ahk
 
 
 
@@ -80,7 +81,7 @@ Class WinUtil {
         }
         else {
             TrayTip("[ " _class " ]", "Deaths: " deaths)
-            SetTimer(HideTrayTip, -4000)
+            SetTimer(HideTrayTip, -3000)
         }
     }
 
@@ -93,10 +94,13 @@ Class WinUtil {
         pre_title_match := A_TitleMatchMode
         A_TitleMatchMode := 'RegEx'
         windows := WinGetList("ahk_exe i)" _re_proc_name)
+        deaths := 0
         for _hwnd in windows
             if WinExist(_hwnd)
-                WinKill()
+                WinKill(), deaths++
         A_TitleMatchMode := pre_title_match
+        TrayTip '[ ' _re_proc_name ' ]', 'Deaths: ' deaths
+        SetTimer((*)=>TrayTip(), -3000)
     }
 
     static WinWaitNewActive(_win_title?, _timeout?) {
@@ -166,6 +170,72 @@ Class WinUtil {
         Static RestoreRegion(_hwnd?) {
             wTitle := "ahk_id " (_hwnd ?? WinExist("A"))
             WinSetRegion(, wTitle)
+        }
+    }
+
+    Class Cycler {
+        static screengap := {x: 8, y: 8}
+
+        static Fill(_hwnd?) {
+            static last_win := 0, last_tick := 0
+            new_tick := A_TickCount
+            _hwnd := _hwnd ?? WinExist('A')
+            if not WinExist(_hwnd)
+                return TrayTip.Quik('[ WinUtil.Cycler.Fill( ' _hwnd ' ) ]',
+                                    'Could not find a valid window', 3333 )
+            _mon := Max(__PC.MonitorWithWindow[_hwnd], 1)
+            if (last_win = _hwnd) and ((new_tick - last_tick) < 1000)
+                if ++_mon > __PC.monitors.Count
+                    _mon := 1
+            wX := __PC.monitors[_mon].left + this.screengap.x
+            wY := __PC.monitors[_mon].top + this.screengap.y
+            wWidth := WinVector.ScrWidth(_mon) - this.screengap.x*2
+            wHeight := WinVector.ScrHeight(_mon) - this.screengap.y*2
+            WinVector.DLLUtil.RealCoordsFromSuperficial(
+                &real_coords := 0, _hwnd,
+                wX, wY,
+                wWidth, wHeight
+            )
+            WinMove real_coords.x, real_coords.y, real_coords.w, real_coords.h, _hwnd
+            last_win := _hwnd, last_tick := new_tick
+        }
+
+        static HalfFill(_hwnd?) {
+            static last_win := 0, last_tick := 0
+            new_tick := A_TickCount
+            _hwnd := _hwnd ?? WinExist('A')
+            if not WinExist(_hwnd)
+                return TrayTip.Quik('[ WinUtil.Cycler.Fill( ' _hwnd ' ) ]',
+                    'Could not find a valid window', 3333)
+            /** @var {__PC.__Monitor} _mon */
+            _mon := __PC.monitors[Max(__PC.MonitorWithWindow[_hwnd], 1)]
+            wWidth := (_mon.width - this.screengap.x * 2) / 2
+            wHeight := (_mon.height - this.screengap.y * 2)
+            WinVector.DLLUtil.SuperficialCoordsFromReal(&scoords:=0, _hwnd)
+            lhs := _mon.left + this.screengap.x
+            rhs := lhs + (_mon.width / 2)
+            if scoords.w = wWidth and scoords.h = wHeight {
+                if scoords.x = lhs
+                    wX := rhs
+                else {
+                    new_mon_n := _mon._N + 1
+                    if new_mon_n > __PC.monitors.Count
+                        new_mon_n := 1
+                    _mon := __PC.monitors[new_mon_n]
+                    wWidth := (_mon.width - this.screengap.x * 2) / 2
+                    wHeight := (_mon.height - this.screengap.y * 2)
+                    wX := _mon.left + this.screengap.x
+                }
+            } else if (scoords.x + (scoords.w / 2)) < (_mon.left + (_mon.width / 2))
+                wX := lhs
+            else wX := rhs
+            wY := _mon.top + this.screengap.y
+            WinVector.DLLUtil.RealCoordsFromSuperficial(
+                &real_coords := 0, _hwnd,
+                wX, wY, wWidth, wHeight
+            )
+            WinMove real_coords.x, real_coords.y, real_coords.w, real_coords.h, _hwnd
+            last_win := _hwnd, last_tick := new_tick
         }
     }
 

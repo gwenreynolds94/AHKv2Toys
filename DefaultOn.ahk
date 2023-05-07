@@ -549,8 +549,10 @@ HotIf
 ;; WinSizePos Hotkeys
 ;
 HotIf (*)=> !!_G.Enabled.WinSizePos
-Hotkey "#b", (*)=> WinUtil.Sizer.WinFull()
-Hotkey "#s", (*)=> WinUtil.Sizer.WinHalf()
+Hotkey "#b", (*)=> WinUtil.Cycler.Fill(WinExist('A'))
+; Hotkey "#b", (*) => WinUtil.Sizer.WinFull()
+Hotkey "#s", (*)=> WinUtil.Cycler.HalfFill(WinExist('A'))
+; Hotkey "#s", (*) => WinUtil.Sizer.WinHalf()
 HotIf
 ; Hotkey "#b", (*)=> SizeWindow()
 ; Hotkey "#s", (*)=> SizeWindowHalf()
@@ -949,13 +951,14 @@ Class WindowFairy extends LeaderKeys {
         this.MapKeyPath(["k", "l"], (*)=>
             WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace('\.', '\.')))
         this.MapKeyPath(['k', 'h', 'h'], (*)=> WinUtil.WinCloseProcesses('hh\.exe'))
-        this.MapKeyPath(["o", "v"], (*) => Run("VSCodium.exe"))
-        this.MapKeyPath(["o", "m"], (*) => Run("Maxthon.exe"))
-        this.MapKeyPath(["o", "e"], (*) => Run("explorer.exe"))
+        this.MapKeyPath(["o", "v", "s"], (*) => Run("VSCodium.exe"))
+        this.MapKeyPath(["o", "m", "x"], (*) => Run("Maxthon.exe"))
+        this.MapKeyPath(["o", "e", "x"], (*) => Run("explorer.exe"))
         this.MapKeyPath(["o", "w", "z"], (*)=> Run("wezterm-gui.exe"))
         this.MapKeyPath(["o", "s", "t"], (*)=> Run("sublime_text.exe"))
         this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
-        this.MapKeyPath(['o', 's', 'i'], (*)=> Run('C:\Users\' A_USERNAME '\Desktop\Soundit.lnk'))
+        this.MapKeyPath(['o', 'l', 's'], (*)=> Run('C:\Users\' A_UserName '\AppData\Local\Logseq\Logseq.exe'))
+        this.MapKeyPath(['o', 's', 'i'], (*)=> Run('C:\Users\' A_UserName '\Desktop\Soundit.lnk'))
         this.MapKeyPath(['c', 'c', 'b'], (*)=> Run(_G.Paths.BCV2Exe ' Toggle'))
         this.MapKeyPath(['a', 'o', 't'], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
         this.MapKeyPath(['n', 'o', 't'], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))

@@ -92,12 +92,14 @@ Class __PC {
         }
     }
 
-    static MonitorWithFocus {
+    static MonitorWithWindow[_hwnd] {
         get {
+            if not WinExist(_hwnd)
+                return false
             this.RefreshMonitors()
             if (mcnt := MonitorGetCount()) = 1
                 return 1
-            WinGetPos(&_x, &_y, &_w, &_h, WinExist("A"))
+            WinGetPos(&_x, &_y, &_w, &_h, _hwnd)
             cx := _x + (_w // 2)
             cy := _y + (_h // 2)
             if !!this.monitors[1].HasFocus[true]
@@ -113,6 +115,8 @@ Class __PC {
             return False
         }
     }
+
+    static MonitorWithFocus => __PC.MonitorWithWindow[WinExist('A')]
 
     Class __Monitor {
         _N := 0,

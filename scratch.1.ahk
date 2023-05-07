@@ -7,6 +7,7 @@
 #Include DEBUG\DBT.ahk
 #Include Utils\BuiltinsExtend.ahk
 #Include Utils\WinUtil\WinUtil.ahk
+#Include Utils\DetectComputer.ahk
 
 ActivateNewBrowser(_browser) {
     WaitForWindow(_initial_list) {
@@ -27,13 +28,21 @@ ActivateNewBrowser(_browser) {
 
 ; ActivateNewBrowser 'wezterm-gui.exe'
 
-MsgBox 'start'
+; MsgBox 'start'
+;
+; run 'msedge.exe'
+;
+; WinUtil.WinWaitNewActive('ahk_exe msedge.exe')
+;
+; MsgBox 'end'
 
-run 'msedge.exe'
+stdo __PC.EnvPathHasFile('sublime_text.exe'),
+     __PC.EnvPathHasFile('wezterm-gui.exe'),
+     __PC.EnvPathHasFile('wezterm-gui.exe'),
+     __PC.EnvPathHasFile('explorer.exe')
 
-WinUtil.WinWaitNewActive('ahk_exe msedge.exe')
+stdo 'soimething'
 
-MsgBox 'end'
 
 ; Run("msedge.exe",,, &new_pid)
 ; tooltip new_pid

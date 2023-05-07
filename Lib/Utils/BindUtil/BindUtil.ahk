@@ -108,6 +108,10 @@ Class LinkTable extends KeyTable {
     }
 }
 
+Class LaunchTable extends KeyTable {
+
+}
+
 Class CountLeader extends KeyTable {
     Class Callback {
         when := ""

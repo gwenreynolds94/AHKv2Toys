@@ -175,6 +175,10 @@ Class __String extends String {
 }
 
 
+TrayTip.Quik := (_this, _title := '', _msg := '', _dur := 3000) => (
+    TrayTip(_msg, _title, 0x20),
+    SetTimer((*) => TrayTip(), (-1) * Abs(_dur)))
+
 
 ; Class __BuiltinClassExtension {
 ;     Static __TargetClass := "unset"
