@@ -5,20 +5,17 @@
 
 s2do(_msg*) {
     if not _msg.Length
-
-    _opts := Map()
-    _opts["noprint"] := False
+        return FileAppend('`n', '*')
+    _opts := Map('noprint', false)
     msgstr := ""
     nestlvl := 0
     indstr := ind_def := " | "
     msglen := _msg.Length
-    if msglen {
-        msglast := _msg[_msg.Length]
-        if (msglast is Object) and ObjHasOwnProp(msglast, "__opts") {
-            for _opt, _val in _opts
-                _opts.%_opt% := msglast.%_opt%
-            _msg.Pop()
-        }
+    if !!msglen and ((msglast:=_msg[msglen]) is Object) and
+                       ObjHasOwnProp(msglast, "__opts") {
+        for _opt, _val in _opts
+            _opts.%_opt% := msglast.%_opt%
+        _msg.Pop()
     }
     EvalIndent() {
         ind := ""
@@ -34,37 +31,50 @@ s2do(_msg*) {
             Return TryArrayOut(out_item)
     }
     TryArrayOut(out_item) {
-        If Type(out_item) = "Array" {
-            indent_str_pre := indstr
-            indstr := "-|-"
-            out_string := TryStringOut("<Array>")
-            indstr := indent_str_pre
-            nestlvl++
-            For item in out_item {
-                out_string .= TryStringOut(item)
-            }
-            nestlvl--
-            ; indent_str := indent_str_pre
-            Return out_string
-        } Else Return TryMapOut(out_item)
+        if not (out_item is Array)
+            return TryMapOut(out_item)
+        ind_pre := indstr
+        indstr := '-|-'
+        out_str := TryStringOut('<Array>')
+        indstr := ind_pre
+        nestlvl++
+        for itm in out_item
+            out_str .= TryStringOut(itm)
+        nestlvl--
+        return out_str
+        ; If Type(out_item) = "Array" {
+        ;     indent_str_pre := indstr
+        ;     indstr := "-|-"
+        ;     out_string := TryStringOut("<Array>")
+        ;     indstr := indent_str_pre
+        ;     nestlvl++
+        ;     For item in out_item {
+        ;         out_string .= TryStringOut(item)
+        ;     }
+        ;     nestlvl--
+        ;     ; indent_str := indent_str_pre
+        ;     Return out_string
+        ; } Else Return TryMapOut(out_item)
     }
     TryMapOut(out_item) {
-        If (Type(out_item)="Map") {
-            indent_str_pre := indstr
-            indstr := "-|-"
-            out_string := TryStringOut("<Map>")
-            indstr := indent_str_pre
-            nestlvl++
-            For itemkey, itemval in out_item {
-                out_string .= TryStringOut(itemkey)
-                nestlvl++
-                out_string .= TryStringOut(itemval)
-                nestlvl--
-            }
-            nestlvl--
-            ; indent_str := indent_str_pre
-            Return out_string
-        } Else Return TryObjectOut(out_item)
+        if not (out_item is Map)
+            return TryObjectOut(out_item)
+        ; If (Type(out_item)="Map") {
+        ;     indent_str_pre := indstr
+        ;     indstr := "-|-"
+        ;     out_string := TryStringOut("<Map>")
+        ;     indstr := indent_str_pre
+        ;     nestlvl++
+        ;     For itemkey, itemval in out_item {
+        ;         out_string .= TryStringOut(itemkey)
+        ;         nestlvl++
+        ;         out_string .= TryStringOut(itemval)
+        ;         nestlvl--
+        ;     }
+        ;     nestlvl--
+        ;     ; indent_str := indent_str_pre
+        ;     Return out_string
+        ; } Else Return TryObjectOut(out_item)
     }
     TryObjectOut(out_item) {
         If IsObject(out_item) {

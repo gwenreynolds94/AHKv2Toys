@@ -21,7 +21,8 @@ Class __PC {
             },
             'HQ7DNU', {
                 name: 'primary',
-                browser: 'msedge.exe'
+                browser: 'firefox.exe'
+                ; browser: 'msedge.exe'
             },
             'JJTV8BS', {
                 name: 'secondary',

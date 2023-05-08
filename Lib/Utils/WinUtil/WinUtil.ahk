@@ -213,7 +213,7 @@ Class WinUtil {
             wHeight := (_mon.height - this.screengap.y * 2)
             WinVector.DLLUtil.SuperficialCoordsFromReal(&scoords:=0, _hwnd)
             lhs := _mon.left + this.screengap.x
-            rhs := lhs + (_mon.width / 2)
+            rhs := lhs + wWidth
             if scoords.w = wWidth and scoords.h = wHeight {
                 if scoords.x = lhs
                     wX := rhs
