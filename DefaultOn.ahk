@@ -22,11 +22,11 @@ Class ScriptDOConf {
     IsCapsDown         := False
     CurrentCapsMod     := ""
     CapsUpLeftHandKeys := [
-        '',
-        '^', '^!', '^+', '^#' , '^!+', '^!#',
-        '!', '!+', '!#', '!+#',
-        '+', '+#',
-        '#'
+        "",
+        "^", "^!", "^+", "^#" , "^!+", "^!#",
+        "!", "!+", "!#", "!+#",
+        "+", "+#",
+        "#"
     ]
     _subl_text_main_rgx := "\s.*Sublime\sText.+\(UNREGISTERED\)"
     _vsc_text_main_rgx  := ".*Visual\sStudio\sCode"
@@ -36,13 +36,15 @@ Class ScriptDOConf {
     X2Delay  := 325
     ThisPC   := __PC.name
     WindowCycleOffset := 1
-    bcv2_exe := 'BCV2.exe'
+    bcv2_exe := "BCV2.exe"
 }
 
 ;; Global Config Class
 
 Class GblDOConf extends ConfTool {
-    /** @prop {ConfTool.SectionEdit} _enabled_edit */
+    /** 
+     * @prop {ConfTool.SectionEdit} _enabled_edit 
+     */
     _enabled_edit := {}
 
     __New() {
@@ -96,9 +98,13 @@ Class GblDOConf extends ConfTool {
     }
 
     Class InstallProp {
-        /** @prop {String} Dest */
+        /** 
+         * @prop {String} Dest 
+         */
         Dest => ""
-        /** @prop {String} Source */
+        /** 
+         * @prop {String} Source 
+         */
         Source => ""
     }
 
@@ -107,28 +113,40 @@ Class GblDOConf extends ConfTool {
     Enabled => this.Ini.Enabled
     General => this.Ini.General
     Paths   => this.Ini.Paths
-    /** @prop {GblDOConf.InstallProp} BCV2 */
+    /** 
+     * @prop {GblDOConf.InstallProp} BCV2 
+     */
     BCV2 => this.Ini.BCV2
-    /** @prop {GblDOConf.InstallProp} OpenEnvVars */
+    /** 
+     * @prop {GblDOConf.InstallProp} OpenEnvVars 
+     */
     OpenEnvVars => this.Ini.OpenEnvVars
-    /** @prop {GblDOConf.InstallProp} UIA64 */
+    /** 
+     * @prop {GblDOConf.InstallProp} UIA64 
+     */
     UIA64 => this.Ini.UIA64
 }
 
 
-/** @var {GblDOConf} _G `GLOBAL` Config */
+/** 
+ * @var {GblDOConf} _G `GLOBAL` Config 
+ */
 _G := GblDOConf()
 
-/** @var {ScriptDOConf} _S `SCRIPT` Config */
+/** 
+ * @var {ScriptDOConf} _S `SCRIPT` Config 
+ */
 _S := ScriptDOConf()
 _S.X1Delay := _G.General.X1Delay
 _S.X2Delay := _G.General.X2Delay
 _S.WindowCycleOffset := _G.General.WindowCycleOffset
 
-if __PC.name = 'primary'
+if __PC.name = "primary"
     _S.WindowCycleOffset -= 1
 
-/** @var {Map} _T `TEMP` Config */
+/** 
+ * @var {Map} _T `TEMP` Config 
+ */
 _T := Map()
 
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
@@ -243,56 +261,56 @@ SetTimer FuckCortana, _G.General.CloseCortanaInterval
 ;     Run(_G.Paths.BCV2Exe)
 ; }
 ; ToggleBCV2Process(*) {
-;     Run _G.Paths.BCV2Exe (!!ProcessExist(_S.bcv2_exe) ? ' Off' : '')
+;     Run _G.Paths.BCV2Exe (!!ProcessExist(_S.bcv2_exe) ? " Off" : "")
 ; }
 (BCV2Manager)
 Class BCV2Manager {
     Static _hotkeys := Map()
     Static __New() {
-        OnExit ObjBindMethod(this, 'WhenExit')
+        OnExit ObjBindMethod(this, "WhenExit")
         if not _G.Enabled.BCV2
             return
         if !ProcessExist(_S.bcv2_exe)
-            Run _G.Paths.BCV2Exe ' On'
-        this._hotkeys["#+c"] := (*)=> Run(_G.Paths.BCV2Exe ' Off')
-        this._hotkeys["#!c"] := (*)=> Run(_G.Paths.BCV2Exe ' Toggle')
+            Run _G.Paths.BCV2Exe " On"
+        this._hotkeys["#+c"] := (*)=> Run(_G.Paths.BCV2Exe " Off")
+        this._hotkeys["#!c"] := (*)=> Run(_G.Paths.BCV2Exe " Toggle")
         this._hotkeys["^#c"] := (*)=> MsgBox(
-            IniRead(A_AppData '/BetterClipboard/BCB.ini', 'Settings', 'State', 'unset')
+            IniRead(A_AppData "/BetterClipboard/BCB.ini", "Settings", "State", "unset")
         )
         this.EnableHotkeys()
     }
 
     Static WhenExit(_exit_reason, *) {
-        if (_exit_reason = 'Reload') or !ProcessExist(_S.bcv2_exe)
+        if (_exit_reason = "Reload") or !ProcessExist(_S.bcv2_exe)
             return 0
-        Run _G.Paths.BCV2Exe ' Off'
+        Run _G.Paths.BCV2Exe " Off"
         return 0
     }
 
     static EnableHotkeys(*) {
         HotIf (*)=> !!_G.Enabled.BCV2
         for _key, _func in this._hotkeys
-            Hotkey _key, _func, 'On'
+            Hotkey _key, _func, "On"
         HotIf
     }
 
     static DisableHotkeys(*) {
         for _key, _func in this._hotkeys
-            Hotkey _key, 'Off'
+            Hotkey _key, "Off"
     }
 }
 ; if !ProcessExist(_S.bcv2_exe) and !!_G.Enabled.BCV2
-;     Run _G.Paths.BCV2Exe ' On'
+;     Run _G.Paths.BCV2Exe " On"
 ; BCV2OnExit(_exit_reason, *) {
-;     ; if _exit_reason != 'Reload' and !!ProcessExist(_S.bcv2_exe)
-;     if _exit_reason != 'Reload'
-;         Run _G.Paths.BCV2Exe ' Off'
+;     ; if _exit_reason != "Reload" and !!ProcessExist(_S.bcv2_exe)
+;     if _exit_reason != "Reload"
+;         Run _G.Paths.BCV2Exe " Off"
 ;     return 0
 ; }
 ; OnExit BCV2OnExit
 ; HotIf (*)=> !!_G.Enabled.BCV2
-; Hotkey "#+c", (*)=> Run(_G.Paths.BCV2Exe ' Off'), "On"
-; Hotkey "#!c", (*)=> Run(_G.Paths.BCV2Exe ' On'), "On"
+; Hotkey "#+c", (*)=> Run(_G.Paths.BCV2Exe " Off"), "On"
+; Hotkey "#!c", (*)=> Run(_G.Paths.BCV2Exe " On"), "On"
 ; HotIf
 
 ;
@@ -306,7 +324,9 @@ Class BCV2Manager {
 ;
 ToggleNotesApp() {
     Static ScritchResourcePath := A_ScriptDir "\ScinSkratch",
-            /** @type {ScritchGui} NotesApp */
+            /** 
+             * @type {ScritchGui} NotesApp 
+             */
            NotesApp := False
     if !!NotesApp {
         NotesApp.ToggleGui()
@@ -433,24 +453,24 @@ if !!_G.Enabled.SearchFirefox {
 }
 SearchBrowserFromClipboard(*) {
     SetTimer(SendXButton2, 0)
-    ; ddg_url := 'https://www.duckduckgo.com/?q=' .
-            ;    (A_Clipboard).Replace('\+', '%2B')
-                            ; .Replace('\,', '%2C')
-                            ; .Replace('\/', '%2F')
-                            ; .Replace('\\', '%5C')
-                            ; .Replace('\#', '%23')
-                            ; .Replace('\$', '%24')
-                            ; .Replace('\%', '%25')
-                            ; .Replace('\&', '%26')
-                            ; .Replace("\'", '%27')
-                            ; .Replace('\s', '+')
-    ; Run __PC.default_browser ' ' ddg_url
+    ; ddg_url := "https://www.duckduckgo.com/?q=" .
+            ;    (A_Clipboard).Replace("\+", "%2B")
+                            ; .Replace("\,", "%2C")
+                            ; .Replace("\/", "%2F")
+                            ; .Replace("\\", "%5C")
+                            ; .Replace("\#", "%23")
+                            ; .Replace("\$", "%24")
+                            ; .Replace("\%", "%25")
+                            ; .Replace("\&", "%26")
+                            ; .Replace("\"", "%27")
+                            ; .Replace("\s", "+")
+    ; Run __PC.default_browser " " ddg_url
 
-    Run __PC.default_browser ' ' URLPuppy.BuildDDGSearch(A_Clipboard)
+    Run __PC.default_browser " " URLPuppy.BuildDDGSearch(A_Clipboard)
 
     ; SetTitleMatchMode "RegEx"
     ; SetTitleMatchMode 2
-    ; wIDstr := ("ahk_exe i)" __PC.default_browser.Replace('\.', '\.'))
+    ; wIDstr := ("ahk_exe i)" __PC.default_browser.Replace("\.", "\."))
     ; if not WinExist(wIDstr) {
     ;     Run(__PC.default_browser)
     ;     new_win := WinUtil.WinWaitNewActive(wIDstr, 5)
@@ -490,12 +510,12 @@ OnX2LButton(*) {
         pre_dur := A_KeyDuration
         A_KeyDelay := 20
         A_KeyDuration := 20
-        Send '{LCtrl Down}{Tab}{LCtrl Up}'
+        Send "{LCtrl Down}{Tab}{LCtrl Up}"
         A_KeyDelay := pre_dly
         A_KeyDuration := pre_dur
     }
     MouseGetPos(&_mx, &_my, &_hwnd)
-    if WinGetProcessName(_hwnd) ~= '^\s*(waterfox|Maxthon)\.exe\s*$'
+    if WinGetProcessName(_hwnd) ~= "^\s*(waterfox|Maxthon)\.exe\s*$"
         WhenMouseOverBrowser(_hwnd)
     else
         WinActivate("ahk_id " WinUtil.PrevWindow[1 + _S.WindowCycleOffset])
@@ -516,12 +536,12 @@ OnX2RButton(*) {
         pre_dur := A_KeyDuration
         A_KeyDelay := 20
         A_KeyDuration := 20
-        Send '{LCtrl Down}{LShift Down}{Tab}{LShift Up}{LCtrl Up}'
+        Send "{LCtrl Down}{LShift Down}{Tab}{LShift Up}{LCtrl Up}"
         A_KeyDelay := pre_dly
         A_KeyDuration := pre_dur
     }
     MouseGetPos(&_mx, &_my, &_hwnd)
-    if WinGetProcessName(_hwnd) ~= '^\s*(waterfox|Maxthon)\.exe\s*$'
+    if WinGetProcessName(_hwnd) ~= "^\s*(waterfox|Maxthon)\.exe\s*$"
         WhenMouseOverBrowser(_hwnd)
     else
         WinActivate("ahk_id " WinUtil.PrevWindow[2 + _S.WindowCycleOffset])
@@ -549,9 +569,9 @@ HotIf
 ;; WinSizePos Hotkeys
 ;
 HotIf (*)=> !!_G.Enabled.WinSizePos
-Hotkey "#b", (*)=> WinUtil.Cycler.Fill(WinExist('A'))
+Hotkey "#b", (*)=> WinUtil.Cycler.Fill(WinExist("A"))
 ; Hotkey "#b", (*) => WinUtil.Sizer.WinFull()
-Hotkey "#s", (*)=> WinUtil.Cycler.HalfFill(WinExist('A'))
+Hotkey "#s", (*)=> WinUtil.Cycler.HalfFill(WinExist("A"))
 ; Hotkey "#s", (*) => WinUtil.Sizer.WinHalf()
 HotIf
 ; Hotkey "#b", (*)=> SizeWindow()
@@ -703,6 +723,8 @@ Class AltShiftDragWindowRect {
                     w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ?
                                                         _w : this.sizeMin.w,
                     h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ?
+                        DllCall("User32.dll\SystemParametersInfo",
+                                "UInt", 0x100C, "UInt", 0, "UIntP", SPITrack, "UInt", False) . "`n" .
                                                         _h : this.sizeMin.h
                 }
                 WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winSizeNew)
@@ -914,7 +936,7 @@ Class WindowFairy extends LeaderKeys {
             (*) => this.Nudge(WinVector.Coord.Right.Mul(this.segment.x)))
 
         wFairyMovements := Map(
-            "Numpad1", (*) => Run('')
+            "Numpad1", (*) => Run("")
         )
 
         this.MapKey("[", (*) => this.Nudge(WinVector.Coord.Thin.Mul(this.segment.x)))
@@ -949,21 +971,22 @@ Class WindowFairy extends LeaderKeys {
 
         this.MapKeyPath(["k", "k"], (*)=> WinClose(WinExist("A")))
         this.MapKeyPath(["k", "l"], (*)=>
-            WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace('\.', '\.')))
-        this.MapKeyPath(['k', 'h', 'h'], (*)=> WinUtil.WinCloseProcesses('hh\.exe'))
-        this.MapKeyPath(["o", "v", "s"], (*) => Run("VSCodium.exe"))
-        this.MapKeyPath(["o", "m", "x"], (*) => Run("Maxthon.exe"))
-        this.MapKeyPath(["o", "e", "x"], (*) => Run("explorer.exe"))
+            WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace("\.", "\.")))
+        this.MapKeyPath(["k", "h", "h"], (*)=> WinUtil.WinCloseProcesses("hh\.exe"))
+        this.MapKeyPath(["o", "v", "s"], (*)=> Run("VSCodium.exe"))
+        this.MapKeyPath(["o", "m", "x"], (*)=> Run("Maxthon.exe"))
+        this.MapKeyPath(["o", "e", "x"], (*)=> Run("explorer.exe"))
         this.MapKeyPath(["o", "w", "z"], (*)=> Run("wezterm-gui.exe"))
         this.MapKeyPath(["o", "s", "t"], (*)=> Run("sublime_text.exe"))
         this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
-        this.MapKeyPath(['o', 'l', 's'], (*)=> Run('C:\Users\' A_UserName '\AppData\Local\Logseq\Logseq.exe'))
-        this.MapKeyPath(['o', 's', 'i'], (*)=> Run('C:\Users\' A_UserName '\Desktop\Soundit.lnk'))
-        this.MapKeyPath(['c', 'c', 'b'], (*)=> Run(_G.Paths.BCV2Exe ' Toggle'))
-        this.MapKeyPath(['a', 'o', 't'], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
-        this.MapKeyPath(['n', 'o', 't'], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
-        this.MapKeyPath(['f', 'w', 'f'], (*) => !!(WinExist('ahk_exe waterfox.exe')) ? (WinActivate()) :
-            (JKQuickToast('There aren`'t any waterfox windows open at the moment', '',)))
+        this.MapKeyPath(["o", "i", "t"], (*)=> Run("itunes.exe"))
+        this.MapKeyPath(["o", "l", "s"], (*)=> Run("C:\Users\" A_UserName "\AppData\Local\Logseq\Logseq.exe"))
+        this.MapKeyPath(["o", "s", "i"], (*)=> Run("C:\Users\" A_UserName "\Desktop\Soundit.lnk"))
+        this.MapKeyPath(["c", "c", "b"], (*)=> Run(_G.Paths.BCV2Exe " Toggle"))
+        this.MapKeyPath(["a", "o", "t"], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
+        this.MapKeyPath(["n", "o", "t"], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
+        this.MapKeyPath(["f", "w", "f"], (*)=> !!(WinExist("ahk_exe waterfox.exe")) ? (WinActivate()) :
+            (JKQuickToast("There aren't any waterfox windows open at the moment", "",)))
 
 
         _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
@@ -1005,7 +1028,7 @@ Class WindowFairy extends LeaderKeys {
         weblinks.Link[          "ddg" , ["d", "d", "g"] ] := "https://www.duckduckgo.com"
         weblinks.Link[       "paypal" , ["p", "a", "y"] ] := "https://www.paypal.com/"
         weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
-        weblinks.Link[          "ora" , ['o', 'r', 'a'] ] := "https://www.ora.sh/"
+        weblinks.Link[          "ora" , ["o", "r", "a"] ] := "https://www.ora.sh/"
 
 
         this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
@@ -1045,7 +1068,9 @@ Class WindowFairy extends LeaderKeys {
 }
 
 Class LaunchFairy {
-    /** @prop {KeyTable} main */
+    /** 
+     * @prop {KeyTable} main 
+     */
     main := {}
     __New(_timeout := 3000) {
         this.main := KeyTable(_timeout)
@@ -1084,6 +1109,7 @@ Class LaunchFairy {
 {
     Msgbox A_ComputerName
     A_Clipboard := A_ComputerName
+    WinUtil.ActiveWindowTracking := !WinUtil.ActiveWindowTracking
 }
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:

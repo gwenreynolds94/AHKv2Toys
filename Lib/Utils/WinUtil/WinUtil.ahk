@@ -21,9 +21,11 @@ Class WinUtil {
                                     "SunAwtFrame" , "ahk_class " ,
                                         "WorkerW" , "ahk_class " ,
                                         "Progman" , "ahk_class "
-    )
+    ),
+    _active_window_tracking := "unset"
 
-    __New() {
+    Static __New() {
+        
     }
 
     /**
@@ -59,6 +61,48 @@ Class WinUtil {
                     _filtered.Push _hwnd
             }
             return _filtered
+        }
+    }
+
+    Static ActiveWindowTracking {
+        Get {
+            Static SPITrack := 0,
+                   SPIOnTop := 0,
+                   SPIDelay := 0
+            if this._active_window_tracking == "unset" {
+                SPITrack := DllCall("User32.dll\SystemParametersInfo",
+                                    "UInt", 0x1000, "UInt", 0, 
+                                    "UIntP", SPITrack, "UInt", False)
+                SPIOnTop := DllCall("User32.dll\SystemParametersInfo",
+                                    "UInt", 0x100C, "UInt", 0, 
+                                    "UIntP", SPIOnTop, "UInt", False)
+                SPIDelay := DllCall("User32.dll\SystemParametersInfo",
+                                    "UInt", 0x2002, "UInt", 0, 
+                                    "UIntP", SPIDelay, "UInt", False)
+                this._active_window_tracking := !!(SPITrack+SPIOnTop+SPIDelay)
+            }
+            return this._active_window_tracking
+        }
+        Set {
+            if !!Value {
+                Track := True
+                OnTop := True
+                Delay := 1000
+            } else {
+                Track := False
+                OnTop := False
+                Delay := 0
+            }
+            DllCall("User32.dll\SystemParametersInfo",
+                    "UInt", 0x1001, "UInt", 0, 
+                    "Ptr", Track, "UInt", False)
+            DllCall("User32.dll\SystemParametersInfo",
+                    "UInt", 0x100D, "UInt", 0, 
+                    "Ptr", OnTop, "UInt", False)
+            DllCall("User32.dll\SystemParametersInfo",
+                    "UInt", 0x2003, "UInt", 0, 
+                    "Ptr", Delay, "UInt", False)
+            this._active_window_tracking := Value
         }
     }
 
