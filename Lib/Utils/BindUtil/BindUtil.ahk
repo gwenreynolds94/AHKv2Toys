@@ -5,6 +5,7 @@
 
 #Include <Utils\BindUtil\KeyTable>
 #Include <Utils\DetectComputer>
+#Include <GdipLib\Gdip_Custom>
 
 
 /**
@@ -29,6 +30,11 @@ Class LeaderKeys extends KeyTable {
     }
 
     EnableLeader(_timeout?, *) {
+        CallToggle() {
+            bound_togglekeypaths := this.boundmeth.togglekeypaths
+            ; ... show leader indicator
+            bound_togglekeypaths(_timeout ?? this.timeout)
+        }
         this._enabled := True
         _timeout := _timeout ?? this.timeout
         Hotkey this.leader,
@@ -52,11 +58,52 @@ Class LeaderKeys extends KeyTable {
     Enabled[_timeout?] {
         get => this._enabled
         set {
-            _timeout := _timeout ?? this.timeout
             if !!Value and !this._enabled
-                this.EnableLeader(_timeout)
+                this.EnableLeader(_timeout ?? this.timeout)
             else if !Value and !!this._enabled
-                this.DisableLeader(_timeout)
+                this.DisableLeader(_timeout ?? this.timeout)
+        }
+    }
+
+    Class LeaderIndicator {
+        static gdip_token := 0x000000
+             , first_instance := true
+             , instances := []
+        
+        
+        gui := {}
+
+        __New() {
+            if !!LeaderKeys.LeaderIndicator.first_instance {
+                LeaderKeys.LeaderIndicator.SetupGdip
+                LeaderKeys.LeaderIndicator.first_instance := false
+            }
+            this.SetupGui
+            LeaderKeys.LeaderIndicator.instances.Push this
+        }
+
+        SetupGui() {
+            this.gui := Gui("AlwaysOnTop Caption", "LeaderIndicator", this)
+        }
+
+        static SetupGdip() {
+            LeaderKeys.LeaderIndicator.gdip_token := Gdip_Startup()
+            if !LeaderKeys.LeaderIndicator.gdip_token
+                return QuikToast( "{LeaderIndicator~SetupGdip} : LeaderIndicator will not be shown"
+                                , "Failed to start GDI+ <> LeaderIndicator cannot be used"
+                                , 3000 )
+            OnExit LeaderKeys.LeaderIndicator.ShutdownGdip
+            ; ...whatever...
+
+        }
+
+        static ShutdownGdip(){
+            if !!LeaderKeys.LeaderIndicator.gdip_token
+                Gdip_Shutdown LeaderKeys.LeaderIndicator.gdip_token
+        }
+
+        __Delete() {
+            LeaderKeys.LeaderIndicator.ShutdownGdip
         }
     }
 }

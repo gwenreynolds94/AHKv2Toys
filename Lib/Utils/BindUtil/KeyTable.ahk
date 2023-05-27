@@ -57,7 +57,7 @@ Class KeyTable {
     ; /** @prop {KeyTable.BoundMethods} boundmeth */
         ; , boundmeth := {bindkey:{}, activate:{}, deactivate:{}, disableontrigger:{}}
 
-    /** @prop {Map<String,(Func|BoundFunc)>} keys */
+    /** @prop {Map} keys */
         , keys := Map()
 
     /** @prop {Map} ktbls */
@@ -66,7 +66,10 @@ Class KeyTable {
     /** @prop {Integer} maxtimeout */
         , maxtimeout := 60 * 1000
 
-    /** @prop {Boolean} _active */
+    /** @prop {Integer} is_root */
+        , is_root := False
+
+    /** @prop {Integer} _active */
         , _active := False
 
     /**
@@ -82,10 +85,10 @@ Class KeyTable {
      * ```
      *
      *
-     * @param {String|Number|Boolean} _timeout
+     * @param {String|Integer|Number} _timeout
      * @return {KeyTable}
      */
-    __New(_timeout := 2000) {
+    __New(_timeout := 2000, _is_root:=False) {
         this.timeout   := this.ParsedTimeout[_timeout]
         this.boundmeth.bindkey          := ObjBindMethod(this, "MapKey"          )
         this.boundmeth.activate         := ObjBindMethod(this, "Activate"        )
@@ -154,7 +157,7 @@ Class KeyTable {
     DisableOnTrigger(_key_action, *) {
         bmda := this.boundmeth.deactivate
         bmda()
-        SetTimer _key_action, (-10)
+        _key_action()
     }
 
     /**
@@ -204,6 +207,18 @@ Class KeyTable {
     ToggleKeyPaths(_timeout?, *) {
         _timeout := this.ParsedTimeout[_timeout ?? this.timeout]
         this.Active := !this.Active
+    }
+
+    Class KeyPressGui {
+        static gui := {}
+
+        static __New() {
+            this.gui := Gui("", "KeyPressGui", this)
+            
+        }
+
+        _Close() {
+        }
     }
 }
 

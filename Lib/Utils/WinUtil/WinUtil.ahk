@@ -5,7 +5,7 @@
 #Include WinVector.ahk
 #Include ..\DetectComputer.ahk
 #Include ..\BuiltinsExtend.ahk
-
+#Include ..\QuikToast.ahk
 
 
 
@@ -34,10 +34,13 @@ Class WinUtil {
      */
     Static PrevWindow[look_behind:=1] {
         Get {
+            _detect_hidden_windows := A_DetectHiddenWindows
+            A_DetectHiddenWindows := false
             look_at := look_behind + 1
             clean_list := WinUtil.FilteredWinList[WinGetList()]
             return ((look_behind + 1) > clean_list.Length) ?
                 clean_list[clean_list.Length] : clean_list[(look_behind + 1)]
+            A_DetectHiddenWindows := _detect_hidden_windows
         }
     }
 
@@ -79,7 +82,8 @@ Class WinUtil {
                 SPIDelay := DllCall("User32.dll\SystemParametersInfo",
                                     "UInt", 0x2002, "UInt", 0, 
                                     "UIntP", SPIDelay, "UInt", False)
-                this._active_window_tracking := !!(SPITrack+SPIOnTop+SPIDelay)
+                this._active_window_tracking := (SPIDelay = 1) ? False : !!(SPITrack+SPIOnTop+SPIDelay)
+                ; this._active_window_tracking := !!(SPITrack+SPIOnTop+SPIDelay)
             }
             return this._active_window_tracking
         }
@@ -143,7 +147,7 @@ Class WinUtil {
             if WinExist(_hwnd)
                 WinKill(), deaths++
         A_TitleMatchMode := pre_title_match
-        TrayTip '[ ' _re_proc_name ' ]', 'Deaths: ' deaths
+        TrayTip "[ " _re_proc_name.Replace("\\\.", ".") " ]", "Deaths: " deaths
         SetTimer((*)=>TrayTip(), -3000)
     }
 
@@ -157,6 +161,15 @@ Class WinUtil {
             if not win_list_og.IndexOf(_hwnd)
                 return _hwnd
         return WinUtil.WinWaitNewActive()
+    }
+
+    Static WinFocus(_wTitle) {
+        if not WinExist(_wTitle)
+            return QuikToast(
+                "Could not find any instance of '" _wTitle "'"
+              , _wTitle " not found"
+              , 3000)
+        WinActivate()
     }
 
     ; static RunWinWait() {}

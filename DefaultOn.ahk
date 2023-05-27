@@ -35,7 +35,7 @@ Class ScriptDOConf {
     X1Delay  := 325
     X2Delay  := 325
     ThisPC   := __PC.name
-    WindowCycleOffset := 1
+    WindowCycleOffset := 2
     bcv2_exe := "BCV2.exe"
 }
 
@@ -59,11 +59,11 @@ Class GblDOConf extends ConfTool {
                 "ReloadMessageDuration", 4000
             ),
             "Paths", Map(
-                "BCV2Exe"    , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "ScritchAhk" , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
+                "BCV2Exe"    , "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
+                "ScritchAhk" , "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\ScinSkratch\Scritch.ahk",
                 "AhkCodeTemp", "C:\WINDOWS\TEMP\A_TempCode.ahk",
                 "AhkUIA"     , "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-                "OpenEnvVars", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
+                "OpenEnvVars", "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk"
             ),
             "Enabled", Map(
                 "AltShiftWinDrag", 1 ,
@@ -81,16 +81,16 @@ Class GblDOConf extends ConfTool {
                 "FocusOnHover"   , 1 ,
             ),
             "BCV2", Map(
-                "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
+                "Source", "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
+                "Dest"  , "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\DOsrc\BCV2.exe"
             ),
             "OpenEnvVars", Map(
-                "Source", "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
+                "Source", "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\Lib\Utils\UIA\OpenEnvironmentVars.ahk",
+                "Dest"  , "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\DOsrc\OpenEnvironmentVars.ahk"
             ),
             "UIA64", Map(
                 "Source", "C:\Program Files\AutoHotkey\v2\AutoHotkey64_UIA.exe",
-                "Dest"  , "C:\Users\jonat\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
+                "Dest"  , "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\DOsrc\AutoHotkey64_UIA.exe"
             )
         ))
         this.Validate()
@@ -141,8 +141,6 @@ _S.X1Delay := _G.General.X1Delay
 _S.X2Delay := _G.General.X2Delay
 _S.WindowCycleOffset := _G.General.WindowCycleOffset
 
-if __PC.name = "primary"
-    _S.WindowCycleOffset -= 1
 
 /** 
  * @var {Map} _T `TEMP` Config 
@@ -447,10 +445,10 @@ SendXButton2(*) {
     SetTimer(,0)
     Return Send("{XButton2}")
 }
-if !!_G.Enabled.SearchFirefox {
-    Hotkey "LWin & AppsKey", (*)=>SearchBrowserFromClipboard()
-    Hotkey "LWin & RWin", (*)=>SearchBrowserFromClipboard()
-}
+HotIf (*)=> !!_G.Enabled.SearchFirefox
+Hotkey "LWin & AppsKey", (*)=>SearchBrowserFromClipboard()
+Hotkey "LWin & RWin", (*)=>SearchBrowserFromClipboard()
+HotIf
 SearchBrowserFromClipboard(*) {
     SetTimer(SendXButton2, 0)
     ; ddg_url := "https://www.duckduckgo.com/?q=" .
@@ -466,7 +464,10 @@ SearchBrowserFromClipboard(*) {
                             ; .Replace("\s", "+")
     ; Run __PC.default_browser " " ddg_url
 
-    Run __PC.default_browser " " URLPuppy.BuildDDGSearch(A_Clipboard)
+    cb := A_Clipboard
+    is_link := (cb ~= "\s") ? False : (cb ~= "(^(http|www\.))|(^[a-zA-Z_-]+\.[a-zA-Z]{1,3}(\/|$))") ? True : False
+
+    Run __PC.default_browser " `"" (!!is_link ? cb : URLPuppy.BuildDDGSearch(cb)) "`""
 
     ; SetTitleMatchMode "RegEx"
     ; SetTitleMatchMode 2
@@ -723,8 +724,6 @@ Class AltShiftDragWindowRect {
                     w: ((_w:=this.home.win.w+mouseDelta.x) > this.sizeMin.w) ?
                                                         _w : this.sizeMin.w,
                     h: ((_h:=this.home.win.h+mouseDelta.y) > this.sizeMin.h) ?
-                        DllCall("User32.dll\SystemParametersInfo",
-                                "UInt", 0x100C, "UInt", 0, "UIntP", SPITrack, "UInt", False) . "`n" .
                                                         _h : this.sizeMin.h
                 }
                 WinVector.DLLUtil.DllWinSetRect(this.home.hwnd, winSizeNew)
@@ -910,7 +909,34 @@ Class WindowFairy extends LeaderKeys {
     default_mult := WinVector.Coord(1, 1, 1, 1),
     _coords := WinVector.Coord(),
     _coords_ready := False,
-    weblinks := Map()
+    weblinks := {},
+    weblink_paths := {
+         gmail        : [ [     "g", "m"], "https://www.gmail.com"                       ],
+         github       : [ ["g", "i", "t"], "https://www.github.com"                      ],
+         soundit      : [ ["s", "i", "a"], "http://192.168.1.6:9697/"                    ],
+         soundit      : [ ["s", "i", "b"], "http://192.168.1.4:9697/"                    ],
+         textnow      : [ [     "t", "n"], "https://www.textnow.com/"                    ],
+         fancyedit    : [ [     "f", "p"], "https://www.textpaint.net/"                  ],
+         fancyconvert : [ [     "f", "c"], "https://www.textfancy.com/font-converter"    ],
+         vscodemarket : [ ["v", "s", "m"], "https://marketplace.visualstudio.com/VSCode" ],
+         ddg          : [ ["d", "d", "g"], "https://www.duckduckgo.com"                  ],
+         paypal       : [ ["p", "a", "y"], "https://www.paypal.com/"                     ],
+         reddit       : [ ["r", "e", "d"], "https://www.reddit.com"                      ],
+         ora          : [ ["o", "r", "a"], "https://www.ora.sh/"                         ],
+         amazon       : [ ["a", "m", "a"], "https://amazon.com/"                         ]
+    },
+    launch_paths := {
+        vscodium     : [ ["o", "v", "s"], (*)=> Run("VSCodium.exe")                      ],
+        maxthon      : [ ["o", "m", "x"], (*)=> Run("Maxthon.exe")                       ],
+        explorer     : [ ["o", "e", "x"], (*)=> Run("explorer.exe")                      ],
+        wezterm      : [ ["o", "w", "z"], (*)=> Run("wezterm-gui.exe")                   ],
+        sublimetext  : [ ["o", "s", "t"], (*)=> Run("sublime_text.exe")                  ],
+        sublimemerge : [ ["o", "s", "m"], (*)=> Run("sublime_merge.exe")                 ],
+        firefox      : [ ["o", "f", "f"], (*)=> Run("firefox.exe")                       ],
+        itunes       : [ ["o", "i", "t"], (*)=> Run("itunes.exe")                        ],
+        logseq       : [ ["o", "l", "s"], (*)=> Run("C:\Users\" A_UserName "\AppData\Local\Logseq\Logseq.exe") ],
+        sounditapp   : [ ["o", "s", "i"], (*)=> Run("C:\Users\" A_UserName "\Desktop\Soundit.lnk")             ]
+    }
 
     Static __New() {
         this.instance := this()
@@ -950,43 +976,26 @@ Class WindowFairy extends LeaderKeys {
         this.MapKey("BackSpace", (*) => this.Deactivate())
         this.MapKey("^/", (*) => this.Deactivate())
 
-
-        mv := {
-            x: this.segment.x // 6,
-            y: this.segment.y // 6,
-            w: this.segment.x // 3,
-            h: this.segment.y // 3,
-        }
-
-        this.MapKeyPath(["p", "p"],
-            (*) => (
-                this.Nudge(
-                    WinVector.Coord.Down.Mul(mv.y)
-                    .Add(WinVector.Coord.Right.Mul(mv.x))
-                    .Add(WinVector.Coord.Thin.Mul(mv.w))
-                    .Add(WinVector.Coord.Short.Mul(mv.h))
-                )
-            ), "max"
-        )
-
         this.MapKeyPath(["k", "k"], (*)=> WinClose(WinExist("A")))
         this.MapKeyPath(["k", "l"], (*)=>
             WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace("\.", "\.")))
+        this.MapKeyPath(["g", "e", "f"], (*)=> (
+            iExe := "iTunesVisualizerHost.exe",
+            WinActivate("ahk_exe " iExe))
+        )
         this.MapKeyPath(["k", "h", "h"], (*)=> WinUtil.WinCloseProcesses("hh\.exe"))
-        this.MapKeyPath(["o", "v", "s"], (*)=> Run("VSCodium.exe"))
-        this.MapKeyPath(["o", "m", "x"], (*)=> Run("Maxthon.exe"))
-        this.MapKeyPath(["o", "e", "x"], (*)=> Run("explorer.exe"))
-        this.MapKeyPath(["o", "w", "z"], (*)=> Run("wezterm-gui.exe"))
-        this.MapKeyPath(["o", "s", "t"], (*)=> Run("sublime_text.exe"))
-        this.MapKeyPath(["o", "s", "m"], (*)=> Run("sublime_merge.exe"))
-        this.MapKeyPath(["o", "i", "t"], (*)=> Run("itunes.exe"))
-        this.MapKeyPath(["o", "l", "s"], (*)=> Run("C:\Users\" A_UserName "\AppData\Local\Logseq\Logseq.exe"))
-        this.MapKeyPath(["o", "s", "i"], (*)=> Run("C:\Users\" A_UserName "\Desktop\Soundit.lnk"))
+
+        for _display_name, _path_info in this.launch_paths.OwnProps()
+            this.MapKeyPath(_path_info[1], _path_info[2])
+
         this.MapKeyPath(["c", "c", "b"], (*)=> Run(_G.Paths.BCV2Exe " Toggle"))
         this.MapKeyPath(["a", "o", "t"], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
         this.MapKeyPath(["n", "o", "t"], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
-        this.MapKeyPath(["f", "w", "f"], (*)=> !!(WinExist("ahk_exe waterfox.exe")) ? (WinActivate()) :
-            (JKQuickToast("There aren't any waterfox windows open at the moment", "",)))
+        this.MapKeyPath(["f", "w", "f"], (*)=> WinUtil.WinFocus("ahk_exe waterfox.exe"))
+        this.MapKeyPath(["f", "w", "z"], (*)=> WinUtil.WinFocus("ahk_exe wezterm-gui.exe"))
+        this.MapKeyPath(["f", "f", "f"], (*)=> WinUtil.WinFocus("ahk_exe firefox.exe"))
+        this.MapKeyPath(["f", "e", "x"], (*)=> WinUtil.WinFocus("ahk_class CabinetWClass"))
+        this.MapKeyPath(["f", "p", "h"], (*)=> WinUtil.WinFocus("ahk_class ApplicationFrameWindow"))
 
 
         _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
@@ -1018,18 +1027,9 @@ Class WindowFairy extends LeaderKeys {
         weblinks.Link[          "tph" , ["t", "p", "h"] ] := link_tph
         weblinks.Link[      "emmylua" , ["e", "m", "y"] ] := link_emmylua
         weblinks.Link[  "thqbygithub" , ["t", "h", "q"] ] := link_thqbygithub
-        weblinks.Link[        "gmail" ,      ["g", "m"] ] := "https://www.gmail.com"
-        weblinks.Link[       "github" , ["g", "i", "t"] ] := "https://www.github.com"
-        ; weblinks.Link[      "soundit" ,      ["s", "i"] ] := "http://192.168.1.4:9697/"
-        weblinks.link[      "textnow" ,      ["t", "n"] ] := "https://www.textnow.com/"
-        weblinks.Link[    "fancyedit" ,      ["f", "p"] ] := "https://www.textpaint.net/"
-        weblinks.Link[ "fancyconvert" ,      ["f", "c"] ] := "https://www.textfancy.com/font-converter"
-        weblinks.Link[ "vscodemarket" , ["v", "s", "m"] ] := "https://marketplace.visualstudio.com/VSCode"
-        weblinks.Link[          "ddg" , ["d", "d", "g"] ] := "https://www.duckduckgo.com"
-        weblinks.Link[       "paypal" , ["p", "a", "y"] ] := "https://www.paypal.com/"
-        weblinks.Link[       "reddit" , ["r", "e", "d"] ] := "https://www.reddit.com"
-        weblinks.Link[          "ora" , ["o", "r", "a"] ] := "https://www.ora.sh/"
 
+        for _display_name, _path_info in this.weblink_paths.OwnProps()
+            weblinks.Link[_display_name, _path_info[1]] := _path_info[2]
 
         this.MapKey("l", (*) => (weblinks.Activate(2000)), True)
 
@@ -1049,6 +1049,9 @@ Class WindowFairy extends LeaderKeys {
 
     Nudge(delta, hwnd:=0) {
         hwnd := hwnd ? hwnd : this.AHwnd
+        if not WinActive(hwnd)
+            WinActivate hwnd
+        WinWaitActive
         ; _aPos := this.APos[hwnd]
         _aPos := WinVector.ActiveCoord.Add(delta)
         ; _aPos.x += delta.x
@@ -1065,6 +1068,69 @@ Class WindowFairy extends LeaderKeys {
     FenceWindow() {
 
     }
+}
+
+Class NumpadFairy extends LeaderKeys {
+    static leader := "NumpadDel & NumpadEnter"
+         , timeout := "none"
+         , cell_size := {
+            w: ((A_ScreenWidth - 8*2) / 8),
+            h: ((A_ScreenHeight - 8*2) / 8)
+         }
+         , instance := {}
+
+    static __New() {
+        this.instance := this()
+        this.instance.Enabled := true
+    }
+
+    __New() {
+        super.__New(NumpadFairy.leader, NumpadFairy.timeout)
+        this.MapKey "NumpadUp", (*)=>this.Nudge("up")
+        this.MapKey "NumpadClear", (*)=>this.Nudge("down")
+        this.MapKey "NumpadLeft", (*)=>this.Nudge("left")
+        this.MapKey "NumpadRight", (*)=>this.Nudge("right")
+        this.MapKey "NumpadEnd", (*)=>WinUtil.Cycler.HalfFill()
+        this.MapKey "NumpadPgDn", (*)=>WinUtil.Cycler.Fill()
+        this.MapKey "NumpadDiv", (*)=>this.Nudge("thin")
+        this.MapKey "NumpadMult", (*)=>this.Nudge("wide")
+        this.MapKey "NumpadSub", (*)=>this.Nudge("short")
+        this.MapKey "NumpadAdd", (*)=>this.Nudge("tall")
+    }
+
+    MoveWindow(_delta, _hwnd:=0) {
+        _hwnd := _hwnd ? WinExist(_hwnd) : WinExist("A")
+        if not WinActive()
+            WinActivate
+        WinWaitActive
+        WinGetPos(&_x, &_y, &_w, &_h)
+        _coords := WinVector.Coord(_x, _y, _w, _h).Add(_delta)
+        WinMove _coords.x, _coords.y, _coords.w, _coords.h
+    }
+
+    Nudge(_direction, _hwnd?) {
+        _hwnd := _hwnd ?? WinExist("A")
+        switch _direction {
+            case "up":
+                this.MoveWindow(WinVector.Coord.Up.Mul(NumpadFairy.cell_size.h), _hwnd)
+            case "down":
+                this.MoveWindow(WinVector.Coord.Down.Mul(NumpadFairy.cell_size.h), _hwnd)
+            case "left":
+                this.MoveWindow(WinVector.Coord.Left.Mul(NumpadFairy.cell_size.w), _hwnd)
+            case "right":
+                this.MoveWindow(WinVector.Coord.Right.Mul(NumpadFairy.cell_size.w), _hwnd)
+            case "short":
+                this.MoveWindow(WinVector.Coord.Short.Mul(NumpadFairy.cell_size.w), _hwnd)
+            case "tall":
+                this.MoveWindow(WinVector.Coord.Tall.Mul(NumpadFairy.cell_size.w), _hwnd)
+            case "thin":
+                this.MoveWindow(WinVector.Coord.Thin.Mul(NumpadFairy.cell_size.w), _hwnd)
+            case "wide":
+                this.MoveWindow(WinVector.Coord.Wide.Mul(NumpadFairy.cell_size.w), _hwnd)
+        }
+    }
+
+
 }
 
 Class LaunchFairy {
@@ -1107,8 +1173,8 @@ Class LaunchFairy {
 
 #F10::
 {
-    Msgbox A_ComputerName
-    A_Clipboard := A_ComputerName
+    ; Msgbox A_ComputerName
+    ; A_Clipboard := A_ComputerName
     WinUtil.ActiveWindowTracking := !WinUtil.ActiveWindowTracking
 }
 

@@ -51,7 +51,7 @@ class WinCache {
 
         Size[_src:='wingetpos'] {
             get {
-
+                
             }
             set {
 
@@ -74,22 +74,25 @@ class WinCache {
         SizePos[_src:='wingetpos'] {
             get {
                 if not WinExist(this.hwnd)
-                    throw TargetError('WinCache.WinItem.SizePos:: ' .
-                                      'The window referenced by this WinItem ' .
-                                      'instance does not exist')
+                    throw TargetError("WinCache.WinItem.SizePos:: " .
+                                      "The window referenced by this WinItem " .
+                                      "instance does not exist")
                 WinGetPos(&_x, &_y, &_w, &_h, this.hwnd)
                 WinVector.DLLUtil.SuperficialCoordsFromReal(
                             &_super_size_pos:={}, this.hwnd)
                 _ahk_size_pos := {x: _x, y: _y, w: _w, h: _h}
                 if not _src
-                    throw ValueError('WinCache.WinItem.SizePos:: _src must not be blank')
-                else if _src ~= 'winget(pos)?|real'
+                    throw ValueError("WinCache.WinItem.SizePos:: _src must not be blank")
+                else if _src ~= "winget(pos)?|real"
                     return _ahk_size_pos
-                else if _src ~= 'super'
+                else if _src ~= "super"
                     return _super_size_pos
-                else throw ValueError('WinCache.WinItem.SizePos:: _src is not valid')
+                else throw ValueError("WinCache.WinItem.SizePos:: _src is not valid")
             }
             set {
+                _x := (Value.HasOwnProp("x")) ? Value.x : "unset"
+                _y := (Value.HasOwnProp("y")) ? Value.y : "unset"
+                WinVector.DLLUtil.RealCoordsFromSuperficial(&real_coords, this.hwnd, Value.x, Value.y, Value.w, Value.h)
             }
         }
     }

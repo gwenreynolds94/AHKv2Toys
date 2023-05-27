@@ -184,13 +184,21 @@ Class WinVector {
 ;     }
 
     Class Directions {
-               /** @prop {WinVector.Coord} Left */
+               /** 
+                * @prop {WinVector.Coord} Left 
+                */
         Static Left := 0
-               /** @prop {WinVector.Coord} Right */
+               /** 
+                * @prop {WinVector.Coord} Right 
+                */
              , Right := 0
-               /** @prop {WinVector.Coord} Up */
+               /**
+                * @prop {WinVector.Coord} Up 
+                */
              , Up := 0
-               /** @prop {WinVector.Coord} Down */
+               /**
+                * @prop {WinVector.Coord} Down 
+                */
              , Down := 0
 
         Static __New() {
@@ -237,7 +245,9 @@ Class WinVector {
         Static Short => WinVector.Coord(0, 0, 0, (-1))
         Static Tall  => WinVector.Coord(0, 0, 0, 1)
 
-        /** @param {WinVector.Coord|Object} _xywh_target */
+        /**
+         * @param {WinVector.Coord|Object} _xywh_target 
+         */
         Static Contain(&_xywh_target, _xywh_min?, _xywh_max?) {
             if not (IsSet(_xywh_min) and IsSet(_xywh_max))
                 if _xywh_target is WinVector.Coord
