@@ -2637,24 +2637,35 @@ Gdip_SetCompositingMode(pGraphics, CompositingMode:=0)
 ; Extra functions
 ;#####################################################################################
 
-Gdip_Startup()
+class GdipCache {
+    static pToken := 0x0
+}
+
+Gdip_Startup(_force:=false)
 {
+    if !_force and (GdipCache.pToken != 0x0)
+        return GdipCache.pToken
+
 	Ptr := A_PtrSize ? "UPtr" : "UInt"
-	pToken := 0
+	_pToken := 0
 
 	if !DllCall("GetModuleHandle", "str", "gdiplus", Ptr)
 		DllCall("LoadLibrary", "str", "gdiplus")
     si := Buffer((A_PtrSize=8) ? 24 : 16, 0)
     StrPut Chr(1), si
-	DllCall("gdiplus\GdiplusStartup", A_PtrSize ? "UPtr*" : "uint*", &pToken, Ptr, si.Ptr, Ptr, 0)
-	return pToken
+	DllCall("gdiplus\GdiplusStartup", A_PtrSize ? "UPtr*" : "uint*", &_pToken, Ptr, si.Ptr, Ptr, 0)
+    GdipCache.pToken := _pToken
+	return _pToken
 }
 
-Gdip_Shutdown(pToken)
+Gdip_Shutdown(_pToken)
 {
+    if not GdipCache.pToken
+        return 1
+
 	Ptr := A_PtrSize ? "UPtr" : "UInt"
 
-	DllCall("gdiplus\GdiplusShutdown", Ptr, pToken)
+	DllCall("gdiplus\GdiplusShutdown", Ptr, _pToken)
 	if hModule := DllCall("GetModuleHandle", "str", "gdiplus", Ptr)
 		DllCall("FreeLibrary", Ptr, hModule)
 	return 0

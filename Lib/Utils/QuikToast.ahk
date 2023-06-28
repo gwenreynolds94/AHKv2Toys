@@ -5,7 +5,10 @@
 
 
 QuikToast(_msg, _title, _timeout_ms?) {
-    _timeout_ms := _timeout_ms ?? _G.General.ReloadMessageDuration
+    static reload_msg_dur := 0, def_reload_msg_dur := 3000
+    if not reload_msg_dur
+        try reload_msg_dur := _G.General.ReloadMessageDuration
+    _timeout_ms := _timeout_ms ?? (!!reload_msg_dur ? reload_msg_dur : def_reload_msg_dur)
     Try {
         _msg_str := String(_msg)
         _title_str := String(_title)

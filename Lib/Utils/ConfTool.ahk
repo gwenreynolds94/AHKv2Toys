@@ -1,3 +1,45 @@
+#Requires AutoHotkey v2.0
+#Warn All, StdOut
+#SingleInstance Force
+
+if (A_LineFile = A_ScriptFullPath) {
+    test_conf := TestConf("C:\Users\" A_UserName "\.test_conf",
+        Map(
+            "SectA", Map(
+                "A", "Aye",
+                "B", "Bee",
+                "C", "See"
+            ),
+            "SectB", Map(
+                "A", "Aye",
+                "B", "Bee",
+                "C", "See"
+            )
+        )
+    )
+    test_conf.Validate()
+    ; using .Ini ;
+    test_conf.Ini.SectNew.A := "AyeAgain"
+    test_conf.Ini.SectNew.B := "BeeAgain"
+    ; using extended class 'shortcut' props
+    test_conf.SectNew.C := "SeeAgain!"
+    test_conf.KeyAB := "AyeBeeNew"
+}
+
+/**
+ * Extend ConfTool so you can define properties to have shortcuts to
+ * specific sections. To define shortcuts to specific keys, you have
+ * to define both `get` and `set` methods
+ */
+Class TestConf extends ConfTool {
+    SectA => this.Ini.SectA
+    SectB => this.Ini.SectB
+    SectNew => this.Ini.SectNew
+    KeyAB {
+        set => this.Ini.SectA.B := Value
+        get => this.Ini.SectA.B
+    }
+}
 
 /**
  * This class implements an object-oriented interface for loading and saving
@@ -16,9 +58,36 @@
  */
 Class ConfTool {
 
+    /**
+     * @param {String} fpath 
+     */
     fpath := ".\.ahkonf"
+
+    /**
+     *
+     */
     defaults := Map()
 
+    /**
+     * @param {String} _confpath path to configuration file to be read/written
+     * @param {Map} _defaults a nest of maps in the following format:
+     *
+     * ```
+     *  _defaults := Map(
+     *      "SectionA", Map(
+     *          "KeyAA", "ValueAA",
+     *          "KeyAB", "ValueAB",
+     *          "KeyAC", "ValueAC"
+     *      ),
+     *      "SectionB", Map(
+     *          "KeyBA", "ValueBA",
+     *          "KeyBB", "ValueBB",
+     *          "KeyBC", "ValueBC"
+     *      )
+     *      ; ...
+     *  )
+     * ```
+     */
     __New(_confpath:="", _defaults:="") {
         this.fpath := _confpath ? _confpath : this.fpath
         this.defaults := _defaults ? _defaults : this.defaults
@@ -28,7 +97,7 @@ Class ConfTool {
         CreateDefaultFile() {
             for _sectname, _sect in this.defaults
                 for _keyname, _keyvalue in _sect
-                    this.Sett[_sectname, _keyname] := _keyvalue
+                    this.Ini.%_sectname%.%_keyname% := _keyvalue
         }
         if FileExist(this.fpath)
             return "exists"
@@ -92,34 +161,56 @@ Class ConfTool {
 
     Class SectionEdit {
 
-        /** @prop {ConfTool} _conftool */
+        /**
+         * @prop {ConfTool} _conftool instance of ConfTool to edit
+         */
         _conftool := ""
 
-        /** @prop {String} _section */
+        /**
+         * @prop {String} _section section to edit
+         */
         _section := "",
 
-        /** @prop {"bool"|"string"} */
+        /**
+         * @prop {"bool"|"string"} types of values in section
+         */
         _value_type := {}
 
+        /**
+         * @prop {Map} _content contents of ini section
+         */
         _content := Map()
 
-        /** @prop {Gui} _gui */
+        /**
+         * @prop {Gui} _gui instance of gui used to edit section
+         */
         _gui := {}
 
-        /** @prop {Map} _guictrls <String, Gui.Control> */
+        /**
+         * @prop {Map} _guictrls <String, Gui.Control> 
+         */
         _guictrls := Map()
 
-        /** @prop {Gui.Control} _gui_exit_btn */
+        /**
+         * @prop {Gui.Control} _gui_exit_btn gui exit button lol
+         */
         _gui_exit_btn := {}
-
+        
+        /**
+         * @param {Integer|Number} _item_width width of key items
+         */
         _item_width := 150
 
+        /**
+         * @param {Object} methbound stores various instance-bound methods
+         */
         methbound := {}
 
         /**
-         * @param {ConfTool} _conftool
-         * @param {String} _section
-         * @param {"bool"|"string"} _value_type
+         * @param {ConfTool} _conftool instance of ConfTool to edit
+         * @param {String} _section section in configuration file to edit
+         * @param {"bool"|"string"} _value_type types of values in section 
+         *  [STRING NOT IMPLEMENTED]
          */
         __New(_conftool, _section, _value_type:="bool") {
             this._conftool := _conftool
@@ -130,12 +221,13 @@ Class ConfTool {
             this.SetupGui()
         }
 
+        /**
+         *
+         */
         SetupGui() {
             this._gui := Gui("+AlwaysOnTop", "Edit" this._section "Gui", this)
             this.UpdateContent()
-            ; this._gui.AddText("x0 y0 w" this._item_width, "Edit " this._section)
             for _key, _value in this._content {
-                ; this._gui.AddText("xp+0 y+10 w" this._item_width, _key)
                 if this._value_type ~= "bool" {
                     this._guictrls[_key] :=
                         this._gui.AddCheckbox("xp+0 y+10 w" this._item_width, _key)
@@ -148,11 +240,16 @@ Class ConfTool {
                 this._gui.AddButton("xp+0 y+10 w" this._item_width, "Close")
             this._gui_exit_btn.OnEvent("Click", "ExitButton_OnClick")
 
-            /** @var {Menu} _tray */
+            /** 
+             * @var {Menu} _tray 
+             */
             _tray := A_TrayMenu
             _tray.Add("Edit " this._section, this.methbound.show)
         }
 
+        /**
+         *
+         */
         UpdateContent() {
             this._content.Clear()
             Loop Parse, IniRead(this._conftool.fpath, this._section), "`n", "`r" {
@@ -161,19 +258,30 @@ Class ConfTool {
             }
         }
 
+        /**
+         *
+         */
         ExitButton_OnClick(*) {
             this.Hide()
         }
 
-        /** @param {Gui.Control} _guictrl */
+        /** 
+         * @param {Gui.Control} _guictrl 
+         */
         CheckBox_OnClick(_guictrl, *) {
             this._conftool.Ini.%(this._section)%.%(_guictrl.Text)% := _guictrl.Value
         }
 
+        /**
+         *
+         */
         Show(*) {
             this._gui.Show()
         }
 
+        /**
+         *
+         */
         Hide(*) {
             this._gui.Hide()
         }
@@ -181,4 +289,5 @@ Class ConfTool {
     }
 
 }
+
 

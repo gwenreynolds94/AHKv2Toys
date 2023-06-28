@@ -13,7 +13,10 @@
  */
 Class LeaderKeys extends KeyTable {
 
-    /** @prop {String} leader */
+
+    /**
+     * @prop {String} leader 
+     */
     leader   := ""
     _enabled := False
 
@@ -65,47 +68,6 @@ Class LeaderKeys extends KeyTable {
         }
     }
 
-    Class LeaderIndicator {
-        static gdip_token := 0x000000
-             , first_instance := true
-             , instances := []
-        
-        
-        gui := {}
-
-        __New() {
-            if !!LeaderKeys.LeaderIndicator.first_instance {
-                LeaderKeys.LeaderIndicator.SetupGdip
-                LeaderKeys.LeaderIndicator.first_instance := false
-            }
-            this.SetupGui
-            LeaderKeys.LeaderIndicator.instances.Push this
-        }
-
-        SetupGui() {
-            this.gui := Gui("AlwaysOnTop Caption", "LeaderIndicator", this)
-        }
-
-        static SetupGdip() {
-            LeaderKeys.LeaderIndicator.gdip_token := Gdip_Startup()
-            if !LeaderKeys.LeaderIndicator.gdip_token
-                return QuikToast( "{LeaderIndicator~SetupGdip} : LeaderIndicator will not be shown"
-                                , "Failed to start GDI+ <> LeaderIndicator cannot be used"
-                                , 3000 )
-            OnExit LeaderKeys.LeaderIndicator.ShutdownGdip
-            ; ...whatever...
-
-        }
-
-        static ShutdownGdip(){
-            if !!LeaderKeys.LeaderIndicator.gdip_token
-                Gdip_Shutdown LeaderKeys.LeaderIndicator.gdip_token
-        }
-
-        __Delete() {
-            LeaderKeys.LeaderIndicator.ShutdownGdip
-        }
-    }
 }
 
 Class LinkTable extends KeyTable {

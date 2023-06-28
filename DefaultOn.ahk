@@ -37,6 +37,9 @@ Class ScriptDOConf {
     ThisPC   := __PC.name
     WindowCycleOffset := 2
     bcv2_exe := "BCV2.exe"
+    Enabled := {
+        CapsLockMods : false
+    }
 }
 
 ;; Global Config Class
@@ -79,6 +82,7 @@ Class GblDOConf extends ConfTool {
                 "SearchFirefox"  , 1 ,
                 "ShiftDelete"    , 1 ,
                 "FocusOnHover"   , 1 ,
+                "CapsLockMods"   , 0 ,
             ),
             "BCV2", Map(
                 "Source", "C:\Users\" A_UserName "\Documents\gitrepos\AHKv2Toys\BetterClipboardV2\BCV2.exe",
@@ -140,7 +144,7 @@ _S := ScriptDOConf()
 _S.X1Delay := _G.General.X1Delay
 _S.X2Delay := _G.General.X2Delay
 _S.WindowCycleOffset := _G.General.WindowCycleOffset
-
+_S.Enabled.CapsLockMods := _G.Enabled.CapsLockMods
 
 /** 
  * @var {Map} _T `TEMP` Config 
@@ -149,7 +153,8 @@ _T := Map()
 
 Hotkey "#F11", (*)=>_G.EnabledEdit.Show()
 
-TraySetIcon ".\DOsrc\DefaultOn-1-1.png"
+; TraySetIcon ".\DOsrc\DefaultOn-1-1.png"
+TraySetIcon ".\DOsrc\ahk.2.logo.ico"
 
 ; _G.General.CloseCortanaInterval := 10 * 1000
 ; _G.General.ReloadMessageDuration := 4000
@@ -819,54 +824,54 @@ OpenEnvironmentVars(){
 
 ; --- Wezterm Config ----------------------------------------------------------
 ; -----------------------------------------------------------------------------
-
-OnCapsDownGlobal(*) {
-    global _S
-    _S.IsCapsDown := True
-    if GetKeyState("LWin")
-        _S.CurrentCapsMod := "Middle"
-    else if GetKeyState("LAlt") and GetKeyState("LShift")
-        _S.CurrentCapsMod := "Right"
-    else _S.CurrentCapsMod := "Left"
-    Click(_S.CurrentCapsMod " Down")
-}
-
-OnCapsUpGlobal(*) {
-    global _S
-    _S.IsCapsDown := False
-    Click _S.CurrentCapsMod " Up"
-}
-
-OnCapsDownWezterm(*)
-{
-    if GetKeyState("Shift", "P")
-        SetStoreCapsLockMode(False) ,
-            SendEvent("{CapsLock}") ,
-         SetStoreCapsLockMode(True)
-    else SendEvent( "{LCtrl Down}"  .
-                    "{LAlt Down}"   .
-                    "{LShift Down}" .
-                    "p"             .
-                    "{LShift Up}"   .
-                    "{LAlt Up}"     .
-                    "{LCtrl Up}"    )
-}
-
-SetupCapsLock(*) {
-    global _S
-    HotIf (*) => (( not WinActive("ahk_exe wezterm-gui.exe")) and (_S.IsCapsDown))
-    for _, lfk in _S.CapsUpLeftHandKeys
-        Hotkey lfk "CapsLock Up", OnCapsUpGlobal
-    HotIf
-}
-
-HotIf (*)=> WinActive("ahk_exe wezterm-gui.exe")
-Hotkey "*CapsLock", OnCapsDownWezterm
-Hotkey "*CapsLock Up", (*)=>0
-HotIf (*)=> ((not WinActive("ahk_exe wezterm-gui.exe")) and (not _S.IsCapsDown))
-Hotkey "*CapsLock", OnCapsDownGlobal
-HotIf
-SetupCapsLock
+; 
+; OnCapsDownGlobal(*) {
+;     global _S
+;     _S.IsCapsDown := True
+;     if GetKeyState("LWin")
+;         _S.CurrentCapsMod := "Middle"
+;     else if GetKeyState("LAlt") and GetKeyState("LShift")
+;         _S.CurrentCapsMod := "Right"
+;     else _S.CurrentCapsMod := "Left"
+;     Click(_S.CurrentCapsMod " Down")
+; }
+; 
+; OnCapsUpGlobal(*) {
+;     global _S
+;     _S.IsCapsDown := False
+;     Click _S.CurrentCapsMod " Up"
+; }
+; 
+; OnCapsDownWezterm(*)
+; {
+;     if GetKeyState("Shift", "P")
+;         SetStoreCapsLockMode(False) ,
+;             SendEvent("{CapsLock}") ,
+;          SetStoreCapsLockMode(True)
+;     else SendEvent( "{LCtrl Down}"  .
+;                     "{LAlt Down}"   .
+;                     "{LShift Down}" .
+;                     "p"             .
+;                     "{LShift Up}"   .
+;                     "{LAlt Up}"     .
+;                     "{LCtrl Up}"    )
+; }
+; 
+; SetupCapsLock(*) {
+;     global _S, _G
+;     HotIf (*) => (( not WinActive("ahk_exe wezterm-gui.exe")) and (_S.IsCapsDown) and !!_G.Enabled.CapsLockMods)
+;     for _, lfk in _S.CapsUpLeftHandKeys
+;         Hotkey lfk "CapsLock Up", OnCapsUpGlobal
+;     HotIf
+; }
+; 
+; HotIf (*)=> !!WinActive("ahk_exe wezterm-gui.exe") and !!_G.Enabled.CapsLockMods
+; Hotkey "*CapsLock", OnCapsDownWezterm
+; Hotkey "*CapsLock Up", (*)=>0
+; HotIf (*)=> ((not WinActive("ahk_exe wezterm-gui.exe")) and (not _S.IsCapsDown) and !!_G.Enabled.CapsLockMods)
+; Hotkey "*CapsLock", OnCapsDownGlobal
+; HotIf
+; SetupCapsLock
 
 
 KillHelpWindows()
@@ -902,9 +907,10 @@ Class WindowFairy extends LeaderKeys {
 ; Class WindowFairy extends KeyTable {
 
     increment := WinVector.Coord(20, 20, 30, 30),
+    _segment_div := 8
     segment := {
-        x: Round((A_ScreenWidth - 8*2) / 4),
-        y: Round((A_ScreenHeight - 8*2) / 4)
+        x: Round((A_ScreenWidth - 8*2) / this._segment_div),
+        y: Round((A_ScreenHeight - 8*2) / this._segment_div)
     }
     default_mult := WinVector.Coord(1, 1, 1, 1),
     _coords := WinVector.Coord(),
@@ -923,7 +929,8 @@ Class WindowFairy extends LeaderKeys {
          paypal       : [ ["p", "a", "y"], "https://www.paypal.com/"                     ],
          reddit       : [ ["r", "e", "d"], "https://www.reddit.com"                      ],
          ora          : [ ["o", "r", "a"], "https://www.ora.sh/"                         ],
-         amazon       : [ ["a", "m", "a"], "https://amazon.com/"                         ]
+         amazon       : [ ["a", "m", "a"], "https://amazon.com/"                         ],
+         youtube      : [ ["y", "o", "u"], "https://youtube.com/"                        ]
     },
     launch_paths := {
         vscodium     : [ ["o", "v", "s"], (*)=> Run("VSCodium.exe")                      ],
@@ -939,8 +946,21 @@ Class WindowFairy extends LeaderKeys {
     }
 
     Static __New() {
-        this.instance := this()
+        SetCapsLockState "AlwaysOff"
+        this.instance := this("CapsLock")
         this.instance.Enabled := True
+    }
+
+    SegmentDiv {
+        get => this._segment_div
+        set {
+            this._segment_div := (Value >= 1) ? Value : 1
+            this.segment := {
+                x: Round((A_ScreenWidth - 8 * 2) / this._segment_div),
+                y: Round((A_ScreenHeight - 8 * 2) / this._segment_div)
+            }
+            JKQuickTip this._segment_div, 1250
+        }
     }
 
     /**
@@ -952,23 +972,21 @@ Class WindowFairy extends LeaderKeys {
      */
     __New(_leader := "Alt & Space", _timeout := "none", default_increment?) {
         super.__New(_leader, _timeout)
-        this.MapKey("Up",
-            (*) => this.Nudge(WinVector.Coord.Up.Mul(this.segment.y)))
-        this.MapKey("Down",
-            (*) => this.Nudge(WinVector.Coord.Down.Mul(this.segment.y)))
-        this.MapKey("Left",
-            (*) => this.Nudge(WinVector.Coord.Left.Mul(this.segment.x)))
-        this.MapKey("Right",
-            (*) => this.Nudge(WinVector.Coord.Right.Mul(this.segment.x)))
+        this.MapKey("Up", (*)=>this.NudgeDynamic("up"))
+        this.MapKey("Down", (*)=>this.NudgeDynamic("down"))
+        this.MapKey("Left", (*)=>this.NudgeDynamic("left"))
+        this.MapKey("Right", (*)=>this.NudgeDynamic("right"))
 
         wFairyMovements := Map(
             "Numpad1", (*) => Run("")
         )
 
-        this.MapKey("[", (*) => this.Nudge(WinVector.Coord.Thin.Mul(this.segment.x)))
-        this.MapKey("]", (*) => this.Nudge(WinVector.Coord.Wide.Mul(this.segment.x)))
-        this.MapKey("-", (*) => this.Nudge(WinVector.Coord.Short.Mul(this.segment.y)))
-        this.MapKey("=", (*) => this.Nudge(WinVector.Coord.Tall.Mul(this.segment.y)))
+        this.MapKey("[", (*)=>this.NudgeDynamic("thin"))
+        this.MapKey("]", (*)=>this.NudgeDynamic("wide"))
+        this.MapKey("-", (*)=>this.NudgeDynamic("short"))
+        this.MapKey("=", (*)=>this.NudgeDynamic("tall"))
+        this.MapKey("+-", (*)=> this.SegmentDiv--)
+        this.MapKey("+=", (*)=> this.SegmentDiv++)
         this.MapKey(",", (*) => this.Cycle(1))
         this.MapKey(".", (*) => this.Cycle(2))
         this.MapKey("/", (*) => this.Cycle(3))
@@ -977,6 +995,8 @@ Class WindowFairy extends LeaderKeys {
         this.MapKey("^/", (*) => this.Deactivate())
 
         this.MapKeyPath(["k", "k"], (*)=> WinClose(WinExist("A")))
+        this.MapKeyPath(["k", "c"], (*)=>
+            WinUtil.WinCloseClass(WinGetClass(WinExist("A"))))
         this.MapKeyPath(["k", "l"], (*)=>
             WinUtil.WinCloseProcesses(WinGetProcessName(WinExist("A")).Replace("\.", "\.")))
         this.MapKeyPath(["g", "e", "f"], (*)=> (
@@ -991,11 +1011,17 @@ Class WindowFairy extends LeaderKeys {
         this.MapKeyPath(["c", "c", "b"], (*)=> Run(_G.Paths.BCV2Exe " Toggle"))
         this.MapKeyPath(["a", "o", "t"], (*)=> WinSetAlwaysOnTop(true, WinExist("A")))
         this.MapKeyPath(["n", "o", "t"], (*)=> WinSetAlwaysOnTop(false, WinExist("A")))
+        this.MapKeyPath(["f", "a", "w"], (*)=>
+            WinUtil.WinFocusProcesses(WinGetProcessName(WinExist("A")).Replace("\.", "\.")))
+        this.MapKeyPath(["f", "a", "c"], (*)=> WinUtil.WinFocusClass())
         this.MapKeyPath(["f", "w", "f"], (*)=> WinUtil.WinFocus("ahk_exe waterfox.exe"))
         this.MapKeyPath(["f", "w", "z"], (*)=> WinUtil.WinFocus("ahk_exe wezterm-gui.exe"))
         this.MapKeyPath(["f", "f", "f"], (*)=> WinUtil.WinFocus("ahk_exe firefox.exe"))
         this.MapKeyPath(["f", "e", "x"], (*)=> WinUtil.WinFocus("ahk_class CabinetWClass"))
         this.MapKeyPath(["f", "p", "h"], (*)=> WinUtil.WinFocus("ahk_class ApplicationFrameWindow"))
+
+        this.MapKey("^Up", (*)=>Send("{LCtrl Down}{LAlt Down}1{LAlt Up}{LCtrl Up}"))
+        this.MapKey("^Down", (*)=>Send("{LCtrl Down}{LAlt Down}3{LAlt Up}{LCtrl Up}"))
 
 
         _ahk_cache_dir := "C:\Users\" A_UserName "\.cache\.ahk2.jk\linkache\"
@@ -1047,6 +1073,47 @@ Class WindowFairy extends LeaderKeys {
 
     AHwnd => WinExist("A")
 
+    Shrink(_dir) {
+        
+    }
+
+    NudgeDynamic(_dir) {
+        
+        delta_coord := 0
+
+        _dir := (_dir = "left")  ? "x0" :
+                (_dir = "right") ? "x1" :
+                (_dir = "down")  ? "y0" :
+                (_dir = "up")    ? "y1" :
+                (_dir = "thin")  ? "x2" :
+                (_dir = "wide")  ? "x3" :
+                (_dir = "short") ? "y2" :
+                (_dir = "tall")  ? "y3" : (0)
+
+
+        switch {
+            case _dir = "x0":
+                delta_coord := WinVector.Coord.Left
+            case _dir = "x1":
+                delta_coord := WinVector.Coord.Right
+            case _dir = "y0":
+                delta_coord := WinVector.Coord.Down
+            case _dir = "y1":
+                delta_coord := WinVector.Coord.Up
+            case _dir = "x2":
+                delta_coord := WinVector.Coord.Thin
+            case _dir = "x3":
+                delta_coord := WinVector.Coord.Wide
+            case _dir = "y2":
+                delta_coord := WinVector.Coord.Short
+            case _dir = "y3":
+                delta_coord := WinVector.Coord.Tall
+        }
+
+        if !!delta_coord
+            this.Nudge(delta_coord.Mul(_dir.StartsWith("x") ? this.segment.x : this.segment.y))
+    }
+
     Nudge(delta, hwnd:=0) {
         hwnd := hwnd ? hwnd : this.AHwnd
         if not WinActive(hwnd)
@@ -1069,6 +1136,8 @@ Class WindowFairy extends LeaderKeys {
 
     }
 }
+
++CapsLock::CapsLock
 
 Class NumpadFairy extends LeaderKeys {
     static leader := "NumpadDel & NumpadEnter"
@@ -1176,6 +1245,12 @@ Class LaunchFairy {
     ; Msgbox A_ComputerName
     ; A_Clipboard := A_ComputerName
     WinUtil.ActiveWindowTracking := !WinUtil.ActiveWindowTracking
+}
+
+#F4::
+{
+    QuikToast("Exitting { OnByDefault.ahk }", "Exitting { OnByDefault.ahk }", 3000)
+    SetTimer (*)=>ExitApp(), -3000
 }
 
 ;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:;:

@@ -26,9 +26,9 @@ class WinCache {
     Class WinItem {
         hwnd := 0x0
         pid := 0x0
-        process := ''
-        class := ''
-        title := ''
+        process := ""
+        class := ""
+        title := ""
 
         __New(_hwnd) {
             this.hwnd := _hwnd
@@ -49,7 +49,7 @@ class WinCache {
             set => (0)
         }
 
-        Size[_src:='wingetpos'] {
+        Size[_src:="wingetpos"] {
             get {
                 
             }
@@ -58,7 +58,7 @@ class WinCache {
             }
         }
 
-        Pos[_src:='wingetpos'] {
+        Pos[_src:="wingetpos"] {
             get {
 
             }
@@ -71,7 +71,7 @@ class WinCache {
          *
          * @param {string} _src < `winget(pos)?` `|` `real` `|` `super` >
          */
-        SizePos[_src:='wingetpos'] {
+        SizePos[_src:="wingetpos"] {
             get {
                 if not WinExist(this.hwnd)
                     throw TargetError("WinCache.WinItem.SizePos:: " .
@@ -102,8 +102,9 @@ class WinCache {
 
 __DEBUG() {
     _w := WinCache.WinItem(WinExist("A"))
-    dbgo _w.SizePos
-    dbgo _w.SizePos['dllsuper']
-    dbgo _w.SizePos['dllreal']
+    msgbox _w.SizePos
+    msgbox _w.SizePos["dllsuper"]
+    msgbox _w.SizePos["dllreal"]
 }
-F9::__DEBUG
+if A_LineFile = A_ScriptFullPath
+    Hotkey "#F9", __DEBUG

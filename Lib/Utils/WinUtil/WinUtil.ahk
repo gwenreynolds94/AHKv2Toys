@@ -111,26 +111,15 @@ Class WinUtil {
     }
 
     Static WinCloseClass(_class?, _callback?, *) {
-        HideTrayTip(*) {
-            TrayTip()
-            if SubStr(A_OSVersion, 1, 3) = "10." {
-                A_IconHidden := True
-                SetTimer((*)=>(A_IconHidden := False), (-200))
-            }
-        }
         _class := IsSet(_class) ? _class : WinGetClass("ahk_id " WinExist("A"))
         living_windows := WinGetList("ahk_class" _class)
         deaths := 0
         for live_hwnd in living_windows
             if WinExist(live_hwnd)
                 WinClose(), deaths++
-        if IsSet(_callback) {
+        if IsSet(_callback)
             _callback(_class, deaths)
-        }
-        else {
-            TrayTip("[ " _class " ]", "Deaths: " deaths)
-            SetTimer(HideTrayTip, -3000)
-        }
+        else QuikToast("[ " _class " ]", "Deaths: " deaths, 3000)
     }
 
     /**
@@ -147,8 +136,7 @@ Class WinUtil {
             if WinExist(_hwnd)
                 WinKill(), deaths++
         A_TitleMatchMode := pre_title_match
-        TrayTip "[ " _re_proc_name.Replace("\\\.", ".") " ]", "Deaths: " deaths
-        SetTimer((*)=>TrayTip(), -3000)
+        QuikToast "[ " _re_proc_name.Replace("\\\.", ".") " ]", "Deaths: " deaths, 3000
     }
 
     static WinWaitNewActive(_win_title?, _timeout?) {
@@ -170,6 +158,30 @@ Class WinUtil {
               , _wTitle " not found"
               , 3000)
         WinActivate()
+    }
+
+    static WinFocusProcesses(_re_proc_name) {
+        pre_title_match := A_TitleMatchMode
+        A_TitleMatchMode := 'RegEx'
+        windows := WinGetList("ahk_exe i)" _re_proc_name)
+        for _hwnd in windows.Reverse()
+            if WinExist(_hwnd)
+                WinActivate
+        A_TitleMatchMode := pre_title_match
+        QuikToast("Found " windows.Length " windows matching " _re_proc_name
+                , windows.Length "x {" _re_proc_name "}"
+                , 1500)
+    }
+
+    static WinFocusClass(_class?) {
+        _class := _class ?? WinGetClass(WinExist("A"))
+        windows := WinGetList("ahk_class " _class)
+        for _hwnd in windows.Reverse()
+            if WinExist(_hwnd)
+                WinActivate
+        QuikToast("Found " windows.Length " windows matching " _class
+                , windows.Length "x {ahk_class " _class "}"
+                , 1500)
     }
 
     ; static RunWinWait() {}

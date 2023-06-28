@@ -3,6 +3,7 @@
 #SingleInstance Force
 
 #Include ..\BuiltinsExtend.ahk
+#Include ..\..\GdipLib\Gdip_Custom.ahk
 
 /**
  * KeyTable
@@ -26,51 +27,93 @@ Class KeyTable {
 ;    }
 
     boundmeth := {
-        /** @prop {Func} bindkey */
+        /**
+         * @prop {Func} bindkey
+         */
         bindkey          : {},
-        /** @prop {Func} activate */
+        /**
+         * @prop {Func} activate
+         */
         activate         : {},
-        /** @prop {Func} deactivate */
+        /**
+         * @prop {Func} deactivate
+         */
         deactivate       : {},
-        /** @prop {Func} toggletable */
+        /**
+         * @prop {Func} toggletable
+         */
         toggletable      : {},
-        /** @prop {Func} togglekeypaths */
+        /**
+         * @prop {Func} togglekeypaths
+         */
         togglekeypaths   : {},
-        /** @prop {Func} disableontrigger */
+        /**
+         * @prop {Func} disableontrigger
+         */
         disableontrigger : {},
-        /** @prop {Func} enable */
+        /**
+         * @prop {Func} enable
+         */
         enable           : {},
-        /** @prop {Func} disable */
+        /**
+         * @prop {Func} disable
+         */
         disable          : {}
     }
 
     Class Defaults {
-        /** @prop {Number} timeout */
+        /**
+         * @prop {Number} timeout
+         */
         Static timeout := False,
-        /** @prop {Integer} maxtimeout */
+        /**
+         * @prop {Integer} maxtimeout
+         */
             maxtimeout := (60 * 1000)
     }
 
-    /** @prop {Number|Boolean} timeout */
+    /**
+     * @prop {Number|Boolean} timeout
+     */
         timeout := 2000
 
     ; /** @prop {KeyTable.BoundMethods} boundmeth */
         ; , boundmeth := {bindkey:{}, activate:{}, deactivate:{}, disableontrigger:{}}
 
-    /** @prop {Map} keys */
+    /**
+     * @prop {Map} keys
+     */
         , keys := Map()
 
-    /** @prop {Map} ktbls */
+    /**
+     * @prop {Map} ktbls
+     */
         , ktbls := Map()
 
-    /** @prop {Integer} maxtimeout */
+    /**
+     * @prop {Integer} maxtimeout
+     */
         , maxtimeout := 60 * 1000
 
-    /** @prop {Integer} is_root */
+    /**
+     * @prop {Integer} is_root
+     */
         , is_root := False
 
-    /** @prop {Integer} _active */
+    /**
+     * @prop {Integer} _active
+     */
         , _active := False
+
+    /**
+     * @prop {Integer} keytable_id used in KeyTable.KeyPressIndicator to ditnguish between keytables
+     */
+        , keytable_id := 0
+
+    /**
+     * @prop {Integer} last_keytable_id store last keytable_id to ensure unique id
+     */
+    static last_keytable_id := 0
 
     /**
      *  ### **`_timeout`**
@@ -209,15 +252,49 @@ Class KeyTable {
         this.Active := !this.Active
     }
 
-    Class KeyPressGui {
-        static gui := {}
+    Class KeyPressIndicator {
+        static gdip_token := 0x000000
+             , first_instance := true
+             ; , instances := {}
+             ; , shown_instances := Map()
+             , active_keys := Map()
+             , gui := {}
+
 
         static __New() {
-            this.gui := Gui("", "KeyPressGui", this)
+            if !!KeyTable.KeyPressIndicator.first_instance {
+                KeyTable.KeyPressIndicator.SetupGdip
+                KeyTable.KeyPressIndicator.first_instance := false
+            }
+            this.SetupGui
+        }
+
+        static PushKey() {
             
         }
 
-        _Close() {
+        static SetupGui() {
+            this.gui := Gui("AlwaysOnTop Caption", "KeyPressIndicator", this)
+        }
+
+        static SetupGdip() {
+            KeyTable.KeyPressIndicator.gdip_token := Gdip_Startup()
+            if !KeyTable.KeyPressIndicator.gdip_token
+                return QuikToast( "{KeyPressIndicator~SetupGdip} : KeyPressIndicator will not be shown"
+                                , "Failed to start GDI+ <> KeyPressIndicator cannot be used"
+                                , 3000 )
+            OnExit KeyTable.KeyPressIndicator.ShutdownGdip
+            ; ...whatever...
+
+        }
+
+        static ShutdownGdip(*){
+            if !!KeyTable.KeyPressIndicator.gdip_token
+                Gdip_Shutdown KeyTable.KeyPressIndicator.gdip_token
+        }
+
+        __Delete() {
+            KeyTable.KeyPressIndicator.ShutdownGdip
         }
     }
 }
